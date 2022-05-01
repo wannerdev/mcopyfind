@@ -1,7 +1,7 @@
 <?php
 
 $capabilities = array(
-    'plagiarism/mcopyfind:createReports'  => array(
+    'plagiarism/mcopyfind:create'  => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -9,7 +9,7 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW,
         ],
     ),
-    'plagiarism/mcopyfind:viewReports' => array(
+    'plagiarism/mcopyfind:view' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
