@@ -16,11 +16,12 @@
 
 /**
  *
- * @package   plagiarism_new
+ * @package   plagiarism_mcopyfind
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['pluginname'] = 'plagiarism_mcopyfind';
 $string['studentdisclosuredefault']  ='All files uploaded will be submitted to a plagiarism detection service';
 $string['studentdisclosure'] = 'Student Disclosure';
 $string['studentdisclosure_help'] = 'This text will be displayed to all students on the file upload page.';
