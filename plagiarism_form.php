@@ -17,7 +17,7 @@ class plagiarism_setup_form extends moodleform {
         $mform->addHelpButton('mcopyfind_student_disclosure', 'studentdisclosure', 'plagiarism_mcopyfind');
         $mform->setDefault('mcopyfind_student_disclosure', get_string('studentdisclosuredefault','plagiarism_mcopyfind'));
 
-        $this->add_action_buttons(true);
+        $this->add_action_buttons(false);
     }
 }
 

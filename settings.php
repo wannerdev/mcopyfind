@@ -31,8 +31,8 @@
 
     require_login();
     admin_externalpage_setup('plagiarismmcopyfind');
-
-    $context = context_system::instance(CONTEXT_SYSTEM);
+    // CONTEXT_SYSTEM
+    $context = context_system::instance();
 
     require_capability('moodle/site:config', $context, $USER->id, true, "nopermissions");
 
