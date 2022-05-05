@@ -64,7 +64,7 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         echo $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
         $formatoptions = new stdClass;
         $formatoptions->noclean = true;
-        echo format_text($plagiarismsettings['new_student_disclosure'], FORMAT_MOODLE, $formatoptions);
+        echo format_text($plagiarismsettings['mcopyfind_student_disclosure'], FORMAT_MOODLE, $formatoptions);
         echo $OUTPUT->box_end();
     }
 
@@ -93,6 +93,7 @@ function mcopyfind_event_file_uploaded($eventdata) {
 
     return $result;
 }
+
 function mcopyfind_event_files_done($eventdata) {
     $result = true;
         //mainly used by assignment finalize - used if you want to handle "submit for marking" events
