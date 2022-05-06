@@ -30,5 +30,4 @@ $handlers = array (
         'handlerfunction'  => 'mcopyfind_event_mod_deleted',
         'schedule'         => 'cron'
     ),
-
 );
