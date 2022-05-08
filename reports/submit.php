@@ -21,36 +21,33 @@
  * @package     plagiarism_mcopyfind
  * @subpackage  plagiarism
  * @author      Jesús Prieto <jprieto@plagscan.com> (Based on the work of Ruben Olmedo  <rolmedo@plagscan.com>)
- * @copyright   2018 PlagScan GmbH {@link https://www.plagscan.com/}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use plagiarism_plagscan\classes\plagscan_connection;
+use plagiarism_plagscan\handlers\file_handler;
 
-use mod_assign\event\submission_graded;
 
 require(__DIR__ . '/../../../config.php');
 
-require_once($CFG->dirroot . '/plagiarism/mcopyfind/lib.php');
 global $CFG, $DB, $USER;
 $PAGE->set_url(new moodle_url('/plagiarism/mcopyfind/reports/submit.php'));
 
 require_login();
 
 $cmid = required_param('cmid', PARAM_INT);
-//$content = optional_param('content', '', PARAM_RAW);
-//$objectid = optional_param('objectid', 0, PARAM_INT);
+$pathnamehash = optional_param('pathnamehash', '',PARAM_RAW);
+
+$userid = required_param('userid', PARAM_INT);
 $return = required_param('return', PARAM_TEXT);
 
- if ($CFG->version < 2011120100) {
-     $context = get_context_instance(CONTEXT_MODULE, $cmid);
- } else {
-     $context = context_module::instance($cmid);
- }
-//$context=context_module::instance($cmid);
-//print_error($cmid);
-//print_error($PAGE->cm);
+if ($CFG->version < 2011120100) {
+    $context = get_context_instance(CONTEXT_MODULE, $cmid);
+} else {
+    $context = context_module::instance($cmid);
+}
 $PAGE->set_context($context);
 
-if (!(has_capability('plagiarism/mcopyfind:view', $context) || has_capability('plagiarism/mcopyfind:create', $context))) {
+if (!(has_capability('plagiarism/mcopyfind:view', $context) || has_capability('plagiarism/mcopyfind:write', $context))) {
     throw new moodle_exception('Permission denied! You do not have the right capabilities.', 'plagiarism_mcopyfind');
 }
 
@@ -59,15 +56,14 @@ if (!get_config('plagiarism_mcopyfind', 'enabled')) {
     print_error('disabledsite', 'plagiarism_mcopyfind');
 }
 
-$cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
-//$cm=get_fast_modinfo($courseorid)->get_cm($cmid);
-//$cm=get_fast_modinfo(4)->get_cm($cmid);
-
 $notification = \core\output\notification::NOTIFY_SUCCESS;
 
-$sub = new submitted_assignments();
+if(isset($pathnamehash) && !empty($pathnamehash)){
+    $hashes = array();
+    array_push($hashes, $pathnamehash);
+    // file_handler::instance()->file_uploaded_without_event($context,$userid, $hashes);
 
-$sub->access_all_files($cm, $context);
+}
 
 
 

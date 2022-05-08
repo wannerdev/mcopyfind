@@ -94,21 +94,21 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         global $PAGE, $DB, $CFG;
 
         //called at top of submissions/grading pages - allows printing of admin style links or updating status
-        $run = plagscan_get_instance_config($cm->id);
         
-        if ($run->upload == self::RUN_NO) {
-            return '';
-        }
+        
+        // if ($config->isEnabled == self::RUN_NO) {
+        //     return '';
+        // }
 
 
         $output = '';
 //$DB->set_debug(true);
-        if ($run->upload == self::RUN_AUTO) {
+        //if ($config->upload == self::RUN_AUTO) {
             $modinfo = get_fast_modinfo($course);
             $cminfo = $modinfo->get_cm($cm->id);
             if ($cminfo->modname != 'assignment' && $cminfo->modname != 'assign') {
                 // Not an assignment - auto submission to plagscan will not work
-                $output .= get_string('onlyassignmentwarning', 'plagiarism_plagscan');
+                $output .= 'onlyassignmentwarning';//get_string('onlyassignmentwarning', 'plagiarism_plagscan');
             } else {
                 if ($cminfo->modname == 'assignment') {
                     $timedue = $DB->get_field('assignment', 'timedue', array('id' => $cm->instance));
@@ -119,24 +119,16 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
                     // No deadline set - auto submission will never happen
                     $output .= "nodeadlinewarning";//get_string('nodeadlinewarning', 'plagiarism_plagscan');
                 } else {
-                    if ($timedue < $run->complete) {
-                        $output .= "autodescriptionsubmitted".userdate($run->complete, get_string('strftimedatetimeshort')) ;//get_string('autodescriptionsubmitted', 'plagiarism_plagscan', userdate($run->complete, get_string('strftimedatetimeshort')));
+                    if ($timedue < 0) {
+                        $output .= "autodescriptionsubmitted".userdate(0, get_string('strftimedatetimeshort')) ;//get_string('autodescriptionsubmitted', 'plagiarism_plagscan', userdate($run->complete, get_string('strftimedatetimeshort')));
                     } else {
                         $output .= 'autodescription';//get_string('autodescription', 'plagiarism_plagscan');
                     }
                 }
             }
             $output .= '<br/>';
-        }
-        //  print_r($cm->id); = 37
-        //    $filearray = $this->get_links($linkarray->file);
-        //     $contentarray = $this->get_links($linkarray->content);
-        //$checkallfilestatus = new moodle_url('/plagiarism/plagscan/classes/file_submission/check_filestatus.php', array('cmid' => $cm->id,'return' => urlencode($PAGE->url)));
-        //$output .= html_writer::link($checkallfilestatus, get_string('checkallfilestatus', 'plagiarism_plagscan'));
-        //$output .= html_writer::empty_tag('br');
-        //$checkalltextstatus = new moodle_url('/plagiarism/plagscan/classes/content_submission/check_contentstatus.php', array('cmid' => $cm->id,'return' => urlencode($PAGE->url)));
-        //$output .= html_writer::link($checkalltextstatus, get_string('checkalltextstatus', 'plagiarism_plagscan'));
         
+   
         $pageurl = $PAGE->url;
         $pagination = optional_param('page', -1, PARAM_INT);
         
@@ -145,10 +137,10 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         }
         $output .= html_writer::empty_tag('br');
         $params = array('cmid' => s($cm->id), 
-        'return' => urlencode($pageurl));
+                        'return' => urlencode($pageurl));
 
-        $submiturl = new moodle_url('/plagiarism/plagscan/reports/submit_all_files.php', $params);
-        $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_plagscan'));
+        $submiturl = new moodle_url('/plagiarism/mcopyfind/reports/submit_all_files.php', $params);
+        $output .= html_writer::link($submiturl, "submit_all_files"); //get_string('submit_all_files', 'plagiarism_plagscan')
         $output .= html_writer::empty_tag('br');
 
 

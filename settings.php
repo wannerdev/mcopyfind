@@ -48,7 +48,7 @@
 
     if (($data = $mform->get_data()) && confirm_sesskey()) {
         if (!isset($data->mcopyfind_use)) {
-            $data->mcopyfind_use = 0;
+             $data->mcopyfind_use = 0;
         }
         foreach ($data as $field=>$value) {
             if (strpos($field, 'mcopyfind')===0) {
@@ -68,6 +68,8 @@
                 }
             }
         }
+        
+        set_config('enabled', $data->mcopyfind_use, 'plagiarism_mcopyfind');
         $OUTPUT->notification = get_string('savedconfigsuccess', 'plagiarism_mcopyfind');
     }
     $plagiarismsettings = (array)get_config('plagiarism');

@@ -9,6 +9,8 @@ class plagiarism_setup_form extends moodleform {
         global $CFG;
 
         $mform =& $this->_form;
+        
+
         $choices = array('No','Yes');
         $mform->addElement('html', get_string('mcopyfindexplain', 'plagiarism_mcopyfind'));
         $mform->addElement('checkbox', 'mcopyfind_use', get_string('usemcopyfind', 'plagiarism_mcopyfind'));
@@ -16,7 +18,6 @@ class plagiarism_setup_form extends moodleform {
         $mform->addElement('textarea', 'mcopyfind_student_disclosure', get_string('studentdisclosure','plagiarism_mcopyfind'),'wrap="virtual" rows="6" cols="50"');
         $mform->addHelpButton('mcopyfind_student_disclosure', 'studentdisclosure', 'plagiarism_mcopyfind');
         $mform->setDefault('mcopyfind_student_disclosure', get_string('studentdisclosuredefault','plagiarism_mcopyfind'));
-
         $this->add_action_buttons(false);
     }
 }
