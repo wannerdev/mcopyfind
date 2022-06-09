@@ -23,10 +23,6 @@
  * @author      Jesús Prieto <jprieto@plagscan.com> (Based on the work of Ruben Olmedo  <rolmedo@plagscan.com>)
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-use plagiarism_plagscan\classes\plagscan_connection;
-use plagiarism_plagscan\handlers\file_handler;
-
-
 require(__DIR__ . '/../../../config.php');
 
 global $CFG, $DB, $USER;

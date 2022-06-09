@@ -140,9 +140,12 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
                         'return' => urlencode($pageurl));
 
         $submiturl = new moodle_url('/plagiarism/mcopyfind/reports/submit_all_files.php', $params);
-        $output .= html_writer::link($submiturl, "submit_all_files"); //get_string('submit_all_files', 'plagiarism_plagscan')
+        $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind'));
         $output .= html_writer::empty_tag('br');
 
+        $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/compareDocs.php');
+        $output .= html_writer::link($compareurl, "test compare function");
+        $output .= html_writer::empty_tag('br');
 
         return $output;
     }

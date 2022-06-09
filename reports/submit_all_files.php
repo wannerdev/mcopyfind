@@ -25,13 +25,13 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_assign\event\submission_graded;
 
 require(__DIR__ . '/../../../config.php');
 
+require_once($CFG->dirroot . '/plagiarism/mcopyfind/classes/compareDocs.php');
 require_once($CFG->dirroot . '/plagiarism/mcopyfind/lib.php');
 global $CFG, $DB, $USER;
-$PAGE->set_url(new moodle_url('/plagiarism/mcopyfind/reports/submit.php'));
+$PAGE->set_url(new moodle_url('/plagiarism/mcopyfind/reports/submit_all.php'));
 
 require_login();
 
@@ -65,9 +65,8 @@ $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
 
 $notification = \core\output\notification::NOTIFY_SUCCESS;
 
-$sub = new submitted_assignments();
-
-$sub->access_all_files($cm, $context);
+// $sub = new mcopyfind_assignments();
+// $sub->access_all_files($cm, $context);
 
 
 
