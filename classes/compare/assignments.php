@@ -24,14 +24,14 @@
  * @license      http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace plagiarism_mcopyfind\classes;
+namespace plagiarism_mcopyfind\compare;
 
 
 class assignments {
 
 
     /**
-     * Constructor of the plagscan_connection class
+     * Constructor of the plagiarism assignments class
      * 
      * @param bool $notinstance
      */
@@ -42,6 +42,9 @@ class assignments {
         }
     }
 
+    /**
+     * Case where all assignments have to be compared
+     */
     public function access_all_files($cm, $context) {
         global $CFG, $DB;
         
@@ -80,19 +83,30 @@ class assignments {
                 }
             }
             
+            $corpus =array();
+            $hashes = array();
             foreach ($files as $file) {
                 $filename = $file->get_filename();
                 $userid = $file->get_userid();
                 $pathnamehash = $file->get_pathnamehash();
-                         
+                // $document
                 //this wirft die frage auf wie die daten gespeichert werden , soll mcoipyfind die daten alle kopieren?
-                //oder einfach nur die analysen?
-                //Sinnvoll wäre es momentan wenn ich das richtig verstehe nur die reports zu speichern.
-                //vlt nur metadaten sammeln wie hash und id.              
+                // Wenn Dateien aus externen quellen kommen und die dateien nicht in der db sind, dann müssen sie in die db geschrieben werden.
+                $document = new Document($file->get_filename);
                 
-                $hashes = array();
+                //Momentan erstmal nur die reports speichern.
+                //vlt nur metadaten sammeln wie hash und id.     
+                //For compareDocs         
+                // array_push($corpus ,$document);
                 array_push($hashes, $pathnamehash);
             }
+            //Todo finish testing compareDocs class
+            // $comparer = CompareDocuments();
+            // foreach ($corpus as $doc) {
+            //     for($i = 0; $i < count($corpus); $i++) {
+            //         $comparer->compare($doc, $corpus[$i]);
+            //     }                
+            // }
         }
     }
     

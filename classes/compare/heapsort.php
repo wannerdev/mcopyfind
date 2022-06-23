@@ -11,9 +11,10 @@
 // values in the branches below it. The second half of the routine takes values off the top of the heap
 // and then resorts the heap so as to fill the opening and promote the remaining values. Ultimately, the
 // entire heap is put into ascending numerical order
-namespace plagiarism_mcopyfind\classes;
 
-class HeapSort{
+namespace plagiarism_mcopyfind\compare;
+
+class heapsort{
 
     static function &HeapSorting(&$tableA, &$tableB,  $n)
     {

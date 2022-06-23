@@ -1,18 +1,20 @@
 <?php
 
 
-namespace plagiarism_mcopyfind\classes;
+namespace plagiarism_mcopyfind\compare;
 
 require('./Document.php');
+require('./compare_functions.php');
 
 //$doc1 = new document();
 
 //open document
 //check if its valid
-class CompareDocuments
+class load_document
 {
     //Settings
     static $phraseLength = 3;
+//m_PhraseLength
 
     //set wordNumber to 0
     function main()
@@ -58,7 +60,7 @@ class CompareDocuments
                 if ($wordsPars) {
                     foreach ($wordsPars as $element) {
                         //  print_r($element. "<br><br>");
-                        $hashes[$document->wordNumber] = CompareDocuments::wordHash($element);
+                        $hashes[$document->wordNumber] = load_document::wordHash($element);
 
                         if ($hashes[$document->wordNumber] != 1) {
                             // print_r($hashes[$document->wordNumber] . "<br><br>");
@@ -80,7 +82,7 @@ class CompareDocuments
                             $pXWordHash = NULL;
                         }
                         $document->wordNumber++;
-                        $pQWordHash[$document->wordNumber] = CompareDocuments::wordHash($element);
+                        $pQWordHash[$document->wordNumber] = load_document::wordHash($element);
                     }
                 }
             }
@@ -102,7 +104,7 @@ class CompareDocuments
             $document->pSortedWordHash[$i] = $pQWordHash[$i];        // copy over hash-coded words
         }
 
-        //$heap= new HeapSort();
+        //$heap= new heapsort();
         //$result= HeapSort::HeapSorting($pSortedWordHash,				// sort hash-coded words (and word numbers)
         //$pSortedWordNumber, $words);
         //var_dump($result);
@@ -115,7 +117,7 @@ class CompareDocuments
         //     echo ($element . "<br>");
         // }
 
-        if (CompareDocuments::$phraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
+        if (load_document::$phraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
         else                                                        // if phrase length is > 1 word, start at first word with more than 3 chars
         {
             $firstLong = 0;
@@ -180,5 +182,17 @@ class CompareDocuments
     }
 }
 
-$test = new CompareDocuments();
+//Testcase 1
+$test = new load_document();
 $test->main();
+
+$cmp = new compare_functions($this);
+$cmp->ComparePair($documents[0],$documents[1]);
+
+$reportGen= new generate_report();
+
+//function generateReport(Document $inputDoc, $MatchAnchor, $words, $href)
+$matchanch =400;
+$words= ["test","test2"];
+$href= "<a href='test'>test</a>";
+$reportGen->generateReport($documents[0], $matchanch,   $words, $href);

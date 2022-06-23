@@ -1,6 +1,6 @@
 <?php
 
-namespace plagiarism_mcopyfind\classes;
+namespace plagiarism_mcopyfind\compare;
 
 const WORD_UNMATCHED=-1;
 const WORD_PERFECT=0;
@@ -10,34 +10,51 @@ function PercentMatching($firstL,$firstR,$lastL,$lastR,$MatchingWordsPerfect){
     return (200*$MatchingWordsPerfect)/($lastL-$firstL+$lastR-$firstR+2);
 }
 
-class Comparer{
+class compare_functions{
 
-    function __construct(){
+    
+    public $m_MismatchTolerance=2;
+    public $m_Compares=0;
+    public $m_PhraseLength = 6;
+    public $m_FilterPhraseLength = 6;
+    public $m_WordThreshold = 100;
+    public $m_SkipLength = 20;
+    public $m_MismatchPercentage = 80;
+    public $m_bBriefReport = false;
+    public $m_bIgnoreCase = false;
+    public $m_bIgnoreNumbers = false;
+    public $m_bIgnoreOuterPunctuation = false;
+    public $m_bIgnorePunctuation = false;
+    public $m_bSkipLongWords = false;
+    public $m_bSkipNonwords = false;
+    public $m_bBasic_Characters = false;
+
+    function __construct($settings){
         $this->wordHash = array();
         $this->wordNumber = 0;
         $this->realwords = 0;
-        $this->m_CompareStep=0;
+        $this->m_CompareStep=1000;
+
+        $this->m_MismatchTolerance=$settings->m_MismatchTolerance;
+        $this->m_Compares=$settings->m_Compares;
+        $this->m_PhraseLength =$settings->m_PhraseLength;
+        $this->m_FilterPhraseLength = $settings->m_FilterPhraseLength ;
+        $this->m_WordThreshold = $settings->m_WordThreshold;
+        $this->m_SkipLength = $settings->m_SkipLength;
+        $this->m_MismatchPercentage = $settings->m_MismatchPercentage;
+        $this->m_bBriefReport = $settings->m_bBriefReport;
+        $this->m_bIgnoreCase = $settings->m_bIgnoreCase;
+        $this->m_bIgnoreNumbers = $settings->m_bIgnoreNumbers;
+        $this->m_bIgnoreOuterPunctuation = $settings->m_bIgnoreOuterPunctuation;
+        $this->m_bIgnorePunctuation = $settings->m_bIgnorePunctuation;
+        $this->m_bSkipLongWords = $settings->m_bSkipLongWords;
+        $this->m_bSkipNonwords = $settings->m_bSkipNonwords;
+        $this->m_bBasic_Characters = $settings->m_bBasic_Characters;
     }
 
     function ComparePair(Document $docL,Document $docR)
     {
-        $m_MismatchTolerance=2;
-
-        $m_Compares=0;
-        $m_PhraseLength = 6;
-        $m_FilterPhraseLength = 6;
-        $m_WordThreshold = 100;
-        $m_SkipLength = 20;
-        $m_MismatchTolerance = 2;
-        $m_MismatchPercentage = 80;
-        $m_bBriefReport = false;
-        $m_bIgnoreCase = false;
-        $m_bIgnoreNumbers = false;
-        $m_bIgnoreOuterPunctuation = false;
-        $m_bIgnorePunctuation = false;
-        $m_bSkipLongWords = false;
-        $m_bSkipNonwords = false;
-        $m_bBasic_Characters = false;
+        
 
         $wordNumberL=0;
         $wordNumberR=0;						// word number for left document and right document
@@ -52,12 +69,11 @@ class Comparer{
         $firstLx="";$firstRx="";								// first original perfectly matching word in left document and right document
         $lastLx="";$lastRx="";									// last original perfectlymatching word in left document and right document
         $flaw=0;											// flaw count
-        $hash=0;
-        $matchingWordsPerfect=0;							// count of perfect matches within a single phrase
+        $hash=0;                                            // hash value for word							
         $anchor=0;											// number of current match anchor
         $i=0;
 
-        $m_MatchingWordsPerfect=0;
+        $m_MatchingWordsPerfect=0;// count of perfect matches within a single phrase
         $m_MatchingWordsTotalL=0;
         $m_MatchingWordsTotalR=0;
 
@@ -72,10 +88,10 @@ class Comparer{
             $m_MatchAnchorR[$wordNumberR]=0;					// zero the right match anchors
         }
 
-        $wordNumberL=$docL->m_FirstHash;						// start left at first >3 letter word
-        $wordNumberR=$docR->m_FirstHash;						// start right at first >3 letter word$m
+        $wordNumberL=$docL->firstHash;						// start left at first >3 letter word
+        $wordNumberR=$docR->firstHash;						// start right at first >3 letter word$m
         $anchor=0;											// start with no html anchors assigned
-                            
+        
         while ( ($wordNumberL < $docL->m_WordsTotal)			// loop while there are still words to check
                 && ($wordNumberR < $docR->m_WordsTotal) )
         {
@@ -188,10 +204,10 @@ class Comparer{
                     $lastLp=$lastL-1;							// pointer to last perfect match left
                     $lastRp=$lastR-1;							// pointer to last perfect match right
                     $MatchingWordsPerfect=$lastLp-$firstLp+1;	// save number of perfect matche;
-                    if($m_MismatchTolerance > 0)				// are we accepting imperfect matches?
+                    if($this->m_MismatchTolerance > 0)				// are we accepting imperfect matches?
                     {
 
-                        $firstLx;$firstLp;					// save pointer to word before first perfect match left
+                        $firstLx=$firstLp;					// save pointer to word before first perfect match left
                         $firstRx=$firstRp;					// save pointer to word before first perfect match right
                         $lastLx=$lastLp;						// save pointer to word after last perfect match left
                         $lastRx=$lastRp;						// save pointer to word after last perfect match right
@@ -221,7 +237,7 @@ class Comparer{
 
                             // we're at a flaw, so increase the flaw count
                             $flaw++;
-                            if( $flaw > $m_MismatchTolerance ) break;	// check for maximum $flaw reached
+                            if( $flaw > $this->m_MismatchTolerance ) break;	// check for maximum $flaw reached
 
                             if( ($firstL-1) >= 0 )					// check one word earlier on left (if it exists)
                             {
@@ -229,7 +245,7 @@ class Comparer{
                                 
                                 if( $docL->m_pWordHash[$firstL-1] == $docR->m_pWordHash[$firstR] )
                                 {
-                                    if( PercentMatching($firstL-1,$firstR,$lastLx,$lastRx,$MatchingWordsPerfect+1) < $m_MismatchPercentage ) break;	// are we getting too imperfect?
+                                    if( PercentMatching($firstL-1,$firstR,$lastLx,$lastRx,$MatchingWordsPerfect+1) < $this->m_MismatchPercentage ) break;	// are we getting too imperfect?
                                     $m_MatchMarkTempL[$firstL]=WORD_FLAW;	// markup non-matching word in left temporary list
                                     $firstL--;						// move up on left to skip over the flaw
                                     $MatchingWordsPerfect++;			// increment perfect match count;
@@ -250,7 +266,7 @@ class Comparer{
 
                                 if( $docL->m_pWordHash[$firstL] == $docR->m_pWordHash[$firstR-1] )
                                 {
-                                    if( PercentMatching($firstL,$firstR-1,$lastLx,$lastRx,$MatchingWordsPerfect+1) < $m_MismatchPercentage ) break;	// are we getting too imperfect?
+                                    if( PercentMatching($firstL,$firstR-1,$lastLx,$lastRx,$MatchingWordsPerfect+1) < $this->m_MismatchPercentage ) break;	// are we getting too imperfect?
                                     $m_MatchMarkTempR[$firstR]=WORD_FLAW;	// markup non-matching word in right temporary list
                                     $firstR--;						// move up on right to skip over the flaw
                                     $MatchingWordsPerfect++;			// increment perfect match count;
@@ -265,7 +281,7 @@ class Comparer{
                                 }
                             }
 
-                            if( PercentMatching($firstL-1,$firstR-1,$lastLx,$lastRx,$MatchingWordsPerfect) < $m_MismatchPercentage ) break;	// are we getting too imperfect?
+                            if( PercentMatching($firstL-1,$firstR-1,$lastLx,$lastRx,$MatchingWordsPerfect) < $this->m_MismatchPercentage ) break;	// are we getting too imperfect?
                             $m_MatchMarkTempL[$firstL]=WORD_FLAW;		// markup word in left temporary list
                             $m_MatchMarkTempR[$firstR]=WORD_FLAW;		// markup word in right temporary list
                             $firstL--;								// move up on left
@@ -293,7 +309,7 @@ class Comparer{
                                 continue;
                             }
                             $flaw++;
-                            if( $flaw == $m_MismatchTolerance ) break;	// check for maximum $flaw reached
+                            if( $flaw == $this->m_MismatchTolerance ) break;	// check for maximum $flaw reached
 
                             if( ($lastL+1) < $docL->m_WordsTotal )		// check one word later on left (if it exists)
                             {
@@ -301,7 +317,7 @@ class Comparer{
                                 
                                 if( $docL->m_pWordHash[$lastL+1] == $docR->m_pWordHash[$lastR] )
                                 {
-                                    if( PercentMatching($firstLx,$firstRx,$lastL+1,$lastR,$MatchingWordsPerfect+1) < $m_MismatchPercentage ) break;	// are we getting too imperfect?
+                                    if( PercentMatching($firstLx,$firstRx,$lastL+1,$lastR,$MatchingWordsPerfect+1) < $this->m_MismatchPercentage ) break;	// are we getting too imperfect?
                                         $m_MatchMarkTempL[$lastL]=WORD_FLAW;		// marku; non-matching word in left temporary list
                                         $lastL++;						// move down on;left to skip over the flaw
                                         $MatchingWordsPerfect++;			// increment perfect match count;
@@ -320,7 +336,7 @@ class Comparer{
                                 if( $m_MatchMarkR[$lastR+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
                                 if( $docL->m_pWordHash[$lastL] == $docR->m_pWordHash[$lastR+1] )
                                 {
-                                    if( PercentMatching($firstLx,$firstRx,$lastL,$lastR+1,$MatchingWordsPerfect+1) < $m_MismatchPercentage ) break;	// are we getting too imperfect?
+                                    if( PercentMatching($firstLx,$firstRx,$lastL,$lastR+1,$MatchingWordsPerfect+1) < $this->m_MismatchPercentage ) break;	// are we getting too imperfect?
                                         $m_MatchMarkTempR[$lastR]=WORD_FLAW;		// mar;up non-matching word in right temporary list
                                         $lastR++;						// move down ;n right to skip over the flaw
                                         $MatchingWordsPerfect++;			// increment perfect match count;
@@ -335,14 +351,14 @@ class Comparer{
                             
                                 }
                             }
-                            if( PercentMatching($firstLx,$firstRx,$lastL+1,$lastR+1,$MatchingWordsPerfect) < $m_MismatchPercentage ) break;	// are we getting too imperfect?
+                            if( PercentMatching($firstLx,$firstRx,$lastL+1,$lastR+1,$MatchingWordsPerfect) < $this->m_MismatchPercentage ) break;	// are we getting too imperfect?
                             $m_MatchMarkTempL[$lastL]=WORD_FLAW;		// marku; word in left temporary list
                             $m_MatchMarkTempR[$lastR]=WORD_FLAW;		// mark;p word in right temporary list
                             $lastL++;								// move down on left
                             $lastR++;								// move;down on right
                         }				
                     }
-                    if( $MatchingWordsPerfect >= $m_PhraseLength )	// check that phrase has enough perfect matches in it to mark
+                    if( $MatchingWordsPerfect >= $this->m_PhraseLength )	// check that phrase has enough perfect matches in it to mark
                     {
                         $anchor++;									// increment anchor count
                         for($i=$firstLp;$i<=$lastLp;$i++)				// loop for all left matched words
@@ -365,10 +381,10 @@ class Comparer{
             $wordNumberR=$WordNumberRedundantR + 1;			// continue searching after the last redundant word on right
         }
 
-        $m_Compares++;										// increment count of comparisons
-        if( ($m_Compares % $this->m_CompareStep)	== 0 )				// if count is divisible by 1000,
+        $this->m_Compares++;										// increment count of comparisons
+        if( ($this->m_Compares % $this->m_CompareStep)	== 0 )				// if count is divisible by 1000,
         {
-            syslog(LOG_INFO, "Comparing: ".$m_Compares." of ".$this->m_TotalCompares);
+            syslog(LOG_INFO, "Comparing: ".$this->m_Compares." of ".$this->m_TotalCompares);
             // fwprintf(m_fLog,L"Comparing Documents, %d Completed\n",m_Compares);
             // fflush(m_fLog);
         }

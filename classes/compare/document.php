@@ -1,6 +1,6 @@
 <?php
 
-namespace plagiarism_mcopyfind\classes;
+namespace plagiarism_mcopyfind\compare;
 
 class Document
 {
@@ -15,6 +15,7 @@ class Document
 
     public $wordNumber = 0;
     public $realwords = 0;
+    public $m_WordsTotal = 0;
 
     function __construct($infile)
     {

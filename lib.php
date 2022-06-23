@@ -143,7 +143,7 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind'));
         $output .= html_writer::empty_tag('br');
 
-        $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/compareDocs.php');
+        $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/load_documents.php');
         $output .= html_writer::link($compareurl, "test compare function");
         $output .= html_writer::empty_tag('br');
 
