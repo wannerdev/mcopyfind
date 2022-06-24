@@ -139,11 +139,11 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         $params = array('cmid' => s($cm->id), 
                         'return' => urlencode($pageurl));
 
-        $submiturl = new moodle_url('/plagiarism/mcopyfind/reports/submit_all_files.php', $params);
+        $submiturl = new moodle_url('/plagiarism/mcopyfind/classes/compare/load_documents.php');//reports/submit_all_files.php', $params);
         $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind'));
         $output .= html_writer::empty_tag('br');
 
-        $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/load_documents.php');
+        $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/compare/load_documents.php');
         $output .= html_writer::link($compareurl, "test compare function");
         $output .= html_writer::empty_tag('br');
 

@@ -28,7 +28,7 @@
 
 require(__DIR__ . '/../../../config.php');
 
-require_once($CFG->dirroot . '/plagiarism/mcopyfind/classes/compareDocs.php');
+require_once($CFG->dirroot . '/plagiarism/mcopyfind/classes/compare/load_documents.php');
 require_once($CFG->dirroot . '/plagiarism/mcopyfind/lib.php');
 global $CFG, $DB, $USER;
 $PAGE->set_url(new moodle_url('/plagiarism/mcopyfind/reports/submit_all.php'));

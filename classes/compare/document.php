@@ -17,7 +17,7 @@ class Document
     public $realwords = 0;
     public $m_WordsTotal = 0;
 
-    function __construct($infile)
+    public function __construct($infile)
     {
         if($infile==null)
             return;

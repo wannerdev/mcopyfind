@@ -3,8 +3,14 @@
 
 namespace plagiarism_mcopyfind\compare;
 
-require('./Document.php');
-require('./compare_functions.php');
+
+//use plagiarism_mcopyfind\classes\generate_report;
+
+include('./document.php');
+include('./settings.php');
+include('./generate_report.php');
+include('./compare_functions.php');
+
 
 //$doc1 = new document();
 
@@ -12,28 +18,43 @@ require('./compare_functions.php');
 //check if its valid
 class load_document
 {
-    //Settings
-    static $phraseLength = 3;
-//m_PhraseLength
 
     //set wordNumber to 0
+    public $settings;
+    public $documents = [];
+
     function main()
     {
+        $this->settings = new settings();
         //loop until EOF
         //count words  - counting settings
         // echo getcwd(); //working directory -> with namespace workdir changes
-        $documents = [];
         // $file = fopen("t01e.txt", "r");
         // $file2 = fopen("t01.txt", "r");
         // echo $file;
         // echo $file2;
         //$documents.put();
-        array_push($documents, new Document("t01.txt"));
-        array_push($documents, new Document("t01e.txt"));
+        array_push($this->documents, new Document("t01.txt"));
+        array_push($this->documents, new Document("t01e.txt"));
 
-        foreach ($documents as $doc) {
+        foreach ($this->documents as $doc) {
             $this->loadDocument($doc);
         }
+
+        //Testcase 1
+        // $test = new load_document();
+        // $test->main();
+
+        $cmp = new compare_functions($this->settings);
+        $cmp->ComparePair($this->documents[0],$this->documents[1]);
+
+        $reportGen= new generate_report();
+
+        //function generateReport(Document $inputDoc, $MatchAnchor, $words, $href)
+        $matchanch =400;
+        $words= ["test","test2"];
+        $href= "<a href='test'>test</a>";
+        $reportGen->generateReport($this->documents[0], $matchanch,   $words, $href);
     }
 
     static function loadDocument($document)
@@ -117,7 +138,7 @@ class load_document
         //     echo ($element . "<br>");
         // }
 
-        if (load_document::$phraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
+        if (settings::$phraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
         else                                                        // if phrase length is > 1 word, start at first word with more than 3 chars
         {
             $firstLong = 0;
@@ -173,7 +194,7 @@ class load_document
         //$word .= " "; 
         $charcount = 0;
         $length = strlen($word);
-        if ($length == 0) return 1;    // if word is null, return 1 as hash value
+        if ($length == null || $length == 0) return 1;    // if word is null, return 1 as hash value
         else while ($charcount != $length) {
             $inhash = (($inhash << 7) | ($inhash >> 25)) ^ mb_ord($word[$charcount]);    // xor into the rotateleft(7) of inhash
             $charcount++;                            // and increment the count of characters in the word
@@ -182,17 +203,10 @@ class load_document
     }
 }
 
+
 //Testcase 1
-$test = new load_document();
-$test->main();
-
-$cmp = new compare_functions($this);
-$cmp->ComparePair($documents[0],$documents[1]);
-
-$reportGen= new generate_report();
-
-//function generateReport(Document $inputDoc, $MatchAnchor, $words, $href)
-$matchanch =400;
-$words= ["test","test2"];
-$href= "<a href='test'>test</a>";
-$reportGen->generateReport($documents[0], $matchanch,   $words, $href);
+ $test = new load_document();
+ $test->main();
+ //$report=fopen("C:\\reports\\matches.html", "r");
+ //echo($report->read());
+ echo file_get_contents("C:\\reports\\matches.html");
