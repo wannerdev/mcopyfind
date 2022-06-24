@@ -60,18 +60,18 @@ class generate_report{
    
     }
 
-    function generateReport(Document $inputDoc, $MatchAnchor, $words, $href)
-    {
-        $this->SetupReport();
-        $wordcount=0;								// current word number
-        // $word;$tword;
-        // $DelimiterType=DEL_TYPE_WHITE;
-        // $xMatch;
-        // $xAnchor;
+    // function generateReport(Document $inputDoc, $MatchAnchor, $words, $href)
+    // {
+    //     $this->SetupReport();
+    //     $wordcount=0;								// current word number
+    //     // $word;$tword;
+    //     // $DelimiterType=DEL_TYPE_WHITE;
+    //     // $xMatch;
+    //     // $xAnchor;
     
-        // $LastMatch=WORD_UNMATCHED;
-        // $LastAnchor=0;
+    //     // $LastMatch=WORD_UNMATCHED;
+    //     // $LastAnchor=0;
     
-        // $iReturn;
-    }
+    //     // $iReturn;
+    // }
 }

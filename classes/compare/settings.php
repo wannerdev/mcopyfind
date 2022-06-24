@@ -4,6 +4,7 @@ namespace plagiarism_mcopyfind\compare;
 
 class settings{
 
+    const WORDBUFFERLENGTH=5;
     //Settings
     public static $phraseLength = 3;
     public static $m_MismatchTolerance=2;

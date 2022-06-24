@@ -1,13 +1,9 @@
 <?php
-
-
 namespace plagiarism_mcopyfind\compare;
-
-
-//use plagiarism_mcopyfind\classes\generate_report;
 
 include('./document.php');
 include('./settings.php');
+include('./words.php');
 include('./generate_report.php');
 include('./compare_functions.php');
 
@@ -16,7 +12,7 @@ include('./compare_functions.php');
 
 //open document
 //check if its valid
-class load_document
+class load_documents
 {
 
     //set wordNumber to 0
@@ -54,7 +50,7 @@ class load_document
         $matchanch =400;
         $words= ["test","test2"];
         $href= "<a href='test'>test</a>";
-        $reportGen->generateReport($this->documents[0], $matchanch,   $words, $href);
+        // $reportGen->generateReport($this->documents[0], $matchanch,   $words, $href);
     }
 
     static function loadDocument($document)
@@ -81,7 +77,7 @@ class load_document
                 if ($wordsPars) {
                     foreach ($wordsPars as $element) {
                         //  print_r($element. "<br><br>");
-                        $hashes[$document->wordNumber] = load_document::wordHash($element);
+                        $hashes[$document->wordNumber] = words::WordHash($element);
 
                         if ($hashes[$document->wordNumber] != 1) {
                             // print_r($hashes[$document->wordNumber] . "<br><br>");
@@ -103,7 +99,7 @@ class load_document
                             $pXWordHash = NULL;
                         }
                         $document->wordNumber++;
-                        $pQWordHash[$document->wordNumber] = load_document::wordHash($element);
+                        $pQWordHash[$document->wordNumber] = words::wordHash($element);
                     }
                 }
             }
@@ -174,38 +170,13 @@ class load_document
     
 
 
-    /** Description of Hashing process
-     * inhash    zzzzzzzxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-     * ----------------------------------------------
-     * 
-     * inhash <7 xxxxxxxxxxxxxxxxxxxxxxxxxxx-0000000
-     * Logical or
-     * inhash >25                           -zzzzzzz
-     * =         xxxxxxxxxxxxxxxxxxxxxxxxxxxxzzzzzzz
-     * Logical xor
-     * char word                            -yyyyyyy
-     * =         xxxxxxxxxxxxxxxxxxxxxxxxxxxxaaaaaaa
-     */
-    static function WordHash($word)
-    {
-        //unsigned long inhash;
-        //$inhash;
-        $inhash = 0;
-        //$word .= " "; 
-        $charcount = 0;
-        $length = strlen($word);
-        if ($length == null || $length == 0) return 1;    // if word is null, return 1 as hash value
-        else while ($charcount != $length) {
-            $inhash = (($inhash << 7) | ($inhash >> 25)) ^ mb_ord($word[$charcount]);    // xor into the rotateleft(7) of inhash
-            $charcount++;                            // and increment the count of characters in the word
-        }
-        return abs($inhash);
-    }
+
+
 }
 
 
 //Testcase 1
- $test = new load_document();
+ $test = new load_documents();
  $test->main();
  //$report=fopen("C:\\reports\\matches.html", "r");
  //echo($report->read());
