@@ -17,20 +17,30 @@ class words {
 
     public $vocab=null;
 
+    //For now defunct Repair later if needed
+    /*Maybe try to use a map later
+    public $vocab[]=null;
+
+    $vobobj=['id' => words::WordHash($word), 'value' =>1];
+    $this->vocab->push($vobobj);
+    */
     public function addword($word){
         if($this->vocab ==null){
-            $vocab= new Set();
-            $vobobj=[words::WordHash($word),1];//,null,null];
+            $this->vocab= new Set();
+            $vobobj=[words::WordHash($word),1];
             $this->vocab->add($vobobj);
         }
         else{
-            // $this->vocab->
             // $vobobj=[load_documents::WordHash($word),1];//,null,null];
             $vobobj=[words::WordHash($word),1];
             $cache=$this->vocab->count;
             $this->vocab->add($vobobj);
-            if($cache == $this->vocab->count){
-                 $this->vocab->last = [words::WordHash($word),2];
+            //obj already in set, increase count
+            if($cache==$this->vocab->count){
+                $vobobj=$this->vocab->get($vobobj);                
+                $this->vocab->remove($vobobj);
+                $vobobj[1]++;
+                $this->vocab->add($vobobj);
             }
         }
 

@@ -8,7 +8,6 @@ include('./generate_report.php');
 include('./compare_functions.php');
 
 
-//$doc1 = new document();
 
 //open document
 //check if its valid
@@ -16,12 +15,15 @@ class load_documents
 {
 
     //set wordNumber to 0
-    public $settings;
     public $documents = [];
+    public $settings;
+        // private function __construct(){
+    //     $this->settings=new settings();
+    // }
 
     function main()
     {
-        $this->settings = new settings();
+        $this->settings =new settings();
         //loop until EOF
         //count words  - counting settings
         // echo getcwd(); //working directory -> with namespace workdir changes
@@ -37,15 +39,12 @@ class load_documents
             $this->loadDocument($doc);
         }
 
-        //Testcase 1
-        // $test = new load_document();
-        // $test->main();
-
+        $reportGen= new generate_report($this->settings);
+        
         $cmp = new compare_functions($this->settings);
         $cmp->ComparePair($this->documents[0],$this->documents[1]);
 
-        $reportGen= new generate_report();
-
+        $reportGen->FinishReports();
         //function generateReport(Document $inputDoc, $MatchAnchor, $words, $href)
         $matchanch =400;
         $words= ["test","test2"];
@@ -53,7 +52,10 @@ class load_documents
         // $reportGen->generateReport($this->documents[0], $matchanch,   $words, $href);
     }
 
-    static function loadDocument($document)
+    /**
+     * Maybe make static to improve performance later
+     */
+    function loadDocument($document)
     {
         $file = fopen($document->path, "r");
         $document->firstHash = null;
@@ -134,7 +136,7 @@ class load_documents
         //     echo ($element . "<br>");
         // }
 
-        if (settings::$phraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
+        if ($this->settings->phraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
         else                                                        // if phrase length is > 1 word, start at first word with more than 3 chars
         {
             $firstLong = 0;
@@ -158,26 +160,16 @@ class load_documents
 
 
     //Guess how this works Probably
-
-    //what it does is it takes 10000 Words of one document - words or characters
+    //what it does is it takes 10000 Words of one document - words or characters?
     //generates hashes for each word, then it sorts the hashes in a heap and then does it for the second document and then compares the heaps?
-
     //then generate html by exporting the document and marking the saved findings
-
-    //Excluding vocab functionality for now, generating html as well!
+    //Excluding vocab functionality for now,
     //specific word hash function
-
-    
-
-
-
-
 }
 
 
 //Testcase 1
  $test = new load_documents();
  $test->main();
- //$report=fopen("C:\\reports\\matches.html", "r");
- //echo($report->read());
+
  echo file_get_contents("C:\\reports\\matches.html");
