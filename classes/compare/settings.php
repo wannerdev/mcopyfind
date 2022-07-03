@@ -2,6 +2,7 @@
 
 namespace plagiarism_mcopyfind\compare;
 
+//Probably can be made static
 class settings{
 
     const WORDBUFFERLENGTH=5;

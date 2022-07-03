@@ -2,15 +2,22 @@
 
 namespace plagiarism_mcopyfind\compare;
 
+use PDF2Text;
+
 const DEL_TYPE_NONE =0;
 const DEL_TYPE_WHITE = 1;
 const DEL_TYPE_NEWLINE = 2;
 const DEL_TYPE_EOF = 3;
 
+include('pdf2Text.php');
+
 class Document
 {
 
-    public $documentType = "DOC_TYPE_UNDEFINED"; // type of document: old, new, etc.
+    public $m_contentType = "DOC_TYPE_UNDEFINED"; // type of document: old, new, etc.
+    public $m_haveFile = false;
+    public $m_UTF8 = false;
+
     public $pWordHash = NULL;
     public $pSortedWordHash = NULL; // a pointer to the hash-coded word list
     public $pSortedWordNumber = NULL; // a pointer to the sorted hash-coded word list
@@ -21,13 +28,223 @@ class Document
     public $path = null;
     public $wordNumber = 0;
     public $realwords = 0;
+    public $words =null;
 
-    public function __construct($infile)
+    public function __construct()
     {
+        $this->words = new words();
+    }
+
+    function definePath($infile){
         if($infile==null)
             return;
         $this->path = $infile;
+        $this->OpenDocument();
     }
+
+    function OpenDocument(){
+        $pfilename = $this->path;
+        // Check that file exists and get its length
+        if( !fopen($pfilename,"r") ) return "ERR_CANNOT_FIND_FILE"; // open fails if file is not found
+        $this->m_haveFile = true;
+
+        $index=strpos($pfilename,'.'); // find $filename extention
+        $pstr=substr($pfilename,$index+1); // get extension 
+        
+        if($pstr == NULL) return "ERR_CANNOT_FIND_FILE_EXTENSION"; // open fails if there is no file extension
+        $pstr++;
+
+        if( (strcmp($pstr,"htm") == 0 ) || (strcmp($pstr,"html") == 0 ) ) $this->m_contentType="CONTENT_TYPE_HTML";
+        else if ( strcmp($pstr,"docx") == 0 ) $this->m_contentType="CONTENT_TYPE_DOCX";
+        else if ( strcmp($pstr,"doc") == 0 ) $this->m_contentType="CONTENT_TYPE_DOC";
+        else if ( strcmp($pstr,"txt") == 0 ) $this->m_contentType="CONTENT_TYPE_TXT";
+        else if ( strcmp($pstr,"pdf") == 0 ) $this->m_contentType="CONTENT_TYPE_PDF";
+        else if ( strcmp($pstr,"url") == 0 ) $this->m_contentType="CONTENT_TYPE_URL";
+        else $this->m_contentType="CONTENT_TYPE_UNKNOWN";
+
+        if($this->m_contentType == "CONTENT_TYPE_DOCX") return $this->OpenDocx($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_HTML" ) return $this->OpenHtml($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_TXT") return $this->OpenTxt($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_DOC") return $this->OpenDoc($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_PDF") return $this->OpenPdf($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_URL") return $this->OpenUrl($pfilename);
+        else return $this->OpenUnknown($pfilename);;
+    }
+
+    function closeDocument(){
+        fclose($this->file);
+        $this->file = null;
+    }
+
+    function OpenHtml($filename)
+    {
+        $m_filep = fopen($filename,"r");
+        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE";
+        $this->$this->m_haveFile = true;
+        $this->m_UTF8 = true; // assume that the html file is encoded in UTF-8
+        return -1;
+    }
+
+    function OpenDoc($filename)
+    {
+        $m_filep = fopen($filename,"rb"); // open in binary read mode
+        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE";
+        $this->m_haveFile = true;
+        $this->m_UTF8 = false;
+        return -1;
+    }
+
+    function OpenTxt($filename)
+    {
+        $m_filep = fopen($filename,"r");
+        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE";
+        $this->m_haveFile = true;
+        if(fgetc($m_filep) == 0xEF) // check for the BOM to indicate a utf-8 text file
+        {
+            if(fgetc($m_filep) == 0xBB)
+            {
+                if(fgetc($m_filep) == 0xBF)
+                {
+                    $this->m_UTF8 = true;  // found BOM; leave input pointing after the BOM
+                    return -1;
+                }
+            }
+        }
+        $this->m_UTF8 = false;
+        fseek($m_filep,0,SEEK_SET); // not a utf-8 text file, so rewind to the beginning
+        return -1;
+    }
+
+    //todo translate fully to php
+     function OpenUrl($filename)
+    {
+        $m_filep = fopen($filename,"r");
+        if($m_filep == NULL) return "ERR_CANNOT_FIND_URL_LINK";
+    
+        $string=true;
+        // $szmessage;
+    
+        while($string)
+        {
+            $string=stream_get_contents($m_filep, -1, 255);
+            if(strcmp($string[0],"url=",4) == 0)
+            {
+                fclose($m_filep); $m_filep = NULL;
+                $dwHttpRequestFlags = "INTERNET_FLAG_EXISTING_CONNECT";
+                $szHeaders[] = "Accept: text/*\r\nUser-Agent: WCopyfind\r\n";
+    
+                // $dwServiceType;
+                // $strServerName;
+                // $strObject;
+                // $nPort;
+                //!AfxParseURL(, dwServiceType, strServerName, strObject, nPort) || dwServiceType != INTERNET_SERVICE_HTTP
+                
+                if (parse_url($string[4]))
+                {
+                    fclose($m_filep); $m_filep = NULL;
+                    return "ERR_CANNOT_ACCESS_URL";
+                }
+    
+                // $m_pSession = new CInternetSession;
+                // $m_pServer = m_pSession->GetHttpConnection(strServerName, nPort);
+                // $m_pHttpFile = m_pServer->OpenRequest(CHttpConnection::HTTP_VERB_GET,strObject, NULL, 1, NULL, NULL, dwHttpRequestFlags);
+                // $m_pHttpFile->AddRequestHeaders(szHeaders);
+                // $m_pHttpFile->SendRequest();
+                // $DWORD dwRet;
+                // $m_pHttpFile->QueryInfoStatusCode(dwRet);
+    
+                // if (dwRet >= 300)
+                // {
+                //     fclose(m_filep); m_filep = NULL;
+                //     return ERR_CANNOT_ACCESS_URL;
+                // }
+                // m_bInternet = true;
+    
+                // DWORD dwQuery;
+                // $szreturn;
+                // dwQuery=HTTP_QUERY_CONTENT_TYPE;
+                // m_pHttpFile->QueryInfo(dwQuery,szreturn);
+    
+                // if(wcsstr(szreturn,L"text/html") != NULL) m_contentType=CONTENT_TYPE_HTML;
+                // else if(wcsstr(szreturn,L"text/plain") != NULL) m_contentType=CONTENT_TYPE_TXT;
+                // if(wcsstr(szreturn,L"UTF-8") != NULL) m_UTF8 = true;
+                // else m_UTF8 = false;
+    
+                // m_haveFile = true;
+                return -1;
+            }
+        }
+        return "ERR_CANNOT_ACCESS_URL";
+    }
+
+        function OpenUnknown($filename)
+    {
+        $m_filep=fopen($filename,"r");
+        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE";
+        $this->m_haveFile = true;
+        $this->m_UTF8 = false;
+        return -1;
+    }
+
+    //todo translate fully to php, search for docx handler in php
+    function OpenDocx($filename)
+    {
+        // $filename;
+        // $filenameLength;
+        // wcstombs_s($filenameLength, $filename, 256, $filename, _TRUNCATE); // convert wide-character $filename to byte $filename
+
+        // $m_docxZipArchive = unzOpen($filename);
+        // if ($m_docxZipArchive == NULL)
+        // {
+        //     $m_filep = NULL;
+        //     return "ERR_CANNOT_OPEN_INPUT_FILE";
+        // }
+
+        // $rv = unzLocateFile(m_docxZipArchive, "word/document.xml", NULL);
+        // if(rv != UNZ_OK)
+        // {
+        //     unzClose(m_docxZipArchive);
+        //     m_docxZipArchive=NULL;
+        //     $m_filep = NULL;
+        //     return ERR_BAD_DOCX_FILE;
+        // }
+        // unzOpenCurrentFile(m_docxZipArchive);
+        // $this->m_haveFile = true;
+        // $m_UTF8 = true;
+        // m_ByteIndexDocx=0; // start at first byte
+        // m_ByteCountDocx=0; // there are currently zero bytes
+        // $m_filep = 1; // indicate that the file was found?
+        return -1;
+    }
+
+    function OpenPdf($filename)
+    { 
+        $m_filep = fstat($filename,"rb");
+        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE"; // open fails if file didn't actually open
+        if($_FILES['file']['type']=="application/pdf") {
+            $a = new PDF2Text();
+            $a->setFilename($filename);
+            $a->decodePDF();
+            return $a->output();
+        }
+        
+        /**
+         *       if($m_pdftotext) // pdftotext program exists, so use it to pipe text to this program
+         *    assemble command line, e.g.: ""C:\\fullpath\\pdftotext.exe" -enc UTF-8 "C:\\anotherpath\\xin.pdf" - "
+         *   // where the final '-' indicates that the output should be piped to a readable input pipe
+         *   // both $filenames (pdftotext.exe and xxx.pdf) need to be in quotes, in case they contain spaces, and the entire command must also be in quotes.
+         *   $commandLine="\"\"". $m_pdftotextFile  . "\"\" -enc UTF-8 \"" . $filename . "\" - \""; // assemble command 
+         *
+         *   if(($m_filep = _wpopen($commandLine,"r")) == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE"; // if the pipe don't form, command filed.
+         *   $this->m_haveFile = true;
+         *   $this->m_UTF8 = true;
+         *
+         *   return -1; // we should now have the text portion of the PDF file as a readable file attached to $m_filep
+         *}
+         * else // don't have pdftotext program avialable, so use default pdf function
+         */
+    }
+    
 
     static function documentToHtml($indoc,  $MatchMark, $MatchAnchor,  $words, $href)
     {
@@ -91,8 +308,8 @@ class Document
                 // if(settings::$m_bIgnoreOuterPunctuation) wordxouterpunct($tword);	// if ignore outer punctuation is active, remove outer punctuation
                 // if(settings::$m_bIgnoreNumbers) WordRemoveNumbers($tword);			// if ignore numbers is active, remove numbers
                 // if(settings::$m_bIgnoreCase) WordToLowerCase($tword);			// if ignore case is active, remove case
-                // if(settings::$m_bSkipLongWords & (wcslen($tword) > settings::$m_SkipLength) ) continue;	// if skip too-long $words is active, skip them
-                // if(settings::$m_bSkipNonwords & (!WordCheck($tword)) ) continue;	// if skip non$words is active, skip them
+                // if(settings::$m_bSkipLongWords $ (wcslen($tword) > settings::$m_SkipLength) ) continue;	// if skip too-long $words is active, skip them
+                // if(settings::$m_bSkipNonwords $ (!WordCheck($tword)) ) continue;	// if skip non$words is active, skip them
 
                 break;
             }

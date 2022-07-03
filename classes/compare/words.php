@@ -17,12 +17,15 @@ class words {
 
     public $vocab=null;
 
-    //For now defunct Repair later if needed
+    /**
+     * For now probably broken Repair later if needed
+     * 
+     * @param type $word
+     * */
     /*Maybe try to use a map later
-    public $vocab[]=null;
-
-    $vobobj=['id' => words::WordHash($word), 'value' =>1];
-    $this->vocab->push($vobobj);
+        public $vocab[]=null;
+        $vobobj=['id' => words::WordHash($word), 'value' =>1];
+        $this->vocab->push($vobobj);
     */
     public function addword($word){
         if($this->vocab ==null){
@@ -46,7 +49,7 @@ class words {
 
     }   
 
-    public function WordRemovePunctuation($word) //TODO return word
+    public static function WordRemovePunctuation($word) //TODO return word
     {        
         $wordlen=strlen($word);
         for($ccnt=0;$ccnt<$wordlen;$ccnt++)
@@ -61,7 +64,7 @@ class words {
         return $word;
     }
 
-    public function wordxouterpunct($word) //TODO return word
+    public static function wordxouterpunct($word) //TODO return word
     {
         
         $wordlen=strlen($word);
@@ -88,7 +91,7 @@ class words {
 
     }
 
-    public function WordRemoveNumbers($word)//TODO return word
+    public static function WordRemoveNumbers($word)//TODO return word
     {
         $$wordlen;
         $$ccnt;
@@ -107,7 +110,7 @@ class words {
         return $word;
     }
 
-    public function WordToLowerCase($word) //TODO return word
+    public static function WordToLowerCase($word) //TODO return word
     {
         $wordlen=strlen($word);
         for($ccnt=0;$ccnt<$wordlen;$ccnt++)
@@ -117,7 +120,7 @@ class words {
         return $word;
     }
 
-    public function WordCheck($word)
+    public static function WordCheck($word)
     {
         $wordlen=$word->length();
 

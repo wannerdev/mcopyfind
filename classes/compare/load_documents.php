@@ -21,9 +21,13 @@ class load_documents
     //     $this->settings=new settings();
     // }
 
-    function main()
+    function __construct(){
+        $this->settings=new settings();
+        
+    }
+
+    function testMain()
     {
-        $this->settings =new settings();
         //loop until EOF
         //count words  - counting settings
         // echo getcwd(); //working directory -> with namespace workdir changes
@@ -32,8 +36,12 @@ class load_documents
         // echo $file;
         // echo $file2;
         //$documents.put();
-        array_push($this->documents, new Document("t01.txt"));
-        array_push($this->documents, new Document("t01e.txt"));
+        $doc1=new Document();
+        $doc1->definePath("t01.txt");
+        $doc2=new Document();
+        $doc2->definePath("t01e.txt");
+        array_push($this->documents, $doc2);
+        array_push($this->documents, $doc1);
 
         foreach ($this->documents as $doc) {
             $this->loadDocument($doc);
@@ -44,6 +52,8 @@ class load_documents
         $cmp = new compare_functions($this->settings);
         $cmp->ComparePair($this->documents[0],$this->documents[1]);
 
+        // $reportGen->DocumentToHtml($this->documents[0], $cmp->m_MatchMarkL, $cmp->m_MatchAnchorL, $cmp->words, $cmp->href);
+        // $reportGen->DocumentToHtml($this->documents[1], $cmp->m_MatchMarkR, $cmp->m_MatchAnchorR, $cmp->words, $cmp->href);
         $reportGen->FinishReports();
         //function generateReport(Document $inputDoc, $MatchAnchor, $words, $href)
         $matchanch =400;
@@ -57,7 +67,9 @@ class load_documents
      */
     function loadDocument($document)
     {
+        $document->openDocument();
         $file = fopen($document->path, "r");
+        if($file)return "ERROR: File not found";
         $document->firstHash = null;
 
         $wordNumber = 0;
@@ -158,7 +170,9 @@ class load_documents
         // rint_error("stop");
     }
 
-
+    function CloseDocument($file){
+        fclose($file);
+    }
     //Guess how this works Probably
     //what it does is it takes 10000 Words of one document - words or characters?
     //generates hashes for each word, then it sorts the hashes in a heap and then does it for the second document and then compares the heaps?
@@ -170,6 +184,6 @@ class load_documents
 
 //Testcase 1
  $test = new load_documents();
- $test->main();
+ $test->testMain();
 
  echo file_get_contents("C:\\reports\\matches.html");
