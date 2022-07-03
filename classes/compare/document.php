@@ -2,6 +2,7 @@
 
 namespace plagiarism_mcopyfind\compare;
 
+use Exception;
 use PDF2Text;
 
 const DEL_TYPE_NONE =0;
@@ -45,13 +46,12 @@ class Document
     function OpenDocument(){
         $pfilename = $this->path;
         // Check that file exists and get its length
-        if( !fopen($pfilename,"r") ) return "ERR_CANNOT_FIND_FILE"; // open fails if file is not found
-        $this->m_haveFile = true;
+        if( !fopen($pfilename,"r") ) throw new Exception("ERR_CANNOT_FIND_FILE"); // open fails if file is not found
 
         $index=strpos($pfilename,'.'); // find $filename extention
         $pstr=substr($pfilename,$index+1); // get extension 
         
-        if($pstr == NULL) return "ERR_CANNOT_FIND_FILE_EXTENSION"; // open fails if there is no file extension
+        if($pstr == NULL) throw new Exception("ERR_CANNOT_FIND_FILE_EXTENSION"); // open fails if there is no file extension
         $pstr++;
 
         if( (strcmp($pstr,"htm") == 0 ) || (strcmp($pstr,"html") == 0 ) ) $this->m_contentType="CONTENT_TYPE_HTML";
@@ -79,7 +79,7 @@ class Document
     function OpenHtml($filename)
     {
         $m_filep = fopen($filename,"r");
-        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE";
+        if($m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE");
         $this->$this->m_haveFile = true;
         $this->m_UTF8 = true; // assume that the html file is encoded in UTF-8
         return -1;
@@ -88,7 +88,7 @@ class Document
     function OpenDoc($filename)
     {
         $m_filep = fopen($filename,"rb"); // open in binary read mode
-        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE";
+        if($m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE");
         $this->m_haveFile = true;
         $this->m_UTF8 = false;
         return -1;
@@ -97,7 +97,7 @@ class Document
     function OpenTxt($filename)
     {
         $m_filep = fopen($filename,"r");
-        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE";
+        if($m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE");
         $this->m_haveFile = true;
         if(fgetc($m_filep) == 0xEF) // check for the BOM to indicate a utf-8 text file
         {
@@ -119,7 +119,7 @@ class Document
      function OpenUrl($filename)
     {
         $m_filep = fopen($filename,"r");
-        if($m_filep == NULL) return "ERR_CANNOT_FIND_URL_LINK";
+        if($m_filep == NULL) throw new Exception("ERR_CANNOT_FIND_URL_LINK");
     
         $string=true;
         // $szmessage;
@@ -142,7 +142,7 @@ class Document
                 if (parse_url($string[4]))
                 {
                     fclose($m_filep); $m_filep = NULL;
-                    return "ERR_CANNOT_ACCESS_URL";
+                    throw new Exception("ERR_CANNOT_ACCESS_URL");
                 }
     
                 // $m_pSession = new CInternetSession;
@@ -174,13 +174,13 @@ class Document
                 return -1;
             }
         }
-        return "ERR_CANNOT_ACCESS_URL";
+        throw new Exception("ERR_CANNOT_ACCESS_URL");
     }
 
         function OpenUnknown($filename)
     {
         $m_filep=fopen($filename,"r");
-        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE";
+        if($m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE");
         $this->m_haveFile = true;
         $this->m_UTF8 = false;
         return -1;
@@ -197,7 +197,7 @@ class Document
         // if ($m_docxZipArchive == NULL)
         // {
         //     $m_filep = NULL;
-        //     return "ERR_CANNOT_OPEN_INPUT_FILE";
+        //     throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE";
         // }
 
         // $rv = unzLocateFile(m_docxZipArchive, "word/document.xml", NULL);
@@ -220,7 +220,7 @@ class Document
     function OpenPdf($filename)
     { 
         $m_filep = fstat($filename,"rb");
-        if($m_filep == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE"; // open fails if file didn't actually open
+        if($m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE"); // open fails if file didn't actually open
         if($_FILES['file']['type']=="application/pdf") {
             $a = new PDF2Text();
             $a->setFilename($filename);
@@ -235,7 +235,7 @@ class Document
          *   // both $filenames (pdftotext.exe and xxx.pdf) need to be in quotes, in case they contain spaces, and the entire command must also be in quotes.
          *   $commandLine="\"\"". $m_pdftotextFile  . "\"\" -enc UTF-8 \"" . $filename . "\" - \""; // assemble command 
          *
-         *   if(($m_filep = _wpopen($commandLine,"r")) == NULL) return "ERR_CANNOT_OPEN_INPUT_FILE"; // if the pipe don't form, command filed.
+         *   if(($m_filep = _wpopen($commandLine,"r")) == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE"; // if the pipe don't form, command filed.
          *   $this->m_haveFile = true;
          *   $this->m_UTF8 = true;
          *

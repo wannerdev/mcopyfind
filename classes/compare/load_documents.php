@@ -47,18 +47,15 @@ class load_documents
             $this->loadDocument($doc);
         }
 
-        $reportGen= new generate_report($this->settings);
+        // $reportGen= new generate_report($this->settings);
         
-        $cmp = new compare_functions($this->settings);
-        $cmp->ComparePair($this->documents[0],$this->documents[1]);
+        $cmp = new compare_functions($this->settings, $this->documents);
+        $cmp->RunComparison();
+        // $cmp->ComparePair($this->documents[0],$this->documents[1]);
 
         // $reportGen->DocumentToHtml($this->documents[0], $cmp->m_MatchMarkL, $cmp->m_MatchAnchorL, $cmp->words, $cmp->href);
         // $reportGen->DocumentToHtml($this->documents[1], $cmp->m_MatchMarkR, $cmp->m_MatchAnchorR, $cmp->words, $cmp->href);
-        $reportGen->FinishReports();
-        //function generateReport(Document $inputDoc, $MatchAnchor, $words, $href)
-        $matchanch =400;
-        $words= ["test","test2"];
-        $href= "<a href='test'>test</a>";
+        
         // $reportGen->generateReport($this->documents[0], $matchanch,   $words, $href);
     }
 
