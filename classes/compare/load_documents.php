@@ -43,14 +43,12 @@ class load_documents
         array_push($this->documents, $doc2);
         array_push($this->documents, $doc1);
 
-        foreach ($this->documents as $doc) {
-            $this->loadDocument($doc);
-        }
-
+        
+        
         // $reportGen= new generate_report($this->settings);
         
         $cmp = new compare_functions($this->settings, $this->documents);
-        $cmp->RunComparison();
+        $cmp->RunComparison($this);
         // $cmp->ComparePair($this->documents[0],$this->documents[1]);
 
         // $reportGen->DocumentToHtml($this->documents[0], $cmp->m_MatchMarkL, $cmp->m_MatchAnchorL, $cmp->words, $cmp->href);
@@ -64,7 +62,6 @@ class load_documents
      */
     function loadDocument($document)
     {
-        $document->openDocument();
         $file = fopen($document->path, "r");
         if($file)return "ERROR: File not found";
         $document->firstHash = null;
@@ -183,4 +180,4 @@ class load_documents
  $test = new load_documents();
  $test->testMain();
 
- echo file_get_contents("C:\\reports\\matches.html");
+ echo file_get_contents("C:\\reports\\matches.htm");

@@ -14,8 +14,10 @@ class compare_functions{
 
     public $settings;
     public $m_Documents=0; //number of documents
-    public $m_pDocs; //array of documents
+    public $m_Compares=0; //number of documents
+    public $m_pDocs=[]; //array of documents
     
+	private $m_MatchingWordsPerfect=0;
 	private $m_MatchMarkL=0;
     private $m_MatchMarkR=0;		// left and right matched word markup list pointers
 	private $m_MatchAnchorL=0;
@@ -364,10 +366,10 @@ class compare_functions{
             $wordNumberR=$WordNumberRedundantR + 1;			// continue searching after the last redundant word on right
         }
 
-        $this->settings->m_Compares++;										// increment count of comparisons
-        if( ($this->settings->m_Compares % $this->m_CompareStep)	== 0 )				// if count is divisible by 1000,
+        $this->m_Compares++;										// increment count of comparisons
+        if( ($this->m_Compares % $this->m_CompareStep)	== 0 )				// if count is divisible by 1000,
         {
-            syslog(LOG_INFO, "Comparing: ".$this->settings->m_Compares." of ");//.$this->m_TotalCompares);
+            syslog(LOG_INFO, "Comparing: ".$this->m_Compares." of ");//.$this->m_TotalCompares);
             // fwprintf(m_fLog,L"Comparing Documents, %d Completed\n",m_Compares);
             // fflush(m_fLog);
         }
@@ -941,35 +943,38 @@ class compare_functions{
         return -1;
     }
 
-    function RunComparison() {
+    function RunComparison($load) {
         //  $DocL;$DocR;								// document number of left document and right document
         // $szMessage;									// status messages
         // $i;												// local index counter
         // $irvalue;
+
         $g_abort = false;					    		// abort signal when true
         $settings =new settings();
-       // $this-> = new compare_functions($settings);
         $reportGen = new generate_report($settings);
-        $loader = new load_documents($settings);
+       
 	    $irvalue = $reportGen->SetupReport(); if($irvalue > -1) return $irvalue;		// setup reporting files	
         
         fprintf($reportGen->m_fLog,"Starting to Load and Hash-Code Documents\n");					// log loading step
         // $m_pStatus->SetWindowTextW(L"Loading and Hash-Coding Documents");  todo replace with html output
-        
-        for($i=0;$i<$this->m_Documents;$i++)			// loop for all document entries
-        {
-            if($g_abort)
-            {
+        foreach ($this->m_pDocs as $doc) {
+            $load->loadDocument($doc);
+        }
+        //not in use for now
+        // foreach($this->m_pDocs as $docs) 			// loop for all document entries
+        // {
+        //     if($g_abort)
+        //     {
                 //m_pStatus->SetWindowTextW(L"Comparison Aborted");
-                return "ERR_ABORT";
-            }
+                // return "ERR_ABORT";
+            // }
             // $m_pProgress->SetPos(i*100/m_pDoc->m_Documents);
             // $szMessage= "Loading: ". $doc->m_szDocumentName;
             // $m_pStatus->SetWindowTextW($szMessage);
 
-            $irvalue = $loader->loadDocument(($this->m_pDocs)); if($irvalue > -1) return $irvalue;			// load this document
+            // $irvalue = $loader->loadDocument(($this->docs)); if($irvalue > -1) return $irvalue;			// load this document
             
-        }
+        // }
 
         fprintf($reportGen->m_fLog,"Done Loading Documents\n");		// Finish loading step log
         fprintf($reportGen->m_fLog,"Starting to Compare Documents\n");		// Finish loading step log
@@ -983,13 +988,15 @@ class compare_functions{
 
         // $this->SetupProgressReports(DOC_TYPE_OLD,DOC_TYPE_NEW,DOC_TYPE_NEW);
 
-        for($DocL=0;$DocL<$this->m_Documents;$DocL++)			// for all possible left documents
+        foreach($this->m_pDocs as $DocL)  // =0;$DocL<$this->m_Documents;$DocL++)			// for all possible left documents
         {
-            $this->m_pDocL = $this->m_pDocs + $DocL;	// obtain a quick pointer to the left document
-
-            for($DocR=0;$DocR<$DocL;$DocR++)					// for all possible right documents
+            // $this->m_pDocL = $this->m_pDocs + $DocL;	// obtain a quick pointer to the left document
+            $this->m_pDocL = $DocL;	
+            foreach($this->m_pDocs as $DocR)//$DocR=0;$DocR<$DocL;$DocR++)					// for all possible right documents
             {
-                $this->m_pDocR = $this->m_pDocs + $DocR;	// obtain a quick pointer to the right document
+                //$this->m_pDocR = $this->m_pDocs + $DocR;	// obtain a quick pointer to the right document
+                $this->m_pDocR = $DocR;
+                if($DocL == $DocR) continue;				// skip if same document
 
                 if($g_abort){
                     // m_pStatus->SetWindowTextW(L"Comparison Aborted");
@@ -1000,7 +1007,7 @@ class compare_functions{
 
                 $irvalue = $this->ComparePair($this->m_pDocL,$this->m_pDocR); if($irvalue > -1) return $irvalue;			// compare the two documents
                 
-                if( ($this->m_Compares%$this->m_CompareStep)	== 0 )				// if count is divisible by 1000,
+                if( ($this->m_Compares %$this->m_CompareStep)	== 0 )				// if count is divisible by 1000,
                 {
                     fprintf($reportGen->m_fLog,"Comparing Documents,". $this->m_pDoc->m_Compares . " Completed\n");		// step log
                     // $szMessage.Format(L"Comparing Documents, %d Completed",m_pDoc->m_Compares);
@@ -1008,7 +1015,7 @@ class compare_functions{
                     // $m_pProgress->SetPos(int((100.0*double(m_pDoc->m_Compares))/double(m_pDoc->m_TotalCompares)));
                 }
                 
-                if($this->m_MatchingWordsPerfect>=$this->m_WordThreshold)		// if there are enough matches to report,
+                if($this->m_MatchingWordsPerfect>=$this->settings->m_WordThreshold)		// if there are enough matches to report,
                 {
                     $this->m_MatchingDocumentPairs++;				// increment count of matched pairs of documents
                     $reportGen->ReportMatchedPair();
@@ -1019,6 +1026,7 @@ class compare_functions{
                     $szPerfectMatch= $this->m_MatchingWordsPerfect. "(" . 100*$this->m_MatchingWordsPerfect/$this->m_pDocL->m_WordsTotal . "L," . 100*$this->m_MatchingWordsPerfect/$this->m_pDocR->m_WordsTotal . "R)"; 
                 
                     $szOverallMatch= $this->m_MatchingWordsTotalL . "(". 100*$this->m_MatchingWordsTotalL/$this->m_pDocL->m_WordsTotal . "%)L;" . "," . $this->m_MatchingWordsTotalR . "(". 100*$this->m_MatchingWordsTotalR/$this->m_pDocR->m_WordsTotal . "%)R";
+                    echo("Item:" . $szPerfectMatch . " ". $szOverallMatch . " " . $this->m_pDoc->m_szDocL . " " . $this->m_pDoc->m_szDocR . "\n");
                     fprintf($reportGen->m_fLog,"Item:" . $szPerfectMatch . " ". $szOverallMatch . " " . $this->m_pDoc->m_szDocL . " " . $this->m_pDoc->m_szDocR . "\n");
                     // $m_pReport->InsertItem(nItem,szPerfectMatch);
                     // $m_pReport->SetItemText(nItem,1,szOverallMatch);

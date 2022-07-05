@@ -15,7 +15,7 @@ include('pdf2Text.php');
 class Document
 {
 
-    public $m_contentType = "DOC_TYPE_UNDEFINED"; // type of document: old, new, etc.
+    public $m_DocumentType = "DOC_TYPE_UNDEFINED"; // type of document: old, new, etc.
     public $m_haveFile = false;
     public $m_UTF8 = false;
 
@@ -45,29 +45,28 @@ class Document
 
     function OpenDocument(){
         $pfilename = $this->path;
-        // Check that file exists and get its length
+        // Check that file exists 
         if( !fopen($pfilename,"r") ) throw new Exception("ERR_CANNOT_FIND_FILE"); // open fails if file is not found
 
         $index=strpos($pfilename,'.'); // find $filename extention
         $pstr=substr($pfilename,$index+1); // get extension 
-        
         if($pstr == NULL) throw new Exception("ERR_CANNOT_FIND_FILE_EXTENSION"); // open fails if there is no file extension
-        $pstr++;
+        
 
-        if( (strcmp($pstr,"htm") == 0 ) || (strcmp($pstr,"html") == 0 ) ) $this->m_contentType="CONTENT_TYPE_HTML";
-        else if ( strcmp($pstr,"docx") == 0 ) $this->m_contentType="CONTENT_TYPE_DOCX";
-        else if ( strcmp($pstr,"doc") == 0 ) $this->m_contentType="CONTENT_TYPE_DOC";
-        else if ( strcmp($pstr,"txt") == 0 ) $this->m_contentType="CONTENT_TYPE_TXT";
-        else if ( strcmp($pstr,"pdf") == 0 ) $this->m_contentType="CONTENT_TYPE_PDF";
-        else if ( strcmp($pstr,"url") == 0 ) $this->m_contentType="CONTENT_TYPE_URL";
-        else $this->m_contentType="CONTENT_TYPE_UNKNOWN";
+        if( (strcmp($pstr,"htm") == 0 ) || (strcmp($pstr,"html") == 0 ) ) $this->m_DocumentType="CONTENT_TYPE_HTML";
+        else if ( strcmp($pstr,"docx") == 0 ) $this->m_DocumentType="CONTENT_TYPE_DOCX";
+        else if ( strcmp($pstr,"doc") == 0 ) $this->m_DocumentType="CONTENT_TYPE_DOC";
+        else if ( strcmp($pstr,"txt") == 0 ) $this->m_DocumentType="CONTENT_TYPE_TXT";
+        else if ( strcmp($pstr,"pdf") == 0 ) $this->m_DocumentType="CONTENT_TYPE_PDF";
+        else if ( strcmp($pstr,"url") == 0 ) $this->m_DocumentType="CONTENT_TYPE_URL";
+        else $this->m_DocumentType="CONTENT_TYPE_UNKNOWN";
 
-        if($this->m_contentType == "CONTENT_TYPE_DOCX") return $this->OpenDocx($pfilename);
-        else if( $this->m_contentType == "CONTENT_TYPE_HTML" ) return $this->OpenHtml($pfilename);
-        else if( $this->m_contentType == "CONTENT_TYPE_TXT") return $this->OpenTxt($pfilename);
-        else if( $this->m_contentType == "CONTENT_TYPE_DOC") return $this->OpenDoc($pfilename);
-        else if( $this->m_contentType == "CONTENT_TYPE_PDF") return $this->OpenPdf($pfilename);
-        else if( $this->m_contentType == "CONTENT_TYPE_URL") return $this->OpenUrl($pfilename);
+        if($this->m_DocumentType == "CONTENT_TYPE_DOCX") return $this->OpenDocx($pfilename);
+        else if( $this->m_DocumentType == "CONTENT_TYPE_HTML" ) return $this->OpenHtml($pfilename);
+        else if( $this->m_DocumentType == "CONTENT_TYPE_TXT") return $this->OpenTxt($pfilename);
+        else if( $this->m_DocumentType == "CONTENT_TYPE_DOC") return $this->OpenDoc($pfilename);
+        else if( $this->m_DocumentType == "CONTENT_TYPE_PDF") return $this->OpenPdf($pfilename);
+        else if( $this->m_DocumentType == "CONTENT_TYPE_URL") return $this->OpenUrl($pfilename);
         else return $this->OpenUnknown($pfilename);;
     }
 
@@ -165,8 +164,8 @@ class Document
                 // dwQuery=HTTP_QUERY_CONTENT_TYPE;
                 // m_pHttpFile->QueryInfo(dwQuery,szreturn);
     
-                // if(wcsstr(szreturn,L"text/html") != NULL) m_contentType=CONTENT_TYPE_HTML;
-                // else if(wcsstr(szreturn,L"text/plain") != NULL) m_contentType=CONTENT_TYPE_TXT;
+                // if(wcsstr(szreturn,L"text/html") != NULL) m_DocumentType=CONTENT_TYPE_HTML;
+                // else if(wcsstr(szreturn,L"text/plain") != NULL) m_DocumentType=CONTENT_TYPE_TXT;
                 // if(wcsstr(szreturn,L"UTF-8") != NULL) m_UTF8 = true;
                 // else m_UTF8 = false;
     

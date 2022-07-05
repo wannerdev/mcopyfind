@@ -9,7 +9,6 @@ class settings{
     //Settings
     public $phraseLength = 3;
     public $m_MismatchTolerance=2;
-    public $m_Compares=0;
     public $m_PhraseLength = 6;
     public $m_FilterPhraseLength = 6;
     public $m_WordThreshold = 100;
