@@ -1,8 +1,11 @@
 <?php
 namespace plagiarism_mcopyfind\compare;
 
+use Exception;
+
 include('./document.php');
 include('./settings.php');
+include('./heapsort.php');
 include('./words.php');
 include('./generate_report.php');
 include('./compare_functions.php');
@@ -29,7 +32,7 @@ class load_documents
     function testMain()
     {
         //loop until EOF
-        //count words  - counting settings
+        //count wordAmount  - counting settings
         // echo getcwd(); //working directory -> with namespace workdir changes
         // $file = fopen("t01e.txt", "r");
         // $file2 = fopen("t01.txt", "r");
@@ -48,13 +51,14 @@ class load_documents
         // $reportGen= new generate_report($this->settings);
         
         $cmp = new compare_functions($this->settings, $this->documents);
+        //echo "Return value Runcoomp".
         $cmp->RunComparison($this);
         // $cmp->ComparePair($this->documents[0],$this->documents[1]);
 
-        // $reportGen->DocumentToHtml($this->documents[0], $cmp->m_MatchMarkL, $cmp->m_MatchAnchorL, $cmp->words, $cmp->href);
-        // $reportGen->DocumentToHtml($this->documents[1], $cmp->m_MatchMarkR, $cmp->m_MatchAnchorR, $cmp->words, $cmp->href);
+        // $reportGen->DocumentToHtml($this->documents[0], $cmp->m_MatchMarkL, $cmp->m_MatchAnchorL, $cmp->wordAmount, $cmp->href);
+        // $reportGen->DocumentToHtml($this->documents[1], $cmp->m_MatchMarkR, $cmp->m_MatchAnchorR, $cmp->wordAmount, $cmp->href);
         
-        // $reportGen->generateReport($this->documents[0], $matchanch,   $words, $href);
+        // $reportGen->generateReport($this->documents[0], $matchanch,   $wordAmount, $href);
     }
 
     /**
@@ -62,22 +66,19 @@ class load_documents
      */
     function loadDocument($document)
     {
-        $file = fopen($document->path, "r");
-        if($file)return "ERROR: File not found";
-        $document->firstHash = null;
+        $file = fopen($document->path,"r");
+        // echo("path  ". $document->path);
+        if(!$file)throw new Exception("ERROR: File not found");
 
         $wordNumber = 0;
-        $words = 0;
+        $wordAmount = 0;
         $hashes = [];
         $realwords = 0;
-        $wordsAllocated = 0;
-        $wordInc = 10000; //Default increment in characters to compare ?
 
-        // $words;
-        // $wordNumber;
-        $pXWordHash = [];
-        $pQWordHash = [];
-        //echo $document->file."WHaaat";
+
+        // echo "\n################################\n";
+        // echo "Document:".$document->path . "\n";
+        echo "################################\n";
         // var_dump($document->file);
         if ($file) {
             while (!feof($file)) {
@@ -85,55 +86,49 @@ class load_documents
                 if ($wordsPars) {
                     foreach ($wordsPars as $element) {
                         //  print_r($element. "<br><br>");
-                        $hashes[$document->wordNumber] = words::WordHash($element);
+                        $hashes[$wordNumber] = words::WordHash($element);
 
-                        if ($hashes[$document->wordNumber] != 1) {
+                        if ($hashes[$wordNumber] != 1) {
                             // print_r($hashes[$document->wordNumber] . "<br><br>");
                             $realwords++;
                         }
-                        if ($document->wordNumber == $wordsAllocated)                            // if hash-coded word entries are full (or don't exist)
-                        {
-                            $wordsAllocated += $wordInc;                            // increase maximum number of words
-                            if ($pXWordHash != NULL) $pXWordHash = null;        // if allocated, delete temporary hash-coded word list
-                            $pXWordHash = [$wordsAllocated];        // allocate new, larger array of entries
-                            if ($pXWordHash == NULL) print_error("ERR_CANNOT_ALLOCATE_WORKING_HASH_ARRAY");
-
-                            if ($pQWordHash != NULL) {
-                                for ($i = 0; $i < $wordNumber; $i++) $pXWordHash[$i] = $pQWordHash[$i];    // copy hash-coded word entries to new array
-                                $pQWordHash = null;    // if allocated, delete temporary hash-coded word list
-                            }
-
-                            $pQWordHash = $pXWordHash;                            // set normal pointer to new, larger array
-                            $pXWordHash = NULL;
-                        }
-                        $document->wordNumber++;
-                        $pQWordHash[$document->wordNumber] = words::wordHash($element);
+                        $wordNumber++;
                     }
                 }
             }
             fclose($file);
         } else {
+            throw new Exception("Error opening file");
             return;
         }
-        $document->words = $document->wordNumber;
+        $wordAmount = $wordNumber;   // save number of wordAmount
+        $document->m_WordsTotal=$wordAmount;							// save number of wordAmount in document entry
 
-        $document->pWordHash = [$words];        // allocate array for hash-coded words in doc entry
-        $document->pSortedWordHash = [$words];    // allocate array for sorted hash-coded words
-        $document->pSortedWordNumber = [$words];            // allocate array for sorted word numbers
+        // var_dump($document->wordAmount); Fix wordAmount vocab
+        var_dump("Words2: ".$wordAmount); 
+        // $wordAmount++; //maybe too small?
+        // $document->pWordHash = [$wordAmount];        // allocate array for hash-coded wordAmount in doc entry
+        // $document->pSortedWordHash = [$wordAmount];    // allocate array for sorted hash-coded wordAmount
+        // $document->pSortedWordNumber = [$wordAmount];            // allocate array for sorted word numbers 
+        // $wordAmount--; //maybe too small?
+        // echo ("ARRAY SIZE:". count($document->pSortedWordHash));
 
-
-        for ($i = 0; $i < $words; $i++)            // loop for all the words in the document
+        for ($i = 0; $i < $wordAmount; $i++)            // loop for all the wordAmount in the document
         {
-            $document->pQWordHash[$i] = $pQWordHash[$i];                // copy over hash-coded words
+            $document->pQWordHash[$i] = $hashes[$i];                // copy over hash-coded wordAmount
             $document->pSortedWordNumber[$i] = $i;                    // copy over word numbers
-            $document->pSortedWordHash[$i] = $pQWordHash[$i];        // copy over hash-coded words
+            $document->pSortedWordHash[$i] = $hashes[$i];        // copy over hash-coded wordAmount
         }
+        // echo("START:");
+        // var_dump($document->pSortedWordHash);
+        $sorted = heapsort::HeapSorting($document->pSortedWordHash,				// sort hash-coded wordAmount (and word numbers)
+                              $document->pSortedWordNumber, $wordAmount-1);
+        $document->pSortedWordHash = $sorted[0];
+        $document->pSortedWordNumber = $sorted[1];
+        //var_dump($document->pSortedWordNumber);
+        // echo("END: \n\n\n\n");
+        //   var_dump($document->pSortedWordHash);
 
-        //$heap= new heapsort();
-        //$result= HeapSort::HeapSorting($pSortedWordHash,				// sort hash-coded words (and word numbers)
-        //$pSortedWordNumber, $words);
-        //var_dump($result);
-        //var_dump($pSortedWordNumber);
         // foreach ($document->pSortedWordNumber as $element) {
         //     echo ($element . "<br>");
         // }
@@ -146,7 +141,7 @@ class load_documents
         else                                                        // if phrase length is > 1 word, start at first word with more than 3 chars
         {
             $firstLong = 0;
-            for ($i = 0; $i < $words; $i++)                                    // loop for all the words in the document
+            for ($i = 1; $i < $wordAmount; $i++)                                    // loop for all the words in the document
             {
                 if (($document->pSortedWordHash[$i] & 0xFFC00000) != 0)    // if the word is longer than 3 letters, break
                 {
@@ -155,6 +150,8 @@ class load_documents
                 }
             }
             $document->firstHash = $firstLong;                    // save the number of the first >3 letter word, or the first word
+            
+            // echo ("setting firstHash: ".$document->firstHash . "\n");
         }
 
         //Test output
@@ -167,8 +164,9 @@ class load_documents
     function CloseDocument($file){
         fclose($file);
     }
+
     //Guess how this works Probably
-    //what it does is it takes 10000 Words of one document - words or characters?
+    //what it does is it takes 10000 Words of one document - wordAmount or characters?
     //generates hashes for each word, then it sorts the hashes in a heap and then does it for the second document and then compares the heaps?
     //then generate html by exporting the document and marking the saved findings
     //Excluding vocab functionality for now,
@@ -180,4 +178,4 @@ class load_documents
  $test = new load_documents();
  $test->testMain();
 
- echo file_get_contents("C:\\reports\\matches.htm");
+//  echo file_get_contents("C:\\reports\\matches.htm");

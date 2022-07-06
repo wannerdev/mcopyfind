@@ -16,7 +16,7 @@ namespace plagiarism_mcopyfind\compare;
 
 class heapsort{
 
-    static function &HeapSorting(&$tableA, &$tableB,  $n)
+    static function HeapSorting($tableA, $tableB,  $n)
     {
         $tempA=0;							// $tempA can hold a hash-coded word temporarily
         $tempB=0;										// $tempB can hold a word number temporarily
@@ -32,7 +32,7 @@ class heapsort{
             $index1 = $index3;							// pointer to the current node
             $index2 = ($index3 << 1);						// pointer to left branch below node
             
-            while ( $index2 <= $n )						// while we haven't gone off bottom of heap
+            while ( $index2 < $n )						// while we haven't gone off bottom of heap 
             {
                 if( $index2 < $n )						// if there are two values branching below this node,
                 {
@@ -61,8 +61,8 @@ class heapsort{
         }
 
 
-        for ( $nr=$n-1;$nr>=1;$nr-- )						// start at end of heap and move backward to start
-                $tempA=$tableA[1];							// swap top node and value beyond end of shortened heap, part1
+        for ( $nr=$n-1;$nr>=1;$nr-- ){						// start at end of heap and move backward to start
+            $tempA=$tableA[1];							// swap top node and value beyond end of shortened heap, part1
             $tempB=$tableB[1];							// swap word number table entry to match, part 1
             $tableA[1]=$tableA[$nr+1];						// swap part 2
             $tableB[1]=$tableB[$nr+1];						// swap part 2
@@ -94,6 +94,8 @@ class heapsort{
                     break;
                 }
             }
-        return;											// both tables are all sorted, so return
         }
+        return array($tableA,$tableB);										// both tables are all sorted, so return
+        }
+
 }

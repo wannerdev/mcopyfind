@@ -15,19 +15,21 @@ include('pdf2Text.php');
 class Document
 {
 
-    public $m_DocumentType = "DOC_TYPE_UNDEFINED"; // type of document: old, new, etc.
+    public $m_contentType = "TYPE_UNDEFINED"; // type of document: txt doc, pdf, etc.
+    public $m_DocumentType = "DOC_TYPE_UNDEFINED"; // Used document ? old, new, etc.
     public $m_haveFile = false;
     public $m_UTF8 = false;
 
     public $pWordHash = NULL;
-    public $pSortedWordHash = NULL; // a pointer to the hash-coded word list
-    public $pSortedWordNumber = NULL; // a pointer to the sorted hash-coded word list
+    public $pSortedWordHash = []; // a pointer to the hash-coded word list
+    public $pSortedWordNumber = []; // a pointer to the sorted hash-coded word list
     public $m_WordsTotal = 0; // an entry for the number of $words in the lists
-    public $firstHash = 0; // an entry for the first word with more than 3 chars
+    public $firstHash = -1; // an entry for the first word with more than 3 chars
 
     public $file = null;
     public $path = null;
-    public $wordNumber = 0;
+
+    // public $wordNumber = 0;
     public $realwords = 0;
     public $words =null;
 
@@ -53,20 +55,20 @@ class Document
         if($pstr == NULL) throw new Exception("ERR_CANNOT_FIND_FILE_EXTENSION"); // open fails if there is no file extension
         
 
-        if( (strcmp($pstr,"htm") == 0 ) || (strcmp($pstr,"html") == 0 ) ) $this->m_DocumentType="CONTENT_TYPE_HTML";
-        else if ( strcmp($pstr,"docx") == 0 ) $this->m_DocumentType="CONTENT_TYPE_DOCX";
-        else if ( strcmp($pstr,"doc") == 0 ) $this->m_DocumentType="CONTENT_TYPE_DOC";
-        else if ( strcmp($pstr,"txt") == 0 ) $this->m_DocumentType="CONTENT_TYPE_TXT";
-        else if ( strcmp($pstr,"pdf") == 0 ) $this->m_DocumentType="CONTENT_TYPE_PDF";
-        else if ( strcmp($pstr,"url") == 0 ) $this->m_DocumentType="CONTENT_TYPE_URL";
-        else $this->m_DocumentType="CONTENT_TYPE_UNKNOWN";
+        if( (strcmp($pstr,"htm") == 0 ) || (strcmp($pstr,"html") == 0 ) ) $this->m_contentType="CONTENT_TYPE_HTML";
+        else if ( strcmp($pstr,"docx") == 0 ) $this->m_contentType="CONTENT_TYPE_DOCX";
+        else if ( strcmp($pstr,"doc") == 0 ) $this->m_contentType="CONTENT_TYPE_DOC";
+        else if ( strcmp($pstr,"txt") == 0 ) $this->m_contentType="CONTENT_TYPE_TXT";
+        else if ( strcmp($pstr,"pdf") == 0 ) $this->m_contentType="CONTENT_TYPE_PDF";
+        else if ( strcmp($pstr,"url") == 0 ) $this->m_contentType="CONTENT_TYPE_URL";
+        else $this->m_contentType="CONTENT_TYPE_UNKNOWN";
 
-        if($this->m_DocumentType == "CONTENT_TYPE_DOCX") return $this->OpenDocx($pfilename);
-        else if( $this->m_DocumentType == "CONTENT_TYPE_HTML" ) return $this->OpenHtml($pfilename);
-        else if( $this->m_DocumentType == "CONTENT_TYPE_TXT") return $this->OpenTxt($pfilename);
-        else if( $this->m_DocumentType == "CONTENT_TYPE_DOC") return $this->OpenDoc($pfilename);
-        else if( $this->m_DocumentType == "CONTENT_TYPE_PDF") return $this->OpenPdf($pfilename);
-        else if( $this->m_DocumentType == "CONTENT_TYPE_URL") return $this->OpenUrl($pfilename);
+        if($this->m_contentType == "CONTENT_TYPE_DOCX") return $this->OpenDocx($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_HTML" ) return $this->OpenHtml($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_TXT") return $this->OpenTxt($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_DOC") return $this->OpenDoc($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_PDF") return $this->OpenPdf($pfilename);
+        else if( $this->m_contentType == "CONTENT_TYPE_URL") return $this->OpenUrl($pfilename);
         else return $this->OpenUnknown($pfilename);;
     }
 
@@ -164,8 +166,8 @@ class Document
                 // dwQuery=HTTP_QUERY_CONTENT_TYPE;
                 // m_pHttpFile->QueryInfo(dwQuery,szreturn);
     
-                // if(wcsstr(szreturn,L"text/html") != NULL) m_DocumentType=CONTENT_TYPE_HTML;
-                // else if(wcsstr(szreturn,L"text/plain") != NULL) m_DocumentType=CONTENT_TYPE_TXT;
+                // if(wcsstr(szreturn,L"text/html") != NULL) m_contentType=CONTENT_TYPE_HTML;
+                // else if(wcsstr(szreturn,L"text/plain") != NULL) m_contentType=CONTENT_TYPE_TXT;
                 // if(wcsstr(szreturn,L"UTF-8") != NULL) m_UTF8 = true;
                 // else m_UTF8 = false;
     

@@ -60,7 +60,7 @@ class generate_report{
         $szfilename = $this->m_szReportFolder."log.txt";
         $this->m_fLog= fopen($szfilename,"w");				// create and open log text file
         if($this->m_fLog == NULL) return "ERR_CANNOT_OPEN_LOG_FILE";
-        fprintf ($this->m_fLog, "Starting Report Files\n". $this->m_StartTicks->format($this->m_StartTicks::RSS));
+        fprintf ($this->m_fLog, "Starting Report Files \n". $this->m_StartTicks->format($this->m_StartTicks::RSS) ."\n");
 
         $szfilename = $this->m_szReportFolder ."matches.txt";
         $this->m_fMatch= fopen($szfilename, "w");				// create and open main comparison report text file
@@ -316,7 +316,7 @@ class generate_report{
         $this->m_fMatchHtml=NULL;
         $m_Time= $date->getTimestamp() - $this->m_StartTicks->getTimestamp();
 
-        fprintf($this->m_fLog,"Done. Total Time:". strval($m_Time) ." seconds\n");
+        fprintf($this->m_fLog,"\nDone. Total Time:". strval($m_Time) ." seconds\n");
         fclose($this->m_fLog);
         $this->m_fLog=NULL;
         return;

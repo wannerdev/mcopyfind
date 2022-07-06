@@ -6,40 +6,42 @@ const WORD_UNMATCHED=-1;
 const WORD_PERFECT=0;
 const WORD_FLAW=1;
 const WORD_FILTERED=1;
-function PercentMatching($firstL,$firstR,$lastL,$lastR,$MatchingWordsPerfect){
-    return (200*$MatchingWordsPerfect)/($lastL-$firstL+$lastR-$firstR+2);
+function PercentMatching($firstL,$firstR,$lastL,$lastR,$MatchingWordsPerfect_){
+    return (200*$MatchingWordsPerfect_)/($lastL-$firstL+$lastR-$firstR+2);
 }
 
 class compare_functions{
 
     public $settings;
-    public $m_Documents=0; //number of documents
-    public $m_Compares=0; //number of documents
-    public $m_pDocs=[]; //array of documents
+    public $m_Documents; //number of documents
+    public $m_Compares=0; //number of comparisons
+    public $m_pDocs; //array of documents
     
 	private $m_MatchingWordsPerfect=0;
-	private $m_MatchMarkL=0;
-    private $m_MatchMarkR=0;		// left and right matched word markup list pointers
-	private $m_MatchAnchorL=0;
-    private $m_MatchAnchorR=0;	// left and right matched string anchors for html files
-	private $m_MatchMarkTempL=0;
-    private $m_MatchMarkTempR=0;// left and right matched word  markup list pointers - temporary
+	// private $m_MatchMarkL=array();
+    // private $m_MatchMarkR=array();		// left and right matched word markup list pointers
+	// private $m_MatchAnchorL=array();
+    // private $m_MatchAnchorR=array();	// left and right matched string anchors for html files
+	// private $m_MatchMarkTempL=array();
+    // private $m_MatchMarkTempR=array();// left and right matched word  markup list pointers - temporary
 
     function __construct($_settings, $docs){
 
         $this->m_pDocs = $docs;
-        $this->wordHash = array();
-        $this->wordNumber = 0;
-        $this->realwords = 0;
+        $this->m_Documents = count($docs);
         $this->m_CompareStep=1000;
-
-
         $this->settings= $_settings;
+        $this->m_MatchingWordsPerfect=0;
     }
 
     function ComparePair(Document $docL,Document $docR)
     {
-        
+        $m_MatchMarkL=array();
+        $m_MatchMarkR=array();		// left and right matched word markup list pointers
+        $m_MatchAnchorL=array();
+        $m_MatchAnchorR=array();	// left and right matched string anchors for html files
+        $m_MatchMarkTempL=array();
+        $m_MatchMarkTempR=array();// left and right matched word  markup list pointers - temporary
 
         // $wordNumberL=0;
         // $wordNumberR=0;						// word number for left document and right document
@@ -58,21 +60,23 @@ class compare_functions{
         // $anchor=0;											// number of current match anchor
         // $i=0;
 
-        $m_MatchingWordsPerfect=0;// count of perfect matches within a single phrase
+        $this->m_MatchingWordsPerfect=0;// count of perfect matches within a single phrase
         $m_MatchingWordsTotalL=0;
         $m_MatchingWordsTotalR=0;
-
         for($wordNumberL=0;$wordNumberL<$docL->m_WordsTotal;$wordNumberL++)	// loop for all left words
         {
-            $this->m_MatchMarkL[$wordNumberL]=WORD_UNMATCHED;		// set the left match markers to "WORD_UNMATCHED"
-            $this->m_MatchMarkL[$wordNumberL]=0;					// zero the left match anchors
+            $m_MatchMarkL[$wordNumberL]=-1;		// set the left match markers to "WORD_UNMATCHED"
+            $m_MatchAnchorL[$wordNumberL]=0;					// zero the left match anchors
         }
         for($wordNumberR=0;$wordNumberR<$docR->m_WordsTotal;$wordNumberR++)	// loop for all right words
         {
-            $this->m_MatchMarkR[$wordNumberR]=WORD_UNMATCHED;		// set the right match markers to "WORD_UNMATCHED"
-            $this->m_MatchAnchorR[$wordNumberR]=0;					// zero the right match anchors
+            $m_MatchMarkR[$wordNumberR]=-1;		// set the right match markers to "WORD_UNMATCHED"
+            $m_MatchAnchorR[$wordNumberR]=0;					// zero the right match anchors
         }
 
+        //
+        // filter left document
+        //
         $wordNumberL=$docL->firstHash;						// start left at first >3 letter word
         $wordNumberR=$docR->firstHash;						// start right at first >3 letter word$m
         $anchor=0;											// start with no html anchors assigned
@@ -81,21 +85,24 @@ class compare_functions{
                 && ($wordNumberR < $docR->m_WordsTotal) )
         {
             // if the next word in the left sorted hash-coded list has been matched
-            if( $this->m_MatchMarkL[$docL->m_pSortedWordNumber[$wordNumberL]] != WORD_UNMATCHED )
+            $index=$docL->pSortedWordNumber[$wordNumberL];
+            if( $m_MatchMarkL[$index] != -1 )
             {
                 $wordNumberL++;								// advance to next left sorted hash-coded word
                 continue;
             }
 
             // if the next word in the right sorted hash-coded list has been matched
-            if( $this->m_MatchMarkR[$docR->m_pSortedWordNumber[$wordNumberR]] != WORD_UNMATCHED )
+            $index =$docR->pSortedWordNumber[$wordNumberR];
+            // echo "+++++++++++\n INDEX:".$index;
+            if( $m_MatchMarkR[$index] != -1 )
             {
                 $wordNumberR++;								// skip to next right sorted hash-coded word
                 continue;
             }
 
             // check for left word less than right word
-            if( $docL->m_pSortedWordHash[$wordNumberL] < $docR->m_pSortedWordHash[$wordNumberR] )
+            if( $docL->pSortedWordHash[$wordNumberL] < $docR->pSortedWordHash[$wordNumberR] )
             {
                 $wordNumberL++;								// advance to next left word
                 if ( $wordNumberL >= $docL->m_WordsTotal) break;
@@ -103,7 +110,7 @@ class compare_functions{
             }
 
             // check for right word less than left word
-            if( $docL->m_pSortedWordHash[$wordNumberL] > $docR->m_pSortedWordHash[$wordNumberR] )
+            if( $docL->pSortedWordHash[$wordNumberL] > $docR->pSortedWordHash[$wordNumberR] )
             {
                 $wordNumberR++;								// advance to next right word
                 if ( $wordNumberR >= $docR->m_WordsTotal) break;
@@ -111,37 +118,37 @@ class compare_functions{
             }
 
             // we have a match, so check redundancy of this words and compare all copies of this word
-            $hash=$docL->m_pSortedWordHash[$wordNumberL];
+            $hash=$docL->pSortedWordHash[$wordNumberL];
             $WordNumberRedundantL=$wordNumberL;
             $WordNumberRedundantR=$wordNumberR;
             while($WordNumberRedundantL < ($docL->m_WordsTotal - 1))
             {
-                if( $docL->m_pSortedWordHash[$WordNumberRedundantL + 1] == $hash ) $WordNumberRedundantL++;
+                if( $docL->pSortedWordHash[$WordNumberRedundantL + 1] == $hash ) $WordNumberRedundantL++;
                 else break;
             }
 
             while($WordNumberRedundantR < ($docR->m_WordsTotal - 1))
             {
-                if( $docR->m_pSortedWordHash[$WordNumberRedundantR + 1] == $hash ) $WordNumberRedundantR++;
+                if( $docR->pSortedWordHash[$WordNumberRedundantR + 1] == $hash ) $WordNumberRedundantR++;
                 else break;
             }
 
             for($counterL=$wordNumberL;$counterL<=$WordNumberRedundantL;$counterL++)	// loop for each copy of this word on the left
             {
-                if( $this->m_MatchMarkL[$docL->m_pSortedWordNumber[$counterL]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
+                if( $m_MatchMarkL[$docL->pSortedWordNumber[$counterL]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
                 for($counterR=$wordNumberR;$counterR<=$WordNumberRedundantR;$counterR++)	// loop for each copy of this word on the right
                 {
-                    if($this->m_MatchMarkR=[$docR->m_pSortedWordNumber[$counterR]] != WORD_UNMATCHED ) continue;	//   skip=0 words that have been matched already
+                    if($m_MatchMarkR[$docR->pSortedWordNumber[$counterR]] != WORD_UNMATCHED ) continue;	//   skip=0 words that have been matched already
 
                     // look up and down the hash-coded (not sorted) lists for matches
-                    $m_MatchMarkTempL[$docL->m_pSortedWordNumber[$counterL]]=WORD_PERFECT;	// markup word in temporary list at perfection quality
-                    $m_MatchMarkTempR[$docR->m_pSortedWordNumber[$counterR]]=WORD_PERFECT;	// marku;
+                    $m_MatchMarkTempL[$docL->pSortedWordNumber[$counterL]]=WORD_PERFECT;	// markup word in temporary list at perfection quality
+                    $m_MatchMarkTempR[$docR->pSortedWordNumber[$counterR]]=WORD_PERFECT;	// marku;
                     //  word=0 in temporary list at perfection quality
 
-                    $firstL = $docL->m_pSortedWordNumber[$counterL]-1;	// start left just before current word
-                    $lastL = $docL->m_pSortedWordNumber[$counterL]+1;	// end left just after current word
-                    $firstR = $docR->m_pSortedWordNumber[$counterR]-1;  // start right just before current word
-                    $lastR=$docR->m_pSortedWordNumber[$counterR]+1;   	// end right just after current word
+                    $firstL = $docL->pSortedWordNumber[$counterL]-1;	// start left just before current word
+                    $lastL = $docL->pSortedWordNumber[$counterL]+1;	// end left just after current word
+                    $firstR = $docR->pSortedWordNumber[$counterR]-1;  // start right just before current word
+                    $lastR=$docR->pSortedWordNumber[$counterR]+1;   	// end right just after current word
 
                     while( ($firstL >= 0) && ($firstR >= 0) )		// if we aren't at the start of either document,
                     {
@@ -151,8 +158,8 @@ class compare_functions{
                         // make sure that left and right words haven't been used in a match before and
                         // that the two words actually match. If so, move up another word and repeat the test.
 
-                        if( $this->m_MatchMarkL[$firstL] != WORD_UNMATCHED ) break;
-                        if( $this->m_MatchMarkR[$firstR] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkL[$firstL] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkR[$firstR] != WORD_UNMATCHED ) break;
 
                         if( $docL->m_pWordHash[$firstL] == $docR->m_pWordHash[$firstR] )
                         {
@@ -171,8 +178,8 @@ class compare_functions{
 
                         // make sure that left and right words haven't been used in a match before and
                         // that the two words actually match. If so, move up another word and repeat the test.
-                        if( $this->m_MatchMarkL[$lastL] != WORD_UNMATCHED ) break;
-                        if( $this->m_MatchMarkR[$lastR] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkL[$lastL] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkR[$lastR] != WORD_UNMATCHED ) break;
                         if( $docL->m_pWordHash[$lastL] == $docR->m_pWordHash[$lastR] )
                         {
                             $m_MatchMarkTempL[$lastL]=WORD_PERFECT;	// markup word in temporary list
@@ -189,7 +196,7 @@ class compare_functions{
                     $lastLp=$lastL-1;							// pointer to last perfect match left
                     $lastRp=$lastR-1;							// pointer to last perfect match right
                     $MatchingWordsPerfect=$lastLp-$firstLp+1;	// save number of perfect matche;
-                    if($this->m_MismatchTolerance > 0)				// are we accepting imperfect matches?
+                    if($this->settings->m_MismatchTolerance > 0)				// are we accepting imperfect matches?
                     {
 
                         $firstLx=$firstLp;					// save pointer to word before first perfect match left
@@ -205,8 +212,8 @@ class compare_functions{
                             
                             // make sure that left and right words haven't been used in a match before and
                             // that the two words actually match. If so, move up another word and repeat the test.
-                            if( $this->m_MatchMarkL[$firstL] != WORD_UNMATCHED ) break;
-                            if( $this->m_MatchMarkR[$firstR] != WORD_UNMATCHED ) break;
+                            if( $m_MatchMarkL[$firstL] != WORD_UNMATCHED ) break;
+                            if( $m_MatchMarkR[$firstR] != WORD_UNMATCHED ) break;
                             if( $docL->m_pWordHash[$firstL] == $docR->m_pWordHash[$firstR] )
                             {
                                 $MatchingWordsPerfect++;				// increment perfect match count;
@@ -226,7 +233,7 @@ class compare_functions{
 
                             if( ($firstL-1) >= 0 )					// check one word earlier on left (if it exists)
                             {
-                                if( $this->m_MatchMarkL[$firstL-1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
+                                if( $m_MatchMarkL[$firstL-1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
                                 
                                 if( $docL->m_pWordHash[$firstL-1] == $docR->m_pWordHash[$firstR] )
                                 {
@@ -247,7 +254,7 @@ class compare_functions{
 
                             if( ($firstR-1) >= 0 )					// check one word earlier on right (if it exists)
                             {
-                                if( $this->m_MatchMarkR[$firstR-1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
+                                if( $m_MatchMarkR[$firstR-1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
 
                                 if( $docL->m_pWordHash[$firstL] == $docR->m_pWordHash[$firstR-1] )
                                 {
@@ -280,8 +287,8 @@ class compare_functions{
                             // Note: when we leave this loop, $lastL and $lastR will always point one word after last match
                             // make sure that left and right words haven't been used in a match before and
                             // that the two words actually match. If so, move up another word and repeat the test.
-                            if( $this->m_MatchMarkL[$lastL] != WORD_UNMATCHED ) break;
-                            if( $this->m_MatchMarkR[$lastR] != WORD_UNMATCHED ) break;
+                            if( $m_MatchMarkL[$lastL] != WORD_UNMATCHED ) break;
+                            if( $m_MatchMarkR[$lastR] != WORD_UNMATCHED ) break;
                             if( $docL->m_pWordHash[$lastL] == $docR->m_pWordHash[$lastR] )
                             {
                                 $MatchingWordsPerfect++;				// increment perfect match count;
@@ -298,7 +305,7 @@ class compare_functions{
 
                             if( ($lastL+1) < $docL->m_WordsTotal )		// check one word later on left (if it exists)
                             {
-                                if( $this->m_MatchMarkL[$lastL+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
+                                if( $m_MatchMarkL[$lastL+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
                                 
                                 if( $docL->m_pWordHash[$lastL+1] == $docR->m_pWordHash[$lastR] )
                                 {
@@ -318,7 +325,7 @@ class compare_functions{
                             }
                             if( ($lastR+1) < $docR->m_WordsTotal )	// check one word later on right (if it exists)
                             {
-                                if( $this->m_MatchMarkR[$lastR+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
+                                if( $m_MatchMarkR[$lastR+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
                                 if( $docL->m_pWordHash[$lastL] == $docR->m_pWordHash[$lastR+1] )
                                 {
                                     if( PercentMatching($firstLx,$firstRx,$lastL,$lastR+1,$MatchingWordsPerfect+1) < $this->settings->m_MismatchPercentage ) break;	// are we getting too imperfect?
@@ -348,15 +355,15 @@ class compare_functions{
                         $anchor++;									// increment anchor count
                         for($i=$firstLp;$i<=$lastLp;$i++)				// loop for all left matched words
                         {
-                            $this->m_MatchMarkL[$i]=$m_MatchMarkTempL[$i];	// copy over left matching markup
-                            if($m_MatchMarkTempL[$i]==WORD_PERFECT) $m_MatchingWordsPerfect++;	// count the number of perfect matching words (same as for right document)
-                            $this->m_MatchMarkL[$i]=$anchor;				// identify the anchor for this phrase
+                            $m_MatchMarkL[$i]=$m_MatchMarkTempL[$i];	// copy over left matching markup
+                            if($m_MatchMarkTempL[$i]==WORD_PERFECT) $this->m_MatchingWordsPerfect++;	// count the number of perfect matching words (same as for right document)
+                            $m_MatchAnchorL[$i]=$anchor;				// identify the anchor for this phrase
                         }
                         $m_MatchingWordsTotalL += $lastLp-$firstLp+1;	// add the number of words in the matching phrase, whether perfect or flawed matches
                         for($i=$firstRp;$i<=$lastRp;$i++)				// loop for all right matched words
                         {
-                            $this->m_MatchMarkR[$i]=$m_MatchMarkTempR[$i];	// copy over right matching markup
-                            $this->m_MatchAnchorR[$i]=$anchor;				// identify the anchor for this phrase
+                            $m_MatchMarkR[$i]=$m_MatchMarkTempR[$i];	// copy over right matching markup
+                            $m_MatchAnchorR[$i]=$anchor;				// identify the anchor for this phrase
                         }
                         $m_MatchingWordsTotalR += $lastRp-$firstRp+1;	// add the number of words in the matching phrase, whether perfect or flawed matches
                     }
@@ -369,7 +376,7 @@ class compare_functions{
         $this->m_Compares++;										// increment count of comparisons
         if( ($this->m_Compares % $this->m_CompareStep)	== 0 )				// if count is divisible by 1000,
         {
-            syslog(LOG_INFO, "Comparing: ".$this->m_Compares." of ");//.$this->m_TotalCompares);
+            syslog(LOG_INFO, "Comparing: ".$this->m_Compares." of ");//.$m_TotalCompares);
             // fwprintf(m_fLog,L"Comparing Documents, %d Completed\n",m_Compares);
             // fflush(m_fLog);
         }
@@ -394,19 +401,19 @@ class compare_functions{
         // $Anchor;											// number of current match $Anchor
         // $i;
     
-        $m_MatchingWordsPerfect=0;
+        $this->m_MatchingWordsPerfect=0;
         $m_MatchingWordsTotalL=0;
         $m_MatchingWordsTotalR=0;
     
         for($WordNumberL=0;$WordNumberL<$DocL->m_WordsTotal;$WordNumberL++)	// loop for all left words
         {
-            $this->m_MatchMarkL[$WordNumberL]=WORD_UNMATCHED;		// set the left match markers to "WORD_UNMATCHED"
-            $this->m_MatchMarkL[$WordNumberL]=0;					// zero the left match $Anchors
+            $m_MatchMarkL[$WordNumberL]=WORD_UNMATCHED;		// set the left match markers to "WORD_UNMATCHED"
+            $m_MatchMarkL[$WordNumberL]=0;					// zero the left match $Anchors
         }
         for($WordNumberR=0;$WordNumberR<$DocR->m_WordsTotal;$WordNumberR++)	// loop for all right words
         {
-            $this->m_MatchMarkR[$WordNumberR]=WORD_UNMATCHED;		// set the right match markers to "WORD_UNMATCHED"
-            $this->m_MatchAnchorR[$WordNumberR]=0;					// zero the right match $Anchors
+            $m_MatchMarkR[$WordNumberR]=WORD_UNMATCHED;		// set the right match markers to "WORD_UNMATCHED"
+            $m_MatchAnchorR[$WordNumberR]=0;					// zero the right match $Anchors
         }
         //
         // filter left document
@@ -418,14 +425,14 @@ class compare_functions{
                 && ($WordNumberF < $DocF->m_WordsTotal) )
         {
             // if the next word in the left sorted $Hash-coded list has been matched
-            if( $this->m_MatchMarkL[$DocL->m_pSortedWordNumber[$WordNumberL]] != WORD_UNMATCHED )
+            if( $m_MatchMarkL[$DocL->pSortedWordNumber[$WordNumberL]] != WORD_UNMATCHED )
             {
                 $WordNumberL++;								// advance to next left sorted $Hash-coded word
                 continue;
             }
     
             // check for left word less than filter word
-            if( $DocL->m_pSortedWordHash[$WordNumberL] < $DocF->m_pSortedWordHash[$WordNumberF] )
+            if( $DocL->pSortedWordHash[$WordNumberL] < $DocF->pSortedWordHash[$WordNumberF] )
             {
                 $WordNumberL++;								// advance to next left word
                 if ( $WordNumberL >= $DocL->m_WordsTotal) break;
@@ -433,7 +440,7 @@ class compare_functions{
             }
     
             // check for filter word less than left word
-            if( $DocL->m_pSortedWordHash[$WordNumberL] > $DocF->m_pSortedWordHash[$WordNumberF] )
+            if( $DocL->pSortedWordHash[$WordNumberL] > $DocF->pSortedWordHash[$WordNumberF] )
             {
                 $WordNumberF++;								// advance to next filter word
                 if ( $WordNumberF >= $DocF->m_WordsTotal) break;
@@ -441,29 +448,29 @@ class compare_functions{
             }
     
             // we have a match, so check redundancy of this words and compare all copies of this word
-            $$Hash=$DocL->m_pSortedWordHash[$WordNumberL];
+            $$Hash=$DocL->pSortedWordHash[$WordNumberL];
             $WordNumberRedundantL=$WordNumberL;
             $WordNumberRedundantF=$WordNumberF;
             while($WordNumberRedundantL < ($DocL->m_WordsTotal - 1))
             {
-                if( $DocL->m_pSortedWordHash[$WordNumberRedundantL + 1] == $Hash ) $WordNumberRedundantL++;
+                if( $DocL->pSortedWordHash[$WordNumberRedundantL + 1] == $Hash ) $WordNumberRedundantL++;
                 else break;
             }
             while($WordNumberRedundantF < ($DocF->m_WordsTotal - 1))
             {
-                if( $DocF->m_pSortedWordHash[$WordNumberRedundantF + 1] == $Hash ) $WordNumberRedundantF++;
+                if( $DocF->pSortedWordHash[$WordNumberRedundantF + 1] == $Hash ) $WordNumberRedundantF++;
                 else break;
             }
             for($iWordNumberL=$WordNumberL;$iWordNumberL<=$WordNumberRedundantL;$iWordNumberL++)	// loop for each copy of this word on the left
             {
-                if( $this->m_MatchMarkL[$DocL->m_pSortedWordNumber[$iWordNumberL]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
+                if( $m_MatchMarkL[$DocL->pSortedWordNumber[$iWordNumberL]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
                 for($iWordNumberF=$WordNumberF;$iWordNumberF<=$WordNumberRedundantF;$iWordNumberF++)	// loop for each copy of this word on the filter
                 {
                     // look up and down the $Hash-coded (not sorted) lists for matches
-                    $FirstL=$DocL->m_pSortedWordNumber[$iWordNumberL]-1;	// start left just before current word
-                    $LastL=$DocL->m_pSortedWordNumber[$iWordNumberL]+1;	// end left just after current word
-                    $FirstF=$DocF->m_pSortedWordNumber[$iWordNumberF]-1;	// start filter just before current word
-                    $LastF=$DocF->m_pSortedWordNumber[$iWordNumberF]+1;	// end filter just after current word
+                    $FirstL=$DocL->pSortedWordNumber[$iWordNumberL]-1;	// start left just before current word
+                    $LastL=$DocL->pSortedWordNumber[$iWordNumberL]+1;	// end left just after current word
+                    $FirstF=$DocF->pSortedWordNumber[$iWordNumberF]-1;	// start filter just before current word
+                    $LastF=$DocF->pSortedWordNumber[$iWordNumberF]+1;	// end filter just after current word
     
                     while( ($FirstL >= 0) && ($FirstF >= 0) )		// if we aren't at the start of either document,
                     {
@@ -473,7 +480,7 @@ class compare_functions{
                         // make sure that left word hasn't been used in a match before and
                         // that the two words actually match. If so, move up another word and repeat the test.
     
-                        if( $this->m_MatchMarkL[$FirstL] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkL[$FirstL] != WORD_UNMATCHED ) break;
     
                         if( $DocL->m_pWordHash[$FirstL] == $DocF->m_pWordHash[$FirstF] )
                         {
@@ -492,7 +499,7 @@ class compare_functions{
                         // make sure that left word hasn't been used in a match before and
                         // that the two words actually match. If so, move up another word and repeat the test.
     
-                        if( $this->m_MatchMarkL[$LastL] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkL[$LastL] != WORD_UNMATCHED ) break;
                         if( $DocL->m_pWordHash[$LastL] == $DocF->m_pWordHash[$LastF] )
                         {
                             $LastL++;								// move down on left
@@ -512,7 +519,7 @@ class compare_functions{
                     {
                         for($i=$FirstLp;$i<=$LastLp;$i++)				// loop for all left matched words
                         {
-                            $this->m_MatchMarkL[$i]=WORD_FILTERED;	// mark word as filtered
+                            $m_MatchMarkL[$i]=WORD_FILTERED;	// mark word as filtered
                         }
                     }
                 }
@@ -530,14 +537,14 @@ class compare_functions{
                 && ($WordNumberF < $DocF->m_WordsTotal) )
         {
             // if the next word in the right sorted $Hash-coded list has been matched
-            if( $this->m_MatchMarkR[$DocR->m_pSortedWordNumber[$WordNumberR]] != WORD_UNMATCHED )
+            if( $m_MatchMarkR[$DocR->pSortedWordNumber[$WordNumberR]] != WORD_UNMATCHED )
             {
                 $WordNumberR++;								// advance to next right sorted $Hash-coded word
                 continue;
             }
     
             // check for right word less than filter word
-            if( $DocR->m_pSortedWordHash[$WordNumberR] < $DocF->m_pSortedWordHash[$WordNumberF] )
+            if( $DocR->pSortedWordHash[$WordNumberR] < $DocF->pSortedWordHash[$WordNumberF] )
             {
                 $WordNumberR++;								// advance to next right word
                 if ( $WordNumberR>= $DocR->m_WordsTotal) break;
@@ -545,7 +552,7 @@ class compare_functions{
             }
     
             // check for filter word less than right word
-            if( $DocR->m_pSortedWordHash[$WordNumberR] > $DocF->m_pSortedWordHash[$WordNumberF] )
+            if( $DocR->pSortedWordHash[$WordNumberR] > $DocF->pSortedWordHash[$WordNumberF] )
             {
                 $WordNumberF++;								// advance to next filter word
                 if ( $WordNumberF >= $DocF->m_WordsTotal) break;
@@ -553,29 +560,29 @@ class compare_functions{
             }
     
             // we have a match, so check redundancy of this words and compare all copies of this word
-            $Hash=$DocR->m_pSortedWordHash[$WordNumberR];
+            $Hash=$DocR->pSortedWordHash[$WordNumberR];
             $WordNumberRedundantR=$WordNumberR;
             $WordNumberRedundantF=$WordNumberF;
             while($WordNumberRedundantR < ($DocR->m_WordsTotal - 1))
             {
-                if( $DocR->m_pSortedWordHash[$WordNumberRedundantR + 1] == $Hash ) $WordNumberRedundantR++;
+                if( $DocR->pSortedWordHash[$WordNumberRedundantR + 1] == $Hash ) $WordNumberRedundantR++;
                 else break;
             }
             while($WordNumberRedundantF < ($DocF->m_WordsTotal - 1))
             {
-                if( $DocF->m_pSortedWordHash[$WordNumberRedundantF + 1] == $Hash ) $WordNumberRedundantF++;
+                if( $DocF->pSortedWordHash[$WordNumberRedundantF + 1] == $Hash ) $WordNumberRedundantF++;
                 else break;
             }
             for($iWordNumberR=$WordNumberR;$iWordNumberR<=$WordNumberRedundantR;$iWordNumberR++)	// loop for each copy of this word on the right
             {
-                if( $this->m_MatchMarkR[$DocR->m_pSortedWordNumber[$iWordNumberR]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
+                if( $m_MatchMarkR[$DocR->pSortedWordNumber[$iWordNumberR]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
                 for($iWordNumberF=$WordNumberF;$iWordNumberF<=$WordNumberRedundantF;$iWordNumberF++)	// loop for each copy of this word on the filter
                 {
                     // look up and down the $Hash-coded (not sorted) lists for matches
-                    $FirstR=$DocR->m_pSortedWordNumber[$iWordNumberR]-1;	// start right just before current word
-                    $LastR=$DocR->m_pSortedWordNumber[$iWordNumberR]+1;	// end right just after current word
-                    $FirstF=$DocF->m_pSortedWordNumber[$iWordNumberF]-1;	// start filter just before current word
-                    $LastF=$DocF->m_pSortedWordNumber[$iWordNumberF]+1;	// end filter just after current word
+                    $FirstR=$DocR->pSortedWordNumber[$iWordNumberR]-1;	// start right just before current word
+                    $LastR=$DocR->pSortedWordNumber[$iWordNumberR]+1;	// end right just after current word
+                    $FirstF=$DocF->pSortedWordNumber[$iWordNumberF]-1;	// start filter just before current word
+                    $LastF=$DocF->pSortedWordNumber[$iWordNumberF]+1;	// end filter just after current word
     
                     while( ($FirstR >= 0) && ($FirstF >= 0) )		// if we aren't at the start of either document,
                     {
@@ -585,7 +592,7 @@ class compare_functions{
                         // make sure that right word hasn't been used in a match before and
                         // that the two words actually match. If so, move up another word and repeat the test.
     
-                        if( $this->m_MatchMarkR[$FirstR] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkR[$FirstR] != WORD_UNMATCHED ) break;
     
                         if( $DocR->m_pWordHash[$FirstR] == $DocF->m_pWordHash[$FirstF] )
                         {
@@ -604,7 +611,7 @@ class compare_functions{
                         // make sure that right word hasn't been used in a match before and
                         // that the two words actually match. If so, move up another word and repeat the test.
     
-                        if( $this->m_MatchMarkR[$LastR] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkR[$LastR] != WORD_UNMATCHED ) break;
                         if( $DocR->m_pWordHash[$LastR] == $DocF->m_pWordHash[$LastF] )
                         {
                             $LastR++;								// move down on right
@@ -624,7 +631,7 @@ class compare_functions{
                     {
                         for($i=$FirstRp;$i<=$LastRp;$i++)				// loop for all right matched words
                         {
-                            $this->m_MatchMarkR[$i]=WORD_FILTERED;	// mark word as filtered
+                            $m_MatchMarkR[$i]=WORD_FILTERED;	// mark word as filtered
                         }
                     }
                 }
@@ -644,21 +651,21 @@ class compare_functions{
                 && ($WordNumberR< $DocR->m_WordsTotal) )
         {
             // if the next word in the left sorted $Hash-coded list has been matched
-            if( $this->m_MatchMarkL[$DocL->m_pSortedWordNumber[$WordNumberL]] != WORD_UNMATCHED )
+            if( $m_MatchMarkL[$DocL->pSortedWordNumber[$WordNumberL]] != WORD_UNMATCHED )
             {
                 $WordNumberL++;								// advance to next left sorted $Hash-coded word
                 continue;
             }
     
             // if the next word in the right sorted $Hash-coded list has been matched
-            if( $this->m_MatchMarkR[$DocR->m_pSortedWordNumber[$WordNumberR]] != WORD_UNMATCHED )
+            if( $m_MatchMarkR[$DocR->pSortedWordNumber[$WordNumberR]] != WORD_UNMATCHED )
             {
                 $WordNumberR++;								// skip to next right sorted $Hash-coded word
                 continue;
             }
     
             // check for left word less than right word
-            if( $DocL->m_pSortedWordHash[$WordNumberL] < $DocR->m_pSortedWordHash[$WordNumberR] )
+            if( $DocL->pSortedWordHash[$WordNumberL] < $DocR->pSortedWordHash[$WordNumberR] )
             {
                 $WordNumberL++;								// advance to next left word
                 if ( $WordNumberL >= $DocL->m_WordsTotal) break;
@@ -666,7 +673,7 @@ class compare_functions{
             }
     
             // check for right word less than left word
-            if( $DocL->m_pSortedWordHash[$WordNumberL] > $DocR->m_pSortedWordHash[$WordNumberR] )
+            if( $DocL->pSortedWordHash[$WordNumberL] > $DocR->pSortedWordHash[$WordNumberR] )
             {
                 $WordNumberR++;								// advance to next right word
                 if ( $WordNumberR>= $DocR->m_WordsTotal) break;
@@ -674,34 +681,34 @@ class compare_functions{
             }
     
             // we have a match, so check redundancy of this words and compare all copies of this word
-            $Hash=$DocL->m_pSortedWordHash[$WordNumberL];
+            $Hash=$DocL->pSortedWordHash[$WordNumberL];
             $WordNumberRedundantL=$WordNumberL;
             $WordNumberRedundantR=$WordNumberR;
             while($WordNumberRedundantL < ($DocL->m_WordsTotal - 1))
             {
-                if( $DocL->m_pSortedWordHash[$WordNumberRedundantL + 1] == $Hash ) $WordNumberRedundantL++;
+                if( $DocL->pSortedWordHash[$WordNumberRedundantL + 1] == $Hash ) $WordNumberRedundantL++;
                 else break;
             }
             while($WordNumberRedundantR < ($DocR->m_WordsTotal - 1))
             {
-                if( $DocR->m_pSortedWordHash[$WordNumberRedundantR + 1] == $Hash ) $WordNumberRedundantR++;
+                if( $DocR->pSortedWordHash[$WordNumberRedundantR + 1] == $Hash ) $WordNumberRedundantR++;
                 else break;
             }
             for($iWordNumberL=$WordNumberL;$iWordNumberL<=$WordNumberRedundantL;$iWordNumberL++)	// loop for each copy of this word on the left
             {
-                if( $this->m_MatchMarkL[$DocL->m_pSortedWordNumber[$iWordNumberL]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
+                if( $m_MatchMarkL[$DocL->pSortedWordNumber[$iWordNumberL]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
                 for($iWordNumberR=$WordNumberR;$iWordNumberR<=$WordNumberRedundantR;$iWordNumberR++)	// loop for each copy of this word on the right
                 {
-                    if( $this->m_MatchMarkR[$DocR->m_pSortedWordNumber[$iWordNumberR]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
+                    if( $m_MatchMarkR[$DocR->pSortedWordNumber[$iWordNumberR]] != WORD_UNMATCHED ) continue;	// skip words that have been matched already
     
                     // look up and down the $Hash-coded (not sorted) lists for matches
-                    $m_MatchMarkTempL[$DocL->m_pSortedWordNumber[$iWordNumberL]]=WORD_PERFECT;	// markup word in temporary list at perfection quality
-                    $m_MatchMarkTempR[$DocR->m_pSortedWordNumber[$iWordNumberR]]=WORD_PERFECT;	// markup word in temporary list at perfection quality
+                    $m_MatchMarkTempL[$DocL->pSortedWordNumber[$iWordNumberL]]=WORD_PERFECT;	// markup word in temporary list at perfection quality
+                    $m_MatchMarkTempR[$DocR->pSortedWordNumber[$iWordNumberR]]=WORD_PERFECT;	// markup word in temporary list at perfection quality
                     
-                    $FirstL=$DocL->m_pSortedWordNumber[$iWordNumberL]-1;	// start left just before current word
-                    $LastL=$DocL->m_pSortedWordNumber[$iWordNumberL]+1;	// end left just after current word
-                    $FirstR=$DocR->m_pSortedWordNumber[$iWordNumberR]-1;	// start right just before current word
-                    $LastR=$DocR->m_pSortedWordNumber[$iWordNumberR]+1;	// end right just after current word
+                    $FirstL=$DocL->pSortedWordNumber[$iWordNumberL]-1;	// start left just before current word
+                    $LastL=$DocL->pSortedWordNumber[$iWordNumberL]+1;	// end left just after current word
+                    $FirstR=$DocR->pSortedWordNumber[$iWordNumberR]-1;	// start right just before current word
+                    $LastR=$DocR->pSortedWordNumber[$iWordNumberR]+1;	// end right just after current word
     
                     while( ($FirstL >= 0) && ($FirstR >= 0) )		// if we aren't at the start of either document,
                     {
@@ -711,8 +718,8 @@ class compare_functions{
                         // make sure that left and right words haven't been used in a match before and
                         // that the two words actually match. If so, move up another word and repeat the test.
     
-                        if( $this->m_MatchMarkL[$FirstL] != WORD_UNMATCHED ) break;
-                        if( $this->m_MatchMarkR[$FirstR] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkL[$FirstL] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkR[$FirstR] != WORD_UNMATCHED ) break;
     
                         if( $DocL->m_pWordHash[$FirstL] == $DocR->m_pWordHash[$FirstR] )
                         {
@@ -733,8 +740,8 @@ class compare_functions{
                         // make sure that left and right words haven't been used in a match before and
                         // that the two words actually match. If so, move up another word and repeat the test.
     
-                        if( $this->m_MatchMarkL[$LastL] != WORD_UNMATCHED ) break;
-                        if( $this->m_MatchMarkR[$LastR] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkL[$LastL] != WORD_UNMATCHED ) break;
+                        if( $m_MatchMarkR[$LastR] != WORD_UNMATCHED ) break;
                         if( $DocL->m_pWordHash[$LastL] == $DocR->m_pWordHash[$LastR] )
                         {
                             $m_MatchMarkTempL[$LastL]=WORD_PERFECT;	// markup word in temporary list
@@ -768,8 +775,8 @@ class compare_functions{
                             
                             // make sure that left and right words haven't been used in a match before and
                             // that the two words actually match. If so, move up another word and repeat the test.
-                            if( $this->m_MatchMarkL[$FirstL] != WORD_UNMATCHED ) break;
-                            if( $this->m_MatchMarkR[$FirstR] != WORD_UNMATCHED ) break;
+                            if( $m_MatchMarkL[$FirstL] != WORD_UNMATCHED ) break;
+                            if( $m_MatchMarkR[$FirstR] != WORD_UNMATCHED ) break;
                             if( $DocL->m_pWordHash[$FirstL] == $DocR->m_pWordHash[$FirstR] )
                             {
                                 $MatchingWordsPerfect++;				// increment perfect match count;
@@ -789,7 +796,7 @@ class compare_functions{
                             
                             if( ($FirstL-1) >= 0 )					// check one word earlier on left (if it exists)
                             {
-                                if( $this->m_MatchMarkL[$FirstL-1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
+                                if( $m_MatchMarkL[$FirstL-1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
                                 
                                 if( $DocL->m_pWordHash[$FirstL-1] == $DocR->m_pWordHash[$FirstR] )
                                 {
@@ -810,7 +817,7 @@ class compare_functions{
     
                             if( ($FirstR-1) >= 0 )					// check one word earlier on right (if it exists)
                             {
-                                if( $this->m_MatchMarkR[$FirstR-1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
+                                if( $m_MatchMarkR[$FirstR-1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
     
                                 if( $DocL->m_pWordHash[$FirstL] == $DocR->m_pWordHash[$FirstR-1] )
                                 {
@@ -844,8 +851,8 @@ class compare_functions{
                             
                             // make sure that left and right words haven't been used in a match before and
                             // that the two words actually match. If so, move up another word and repeat the test.
-                            if( $this->m_MatchMarkL[$LastL] != WORD_UNMATCHED ) break;
-                            if( $this->m_MatchMarkR[$LastR] != WORD_UNMATCHED ) break;
+                            if( $m_MatchMarkL[$LastL] != WORD_UNMATCHED ) break;
+                            if( $m_MatchMarkR[$LastR] != WORD_UNMATCHED ) break;
                             if( $DocL->m_pWordHash[$LastL] == $DocR->m_pWordHash[$LastR] )
                             {
                                 $MatchingWordsPerfect++;				// increment perfect match count;
@@ -864,7 +871,7 @@ class compare_functions{
                                 
                             if( ($LastL+1) < $DocL->m_WordsTotal )		// check one word later on left (if it exists)
                             {
-                                if( $this->m_MatchMarkL[$LastL+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
+                                if( $m_MatchMarkL[$LastL+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
                                 
                                 if( $DocL->m_pWordHash[$LastL+1] == $DocR->m_pWordHash[$LastR] )
                                 {
@@ -885,7 +892,7 @@ class compare_functions{
     
                             if( ($LastR+1) < $DocR->m_WordsTotal )	// check one word later on right (if it exists)
                             {
-                                if( $this->m_MatchMarkR[$LastR+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
+                                if( $m_MatchMarkR[$LastR+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
     
                                 if( $DocL->m_pWordHash[$LastL] == $DocR->m_pWordHash[$LastR+1] )
                                 {
@@ -916,15 +923,15 @@ class compare_functions{
                         $Anchor++;									// increment $Anchor count
                         for($i=$FirstLp;$i<=$LastLp;$i++)				// loop for all left matched words
                         {
-                            $this->m_MatchMarkL[$i]=$m_MatchMarkTempL[$i];	// copy over left matching markup
-                            if($m_MatchMarkTempL[$i]==WORD_PERFECT) $m_MatchingWordsPerfect++;	// count the number of perfect matching words (same as for right document)
-                            $this->m_MatchMarkL[$i]=$Anchor;				// identify the $Anchor for this phrase
+                            $m_MatchMarkL[$i]=$m_MatchMarkTempL[$i];	// copy over left matching markup
+                            if($m_MatchMarkTempL[$i]==WORD_PERFECT) $this->m_MatchingWordsPerfect++;	// count the number of perfect matching words (same as for right document)
+                            $m_MatchMarkL[$i]=$Anchor;				// identify the $Anchor for this phrase
                         }
                         $m_MatchingWordsTotalL += $LastLp-$FirstLp+1;	// add the number of words in the matching phrase, whether perfect or flawed matches
                         for($i=$FirstRp;$i<=$LastRp;$i++)				// loop for all right matched words
                         {
-                            $this->m_MatchMarkR[$i]=$m_MatchMarkTempR[$i];	// copy over right matching markup
-                            $this->m_MatchAnchorR[$i]=$Anchor;				// identify the $Anchor for this phrase
+                            $m_MatchMarkR[$i]=$m_MatchMarkTempR[$i];	// copy over right matching markup
+                            $m_MatchAnchorR[$i]=$Anchor;				// identify the $Anchor for this phrase
                         }
                         $m_MatchingWordsTotalR += $LastRp-$FirstRp+1;	// add the number of words in the matching phrase, whether perfect or flawed matches
                     }
@@ -944,14 +951,15 @@ class compare_functions{
     }
 
     function RunComparison($load) {
-        //  $DocL;$DocR;								// document number of left document and right document
-        // $szMessage;									// status messages
-        // $i;												// local index counter
+        // $DocL;$DocR;			// document number of left document and right document
+        // $szMessage;			// status messages
+        // $i;					// local index counter
         // $irvalue;
-
+        $m_MatchingWordsTotalL=0;		// total number of matching words in left document
+        $m_MatchingWordsTotalR=0;        // total number of matching words in right document 
         $g_abort = false;					    		// abort signal when true
-        $settings =new settings();
-        $reportGen = new generate_report($settings);
+        
+        $reportGen = new generate_report($load->settings);
        
 	    $irvalue = $reportGen->SetupReport(); if($irvalue > -1) return $irvalue;		// setup reporting files	
         
@@ -961,7 +969,7 @@ class compare_functions{
             $load->loadDocument($doc);
         }
         //not in use for now
-        // foreach($this->m_pDocs as $docs) 			// loop for all document entries
+        // foreach($m_pDocs as $docs) 			// loop for all document entries
         // {
         //     if($g_abort)
         //     {
@@ -972,7 +980,7 @@ class compare_functions{
             // $szMessage= "Loading: ". $doc->m_szDocumentName;
             // $m_pStatus->SetWindowTextW($szMessage);
 
-            // $irvalue = $loader->loadDocument(($this->docs)); if($irvalue > -1) return $irvalue;			// load this document
+            // $irvalue = $loader->loadDocument(($docs)); if($irvalue > -1) return $irvalue;			// load this document
             
         // }
 
@@ -980,22 +988,19 @@ class compare_functions{
         fprintf($reportGen->m_fLog,"Starting to Compare Documents\n");		// Finish loading step log
         // $m_pStatus->SetWindowTextW(L"Starting to Compare Documents");  todo replace with html output
         
-        //think about info box javascript box?
+        // Think about info box javascript box?
         // $m_pStatus->SetWindowTextW(L"Comparing Documents");
 
         // progress bar not implemented for now
         // $m_pProgress->SetPos(0);
 
-        // $this->SetupProgressReports(DOC_TYPE_OLD,DOC_TYPE_NEW,DOC_TYPE_NEW);
+        // $SetupProgressReports(DOC_TYPE_OLD,DOC_TYPE_NEW,DOC_TYPE_NEW);
 
-        foreach($this->m_pDocs as $DocL)  // =0;$DocL<$this->m_Documents;$DocL++)			// for all possible left documents
-        {
-            // $this->m_pDocL = $this->m_pDocs + $DocL;	// obtain a quick pointer to the left document
-            $this->m_pDocL = $DocL;	
+        foreach($this->m_pDocs as $DocL)  // =0;$DocL<$m_Documents;$DocL++)			// for all possible left documents
+        {	
             foreach($this->m_pDocs as $DocR)//$DocR=0;$DocR<$DocL;$DocR++)					// for all possible right documents
             {
-                //$this->m_pDocR = $this->m_pDocs + $DocR;	// obtain a quick pointer to the right document
-                $this->m_pDocR = $DocR;
+                // cop line
                 if($DocL == $DocR) continue;				// skip if same document
 
                 if($g_abort){
@@ -1003,9 +1008,9 @@ class compare_functions{
                     return "ERR_ABORT";
                 }
 
-                if( ($this->m_pDocL->m_DocumentType == "DOC_TYPE_OLD") && ($this->_pDoc->m_pDocR->m_DocumentType == "DOC_TYPE_OLD") ) continue;	// don't compare an old document with an old document
+                if( ($DocL->m_DocumentType == "DOC_TYPE_OLD") && ($DocR->m_DocumentType == "DOC_TYPE_OLD") ) continue;	// don't compare an old document with an old document
 
-                $irvalue = $this->ComparePair($this->m_pDocL,$this->m_pDocR); if($irvalue > -1) return $irvalue;			// compare the two documents
+                $irvalue = $this->ComparePair($DocL,$DocR); if($irvalue > -1) return $irvalue;			// compare the two documents
                 
                 if( ($this->m_Compares %$this->m_CompareStep)	== 0 )				// if count is divisible by 1000,
                 {
@@ -1017,15 +1022,15 @@ class compare_functions{
                 
                 if($this->m_MatchingWordsPerfect>=$this->settings->m_WordThreshold)		// if there are enough matches to report,
                 {
-                    $this->m_MatchingDocumentPairs++;				// increment count of matched pairs of documents
+                    $this->settings->m_MatchingDocumentPairs++;				// increment count of matched pairs of documents
                     $reportGen->ReportMatchedPair();
 
                     //m_report is simply a list-window where we can see the matches of the comparison
                     // $nItem=$m_pReport->GetItemCount();
 
-                    $szPerfectMatch= $this->m_MatchingWordsPerfect. "(" . 100*$this->m_MatchingWordsPerfect/$this->m_pDocL->m_WordsTotal . "L," . 100*$this->m_MatchingWordsPerfect/$this->m_pDocR->m_WordsTotal . "R)"; 
+                    $szPerfectMatch= $this->m_MatchingWordsPerfect. "(" . 100*$this->m_MatchingWordsPerfect/$DocL->m_WordsTotal . "L," . 100*$this->m_MatchingWordsPerfect/$DocR->m_WordsTotal . "R)"; 
                 
-                    $szOverallMatch= $this->m_MatchingWordsTotalL . "(". 100*$this->m_MatchingWordsTotalL/$this->m_pDocL->m_WordsTotal . "%)L;" . "," . $this->m_MatchingWordsTotalR . "(". 100*$this->m_MatchingWordsTotalR/$this->m_pDocR->m_WordsTotal . "%)R";
+                    $szOverallMatch= $m_MatchingWordsTotalL . "(". 100*$m_MatchingWordsTotalL/$DocL->m_WordsTotal . "%)L;" . "," . $m_MatchingWordsTotalR . "(". 100*$m_MatchingWordsTotalR/$DocR->m_WordsTotal . "%)R";
                     echo("Item:" . $szPerfectMatch . " ". $szOverallMatch . " " . $this->m_pDoc->m_szDocL . " " . $this->m_pDoc->m_szDocR . "\n");
                     fprintf($reportGen->m_fLog,"Item:" . $szPerfectMatch . " ". $szOverallMatch . " " . $this->m_pDoc->m_szDocL . " " . $this->m_pDoc->m_szDocR . "\n");
                     // $m_pReport->InsertItem(nItem,szPerfectMatch);

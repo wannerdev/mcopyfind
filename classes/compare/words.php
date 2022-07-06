@@ -92,11 +92,7 @@ class words {
     }
 
     public static function WordRemoveNumbers($word)//TODO return word
-    {
-        $$wordlen;
-        $$ccnt;
-        $$icnt;
-        
+    {        
         $wordlen=strlen($word);
         for($ccnt=0;$ccnt<$wordlen;$ccnt++)
         {
