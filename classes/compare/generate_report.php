@@ -18,9 +18,6 @@ class generate_report{
 	public $m_fMatchHtml;						// handle for comparisons that exceed threshold (output) - html
 	public $m_fHtmll;							// handle for output html files					
 	public $m_debug;							// flag to include debug output in log file
-	public $m_MatchMarkL,$m_MatchMarkR;		// left and right matched word markup list pointers
-	public $m_MatchAnchorL, $m_MatchAnchorR;	// left and right matched string anchors for html files
-	public $m_MatchMarkTempL,$m_MatchMarkTempR;// left and right matched word  markup list pointers - temporary
 	public $m_pQWordHash;			// a pointer to a working hash-coded word list
 	public $m_pXWordHash;			// a pointer to a temporary hash-coded word list
 	public $m_WordsAllocated;					// number of words allocated in the many word-related arrays
@@ -43,10 +40,6 @@ class generate_report{
         $this->szfilename="wcopy.log";									// file 
         $this->m_szSoftwareName="mcopyfind";
         $this->settings= $_settings;
-
-        $this->m_pDocS = new load_documents();				
-        $this->m_pDocL = new Document();				
-        $this->m_pDocR = new Document();
 
         $this->SetupReport();
     }
@@ -91,35 +84,36 @@ class generate_report{
    
     }
 
-    function ReportMatchedPair()
+    function ReportMatchedPair(compare_functions $compare, $docL, $docR)
     {
+        		
+        $this->m_pDocL = $docL;				
+         $this->m_pDocR = $docR;
          $hrefL[1000]="";
          $hrefR[1000]="";					// href for the Left and Right html files
          $hrefB[1000]="";					// href from frame file for side-by-side viewing
          $dstring="";						// character buffer for document name strings
     
         $indoc = new document();			// CInputDocument class to handle inputting the document
-        $indoc->m_bBasic_Characters = settings::$m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
+        $indoc->m_bBasic_Characters = $this->settings->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
     
         $iReturn=0;
     
         // report number of matching words in the Match and Log files
-        fprintf($this->m_fMatch, $this->m_MatchingWordsPerfect." " . $this->m_MatchingWordsTotalL . $this->m_MatchingWordsTotalR . $this->m_pDocL->m_szDocumentName.$this->m_pDocR->m_szDocumentName);
-        fprintf($this->m_fLog, "Match:". $this->m_MatchingWordsPerfect. $this->m_MatchingWordsTotalL . $this->m_MatchingWordsTotalR. $this->m_pDocL->m_szDocumentName.$this->m_pDocR->m_szDocumentName ."\n");
+        fprintf($this->m_fMatch, $compare->m_MatchingWordsPerfect." " . $compare->m_MatchingWordsTotalL . $compare->m_MatchingWordsTotalR . $this->m_pDocL->filename.$this->m_pDocR->filename);
+        fprintf($this->m_fLog, "Match:". $compare->m_MatchingWordsPerfect. $compare->m_MatchingWordsTotalL . $compare->m_MatchingWordsTotalR. $this->m_pDocL->filename.$this->m_pDocR->filename ."\n");
         fflush($this->m_fLog);
     
-        $Backslash=-1; //prob wrong
-        $Length=5;  //prob wrong
     
-        $Backslash = strpos($this->m_pDocL->m_szDocumentName, '\\');
-        $Length = strlen($this->m_pDocL->m_szDocumentName);
-        if($Backslash == -1) $m_szDocL = $this->m_pDocL->m_szDocumentName;
-        else $m_szDocL = substr($this->m_pDocL->m_szDocumentName,(-($Length - $Backslash - 1)));
+        $Backslash = strpos($this->m_pDocL->filename, '\\');
+        $Length = strlen($this->m_pDocL->filename);
+        if($Backslash == -1) $m_szDocL = $this->m_pDocL->filename;
+        else $m_szDocL = substr($this->m_pDocL->filename,(-($Length - $Backslash - 1)));
     
-        $Backslash = strpos($this->m_pDocR->m_szDocumentName, '\\');
-        $Length = strlen($this->m_pDocR->m_szDocumentName);
-        if($Backslash == -1) $m_szDocR = $this->m_pDocR->m_szDocumentName;
-        else $m_szDocR = substr($this->m_pDocR->m_szDocumentName,(-($Length - $Backslash - 1)));
+        $Backslash = strpos($this->m_pDocR->filename, '\\');
+        $Length = strlen($this->m_pDocR->filename);
+        if($Backslash == -1) $m_szDocR = $this->m_pDocR->filename;
+        else $m_szDocR = substr($this->m_pDocR->filename,(-($Length - $Backslash - 1)));
     
         $hrefL=$m_szDocL;					// generate name for right html filename
         $hrefL.=".".$m_szDocR.".html";
@@ -131,8 +125,8 @@ class generate_report{
         $hrefB="SBS.".$m_szDocR. "." . $m_szDocL . "." . $dstring . ".html";
     
     
-        $szPerfectMatch =($this->m_MatchingWordsPerfect. "(" . strval(100*$this->m_MatchingWordsPerfect/$this->m_pDocL->m_WordsTotal)."L,".  strval(100*$this->m_MatchingWordsPerfect/$this->m_pDocR->m_WordsTotal)."R)");
-        $szOverallMatch=($this->m_MatchingWordsTotalL . " (". strval(100*$this->m_MatchingWordsTotalL/$this->m_pDocL->m_WordsTotal). ") L;" . $this->m_MatchingWordsTotalR . "(" . strval(100*$this->m_MatchingWordsTotalR/$this->m_pDocR->m_WordsTotal).") R");
+        $szPerfectMatch =($compare->m_MatchingWordsPerfect. "(" . strval(100*$compare->m_MatchingWordsPerfect/$this->m_pDocL->m_WordsTotal)."L,".  strval(100*$compare->m_MatchingWordsPerfect/$this->m_pDocR->m_WordsTotal)."R)");
+        $szOverallMatch=($compare->m_MatchingWordsTotalL . " (". strval(100*$compare->m_MatchingWordsTotalL/$this->m_pDocL->m_WordsTotal). ") L;" . $compare->m_MatchingWordsTotalR . "(" . strval(100*$compare->m_MatchingWordsTotalR/$this->m_pDocR->m_WordsTotal).") R");
         fprintf($this->m_fMatchHtml,
             "<tr><td>%s</td><td>%s</td><td><a href=\"%s\" target=\"_blank\">Side-by-Side</a></td><td>
             <a href=\"%s\" target=\"_blank\">%s</a></td><td><a href=\"%s\" target=\"_blank\">%s</a></td></tr>\n",
@@ -148,23 +142,18 @@ class generate_report{
         fprintf($m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
         fprintf($m_fHtml,"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
         fprintf($m_fHtml,"<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n");
-        fprintf($m_fHtml,"<title>Comparison of ".$m_szDocL. "with". $m_szDocR ."(Matched Words =". $this->m_MatchingWordsPerfect.")</title>\n");
+        fprintf($m_fHtml,"<title>Comparison of ".$m_szDocL. "with". $m_szDocR ."(Matched Words =". $compare->m_MatchingWordsPerfect.")</title>\n");
         fprintf($m_fHtml,"<base target='right'>\n");
         fprintf($m_fHtml,"</head>\n");
         fprintf($m_fHtml,"<body>\n");
         
-        // $iReturn = $indoc->loadDocument($this->m_pDocL->m_szDocumentName);	// open left document for word input
-        $test = new load_documents();
-        $iReturn= $test->loadDocument($this->m_pDocL->m_szDocumentName);
-        if($iReturn > -1)
-        {
-            // $indoc.CloseDocument();							// close document
-            return $iReturn;
-        }
+       
+        $this->m_pDocL->OpenDocument();
+        
                     
         // generate text body of html file, with matching words underlined
-    
         $iReturn = generate_report::DocumentToHtml($indoc,$this->m_MatchMarkL,$this->m_MatchAnchorL,$this->m_pDocL->m_WordsTotal,$hrefR); if($iReturn > -1) return $iReturn;
+        
         // $indoc->CloseDocument();								// close document
     
         fprintf($m_fHtml,"\n</body></html>\n");				// complete html file
@@ -181,12 +170,12 @@ class generate_report{
         fprintf($m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
         fprintf($m_fHtml,"<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n");
         fprintf($m_fHtml,"<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n");
-        fprintf($m_fHtml,"<title>Comparison of %s with %s (Matched Words = %d)</title>\r\n",$m_szDocR,$m_szDocL,$this->m_MatchingWordsPerfect);
+        fprintf($m_fHtml,"<title>Comparison of %s with %s (Matched Words = %d)</title>\r\n",$m_szDocR,$m_szDocL,$compare->m_MatchingWordsPerfect);
         fprintf($m_fHtml,"<base target='left'>\r\n");
         fprintf($m_fHtml,"</head>\r\n");
         fprintf($m_fHtml,"<body>\r\n");
     
-        $iReturn = $indoc->OpenDocument($this->m_pDocR->m_szDocumentName);	// open right document for word input
+        $iReturn = $indoc->OpenDocument($this->m_pDocR->filename);	// open right document for word input
         if($iReturn > -1)
         {
             // $indoc.CloseDocument();							// close document
@@ -210,7 +199,7 @@ class generate_report{
         // create side-by-side wrapper html file
     
         fprintf($m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
-        fprintf($m_fHtml,"<html><title>Comparison of %s with %s (Matched Words = %d)</title>\n",$m_szDocR, $m_szDocL, $this->m_MatchingWordsPerfect);
+        fprintf($m_fHtml,"<html><title>Comparison of %s with %s (Matched Words = %d)</title>\n",$m_szDocR, $m_szDocL, $compare->m_MatchingWordsPerfect);
         fprintf($m_fHtml,"<frameset cols=\"*,*\" frameborder=\"YES\" border=\"1\" framespacing=\"0\">");
         fprintf($m_fHtml,"<frame src=\"%s\" name=\"left\">\n",$hrefL);
         fprintf($m_fHtml,"<frame src=\"%s\" name=\"right\">\n",$hrefR);
@@ -223,8 +212,6 @@ class generate_report{
 
     function DocumentToHtml(Document $indoc,$MatchMark, $MatchAnchor, $words, $href)
     {
-        //  $this->SetupReport();
-
         $wordcount=0;								// current word number
 
         $word="";								// current word
@@ -235,7 +222,7 @@ class generate_report{
         $xAnchor=0;
         $LastMatch=WORD_UNMATCHED;
         $LastAnchor=0;
-        $$iReturn=0;
+        $iReturn=0;
 
         for($wordcount=0;$wordcount<$words;$wordcount++)	// loop for every word
         {
@@ -244,27 +231,27 @@ class generate_report{
 
             if(($LastMatch!=$xMatch) || ($LastAnchor!=$xAnchor))	// check for a change of markup or anchor
             {
-                if($LastMatch==WORD_PERFECT) fprintf($this->this->$m_fHtml,"</font>");	// close out red markups if they were active
-                else if($LastMatch==WORD_FLAW) fprintf($this->$m_fHtml,"</font></i>");	// close out green italics if they were active
-                else if($LastMatch==WORD_FILTERED)  fprintf($this->$m_fHtml,"</font>");	// close out blue markups if they were active
+                if($LastMatch==WORD_PERFECT) fprintf($this->this->m_fHtml,"</font>");	// close out red markups if they were active
+                else if($LastMatch==WORD_FLAW) fprintf($this->m_fHtml,"</font></i>");	// close out green italics if they were active
+                else if($LastMatch==WORD_FILTERED)  fprintf($this->m_fHtml,"</font>");	// close out blue markups if they were active
 
                 if($LastAnchor!=$xAnchor)
                 {
                     if($LastAnchor>0)
                     {
-                        fprintf($this->$m_fHtml,"</a>");	// close out any active anchor
+                        fprintf($this->m_fHtml,"</a>");	// close out any active anchor
                         $LastAnchor=0;
                     }
                     if($xAnchor>0)
                     {
-                        if($this->m_bBriefReport && ($wordcount>0) ) fprintf($this->$m_fHtml,"</P>\n<P>");	// print a paragraph mark for a new line
-                        fprintf($this->$m_fHtml,"<a name='%i' href='%s#%i'>",$MatchAnchor[$wordcount],$href,$MatchAnchor[$wordcount]);	// start new anchor
+                        if($this->m_bBriefReport && ($wordcount>0) ) fprintf($this->m_fHtml,"</P>\n<P>");	// print a paragraph mark for a new line
+                        fprintf($this->m_fHtml,"<a name='%i' href='%s#%i'>",$MatchAnchor[$wordcount],$href,$MatchAnchor[$wordcount]);	// start new anchor
                     }
                 }
 
-                if($xMatch==WORD_PERFECT) fprintf($$this->$m_fHtml,"<font color='#FF0000'>");	// start red for perfection
-                else if($xMatch==WORD_FLAW) fprintf($this->$m_fHtml,"<i><font color='#007F00'>");	// start green italics for imperfection
-                else if($xMatch==WORD_FILTERED)  fprintf($this->$m_fHtml,"<font color='#0000FF'>");	// start blue for filtered
+                if($xMatch==WORD_PERFECT) fprintf($this->m_fHtml,"<font color='#FF0000'>");	// start red for perfection
+                else if($xMatch==WORD_FLAW) fprintf($this->m_fHtml,"<i><font color='#007F00'>");	// start green italics for imperfection
+                else if($xMatch==WORD_FILTERED)  fprintf($this->m_fHtml,"<font color='#0000FF'>");	// start blue for filtered
             }
 
             $LastMatch=$xMatch;
@@ -273,7 +260,7 @@ class generate_report{
             while(true)
             {
                 if($DelimiterType == DEL_TYPE_EOF) return -1;			// shouldn't happen unless document changed during scan
-                $$iReturn = $indoc->Words->vocab($word) ;//.GetWord($word,$DelimiterType); if($iReturn > -1) return $iReturn;	// get next word
+                $iReturn = $indoc->Words->vocab($word) ;//.GetWord($word,$DelimiterType); if($iReturn > -1) return $iReturn;	// get next word
 
                 $tword=$word;								// copy word to a temporary
 
@@ -281,26 +268,26 @@ class generate_report{
                 if($this->settings->m_bIgnoreOuterPunctuation) Words::wordxouterpunct($tword);	// if ignore outer punctuation is active, remove outer punctuation
                 if($this->settings->m_bIgnoreNumbers) Words::WordRemoveNumbers($tword);			// if ignore numbers is active, remove numbers
                 if($this->settings->m_bIgnoreCase) Words::WordToLowerCase($tword);			// if ignore case is active, remove case
-                if($this->settings->m_bSkipLongWords & (strlen($tword) > $m_SkipLength) ) continue;	// if skip too-long words is active, skip them
+                if($this->settings->m_bSkipLongWords & (strlen($tword) > $this->settings->m_SkipLength) ) continue;	// if skip too-long words is active, skip them
                 if($this->settings->m_bSkipNonwords & (!Words::WordCheck($tword)) ) continue;	// if skip nonwords is active, skip them
 
                 break;
             }
         
-            if( (!$m_bBriefReport) || ($xMatch == WORD_PERFECT) || ($xMatch == WORD_FLAW) )
+            if( (!$this->m_bBriefReport) || ($xMatch == WORD_PERFECT) || ($xMatch == WORD_FLAW) )
             {
                 $wordLength=strlen($word);						// find length of word
                 // If problems with html characters test double encoding
-                for($i=0;$i<$wordLength;$i++) fprintf($$this->$m_fHtml,htmlspecialchars($word[$i])); // print the character, using UTF8 translation
+                for($i=0;$i<$wordLength;$i++) fprintf($this->m_fHtml,htmlspecialchars($word[$i])); // print the character, using UTF8 translation
                 	
-                if($DelimiterType == DEL_TYPE_WHITE) fprintf($this->$m_fHtml," ");					// print a blank for white space
-                else if($DelimiterType == DEL_TYPE_NEWLINE) fprintf($this->$m_fHtml,"<br>");			// print a break for a new line
+                if($DelimiterType == DEL_TYPE_WHITE) fprintf($this->m_fHtml," ");					// print a blank for white space
+                else if($DelimiterType == DEL_TYPE_NEWLINE) fprintf($this->m_fHtml,"<br>");			// print a break for a new line
             }
         }
-        if($LastMatch==WORD_PERFECT) fprintf($this->$m_fHtml,"</font>");	// close out red markups if they were active
-        else if($LastMatch==WORD_FLAW) fprintf($this->$m_fHtml,"</font></i>");	// close out green italics if they were active
-        else if($LastMatch==WORD_FILTERED)  fprintf($this->$m_fHtml,"</font>");	// close out blue markups if they were active
-        if($LastAnchor>0) fprintf($this->$m_fHtml,"</a>");	// close out any active anchor
+        if($LastMatch==WORD_PERFECT) fprintf($this->m_fHtml,"</font>");	// close out red markups if they were active
+        else if($LastMatch==WORD_FLAW) fprintf($this->m_fHtml,"</font></i>");	// close out green italics if they were active
+        else if($LastMatch==WORD_FILTERED)  fprintf($this->m_fHtml,"</font>");	// close out blue markups if they were active
+        if($LastAnchor>0) fprintf($this->m_fHtml,"</a>");	// close out any active anchor
         return -1;
     }
 

@@ -20,9 +20,8 @@ class load_documents
     //set wordNumber to 0
     public $documents = [];
     public $settings;
-        // private function __construct(){
-    //     $this->settings=new settings();
-    // }
+    public $wordsize=10000;
+    public $wordInc=10000;
 
     function __construct(){
         $this->settings=new settings();
@@ -66,7 +65,7 @@ class load_documents
      */
     function loadDocument($document)
     {
-        $file = fopen($document->path,"r");
+        $file = fopen($document->filename,"r");
         // echo("path  ". $document->path);
         if(!$file)throw new Exception("ERROR: File not found");
 
@@ -93,6 +92,9 @@ class load_documents
                             $realwords++;
                         }
                         $wordNumber++;
+                        if($wordNumber == $this->wordsize) {
+                            $this->wordsize += $this->wordInc;
+                        }
                     }
                 }
             }
@@ -115,7 +117,7 @@ class load_documents
 
         for ($i = 0; $i < $wordAmount; $i++)            // loop for all the wordAmount in the document
         {
-            $document->pQWordHash[$i] = $hashes[$i];                // copy over hash-coded wordAmount
+            $document->m_pWordHash[$i] = $hashes[$i];                // copy over hash-coded wordAmount
             $document->pSortedWordNumber[$i] = $i;                    // copy over word numbers
             $document->pSortedWordHash[$i] = $hashes[$i];        // copy over hash-coded wordAmount
         }
@@ -171,6 +173,12 @@ class load_documents
     //then generate html by exporting the document and marking the saved findings
     //Excluding vocab functionality for now,
     //specific word hash function
+
+    //Improvment idea define header and footer to ignore
+    //needs page number with range of words
+    //List of pages with start number of a page,
+    // Comparing starts always at page+ header and ends at page-footer //before comparing you ask if the word is inside the page range
+    
 }
 
 
