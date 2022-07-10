@@ -11,17 +11,17 @@ class generate_report{
     public $settings;
     public $m_fLog; // handle for the log file
     public $m_StartTicks; //time when the comparison started
-    public $m_MatchingDocumentPairs=0; //number of matching document pairs
+    // public $m_MatchingDocumentPairs=0; //number of matching document pairs
     public $m_szSoftwareName;
 
     public $m_fMatch;							// handle for comparisons that exceed threshold (output)
 	public $m_fMatchHtml;						// handle for comparisons that exceed threshold (output) - html
-	public $m_fHtmll;							// handle for output html files					
+	public $m_fHtml;							// handle for output html files					
 	public $m_debug;							// flag to include debug output in log file
 	public $m_pQWordHash;			// a pointer to a working hash-coded word list
 	public $m_pXWordHash;			// a pointer to a temporary hash-coded word list
 	public $m_WordsAllocated;					// number of words allocated in the many word-related arrays
-    public $m_bBriefReport;
+    public $m_bBriefReport=false;
 
     public $m_pDocS;				// All documents
     public $m_pDocL;				// Left document object
@@ -38,7 +38,7 @@ class generate_report{
             $this->m_szReportFolder = "/var/moodledata/mcopyfind/reports/"; //path folder 
         }								
         $this->szfilename="wcopy.log";									// file 
-        $this->m_szSoftwareName="mcopyfind";
+        $this->m_szSoftwareName="Mcopyfind";
         $this->settings= $_settings;
 
         $this->SetupReport();
@@ -53,13 +53,14 @@ class generate_report{
         $szfilename = $this->m_szReportFolder."log.txt";
         $this->m_fLog= fopen($szfilename,"w");				// create and open log text file
         if($this->m_fLog == NULL) return "ERR_CANNOT_OPEN_LOG_FILE";
-        fprintf ($this->m_fLog, "Starting Report Files \n". $this->m_StartTicks->format($this->m_StartTicks::RSS) ."\n");
+        $out ="Starting Report Files \n". $this->m_StartTicks->format($this->m_StartTicks::RSS) ."\n";
+        fprintf($this->m_fLog, $out);
 
         $szfilename = $this->m_szReportFolder ."matches.txt";
         $this->m_fMatch= fopen($szfilename, "w");				// create and open main comparison report text file
         if($this->m_fMatch == NULL) return "ERR_CANNOT_OPEN_COMPARISON_REPORT_TXT_FILE";
     
-        $szfilename=$this->m_szReportFolder."matches.htm";
+        $szfilename=$this->m_szReportFolder."matches.html";
         $this->m_fMatchHtml=fopen( $szfilename, "w");			// create and open main comparison report html file
         if($this->m_fMatchHtml == NULL) return "ERR_CANNOT_OPEN_COMPARISON_REPORT_HTML_FILE";
         
@@ -80,19 +81,19 @@ class generate_report{
         else fprintf($this->m_fMatchHtml,"<br>Skip Long Words: No\n");
         fprintf($this->m_fMatchHtml,"<br>Most Imperfections to Allow: \n".$this->settings->m_MismatchTolerance);
         fprintf($this->m_fMatchHtml,"<br>Minimum %% of Matching Words: \n". $this->settings->m_MismatchPercentage);
-        fprintf($this->m_fMatchHtml,"</blockquote><br><br><table border='1' cellpadding='5'><tr><td align='center'>Perfect Match</td><td align='center'>Overall Match</td><td align='center'>View Both Files</td><td align='center'>File </td><td align='center'>File R</td></tr>");
-   
+        fprintf($this->m_fMatchHtml,"</blockquote><br><br><table border='1' cellpadding='5'><tr><td align='center'>Perfect Match</td><td align='center'>Overall Match</td><td align='center'>View Both Files</td><td align='center'>File L</td><td align='center'>File R</td></tr>");
+
     }
 
     function ReportMatchedPair(compare_functions $compare, $docL, $docR)
     {
         		
         $this->m_pDocL = $docL;				
-         $this->m_pDocR = $docR;
-         $hrefL[1000]="";
-         $hrefR[1000]="";					// href for the Left and Right html files
-         $hrefB[1000]="";					// href from frame file for side-by-side viewing
-         $dstring="";						// character buffer for document name strings
+        $this->m_pDocR = $docR;
+        $hrefL[1000]="";
+        $hrefR[1000]="";					// href for the Left and Right html files
+        $hrefB[1000]="";					// href from frame file for side-by-side viewing
+        $dstring="";						// character buffer for document name strings
     
         $indoc = new document();			// CInputDocument class to handle inputting the document
         $indoc->m_bBasic_Characters = $this->settings->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
@@ -100,33 +101,35 @@ class generate_report{
         $iReturn=0;
     
         // report number of matching words in the Match and Log files
-        fprintf($this->m_fMatch, $compare->m_MatchingWordsPerfect." " . $compare->m_MatchingWordsTotalL . $compare->m_MatchingWordsTotalR . $this->m_pDocL->filename.$this->m_pDocR->filename);
-        fprintf($this->m_fLog, "Match:". $compare->m_MatchingWordsPerfect. $compare->m_MatchingWordsTotalL . $compare->m_MatchingWordsTotalR. $this->m_pDocL->filename.$this->m_pDocR->filename ."\n");
+        $out =$compare->m_MatchingWordsPerfect." " . $compare->m_MatchingWordsTotalL . $compare->m_MatchingWordsTotalR . $this->m_pDocL->filename.$this->m_pDocR->filename;
+        fprintf($this->m_fMatch, $out);
+        $out="Match:". $compare->m_MatchingWordsPerfect. $compare->m_MatchingWordsTotalL . $compare->m_MatchingWordsTotalR. $this->m_pDocL->filename.$this->m_pDocR->filename ."\n";
+        fprintf($this->m_fLog, $out);
         fflush($this->m_fLog);
     
     
         $Backslash = strpos($this->m_pDocL->filename, '\\');
         $Length = strlen($this->m_pDocL->filename);
         if($Backslash == -1) $m_szDocL = $this->m_pDocL->filename;
-        else $m_szDocL = substr($this->m_pDocL->filename,(-($Length - $Backslash - 1)));
+        else $m_szDocL = substr($this->m_pDocL->filename,(-($Length - $Backslash )));
     
         $Backslash = strpos($this->m_pDocR->filename, '\\');
         $Length = strlen($this->m_pDocR->filename);
         if($Backslash == -1) $m_szDocR = $this->m_pDocR->filename;
-        else $m_szDocR = substr($this->m_pDocR->filename,(-($Length - $Backslash - 1)));
+        else $m_szDocR = substr($this->m_pDocR->filename,(-($Length - $Backslash)));
     
-        $hrefL=$m_szDocL;					// generate name for right html filename
-        $hrefL.=".".$m_szDocR.".html";
+        $hrefL = $m_szDocL;					// generate name for right html filename
+        $hrefL.= "." . $m_szDocR.".html";
     
-        $hrefR=$m_szDocR;					// generate name for right html filename
+        $hrefR = $m_szDocR;					// generate name for right html filename
         $hrefR.="." . $m_szDocL . ".html";
     
-        $dstring=strval($this->m_MatchingDocumentPairs);
-        $hrefB="SBS.".$m_szDocR. "." . $m_szDocL . "." . $dstring . ".html";
+        $dstring = strval($compare->m_MatchingDocumentPairs);
+        $hrefB = "SBS.".$this->m_pDocR->filename . $this->m_pDocL->filename . "." . $dstring . ".html";
     
     
-        $szPerfectMatch =($compare->m_MatchingWordsPerfect. "(" . strval(100*$compare->m_MatchingWordsPerfect/$this->m_pDocL->m_WordsTotal)."L,".  strval(100*$compare->m_MatchingWordsPerfect/$this->m_pDocR->m_WordsTotal)."R)");
-        $szOverallMatch=($compare->m_MatchingWordsTotalL . " (". strval(100*$compare->m_MatchingWordsTotalL/$this->m_pDocL->m_WordsTotal). ") L;" . $compare->m_MatchingWordsTotalR . "(" . strval(100*$compare->m_MatchingWordsTotalR/$this->m_pDocR->m_WordsTotal).") R");
+        $szPerfectMatch =($compare->m_MatchingWordsPerfect. " (" . round(100*$compare->m_MatchingWordsPerfect/$this->m_pDocL->m_WordsTotal,2)."% L, ".  round(100*$compare->m_MatchingWordsPerfect/$this->m_pDocR->m_WordsTotal,2)."% R)");
+        $szOverallMatch=($compare->m_MatchingWordsTotalL . " (". round(100*$compare->m_MatchingWordsTotalL/$this->m_pDocL->m_WordsTotal,2). "%)L; " . $compare->m_MatchingWordsTotalR . "(" . round(100*$compare->m_MatchingWordsTotalR/$this->m_pDocR->m_WordsTotal,2)."%) R");
         fprintf($this->m_fMatchHtml,
             "<tr><td>%s</td><td>%s</td><td><a href=\"%s\" target=\"_blank\">Side-by-Side</a></td><td>
             <a href=\"%s\" target=\"_blank\">%s</a></td><td><a href=\"%s\" target=\"_blank\">%s</a></td></tr>\n",
@@ -134,46 +137,46 @@ class generate_report{
     
 
         $dstring = $this->m_szReportFolder .  "\\" . $hrefL;					// generate full path for left html file
-        $m_fHtml=fopen($dstring,"w"); 				// create and open left html file
-        if($m_fHtml == NULL) return "ERR_CANNOT_OPEN_LEFT_HTML_FILE";
+        $this->m_fHtml=fopen($dstring,"w"); 				// create and open left html file
+        if($this->m_fHtml == NULL) return "ERR_CANNOT_OPEN_LEFT_HTML_FILE";
     
         // create header material for left html file
     
-        fprintf($m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
-        fprintf($m_fHtml,"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
-        fprintf($m_fHtml,"<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n");
-        fprintf($m_fHtml,"<title>Comparison of ".$m_szDocL. "with". $m_szDocR ."(Matched Words =". $compare->m_MatchingWordsPerfect.")</title>\n");
-        fprintf($m_fHtml,"<base target='right'>\n");
-        fprintf($m_fHtml,"</head>\n");
-        fprintf($m_fHtml,"<body>\n");
+        fprintf($this->m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
+        fprintf($this->m_fHtml,"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
+        fprintf($this->m_fHtml,"<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n");
+        fprintf($this->m_fHtml,"<title>Comparison of ".$m_szDocL. "with". $m_szDocR ."(Matched Words =". $compare->m_MatchingWordsPerfect.")</title>\n");
+        fprintf($this->m_fHtml,"<base target='right'>\n");
+        fprintf($this->m_fHtml,"</head>\n");
+        fprintf($this->m_fHtml,"<body>\n");
         
-       
-        $this->m_pDocL->OpenDocument();
+        $indoc->filename = $this->m_pDocL->filename;
+        $indoc->OpenDocument();
         
-                    
+        //$indoc = $m_filep;
         // generate text body of html file, with matching words underlined
-        $iReturn = generate_report::DocumentToHtml($indoc,$this->m_MatchMarkL,$this->m_MatchAnchorL,$this->m_pDocL->m_WordsTotal,$hrefR); if($iReturn > -1) return $iReturn;
+        $iReturn = generate_report::DocumentToHtml($indoc,$compare->m_MatchMarkL,$compare->m_MatchAnchorL,$this->m_pDocL->m_WordsTotal,$hrefR); if($iReturn > -1) return $iReturn;
         
-        // $indoc->CloseDocument();								// close document
+        $indoc->CloseDocument();								// close document
     
-        fprintf($m_fHtml,"\n</body></html>\n");				// complete html file
-        fclose($m_fHtml); $m_fHtml=NULL;						// close html file
+        fprintf($this->m_fHtml,"\n</body></html>\n");				// complete html file
+        fclose($this->m_fHtml); $this->m_fHtml=NULL;						// close html file
     
         $dstring=$this->m_szReportFolder;						// generate full path for right html file
         $dstring .= "\\" . $hrefR;
     
-        $m_fHtml = fopen($dstring,"w");					// create and open right html file
-        if($m_fHtml == NULL) return "ERR_CANNOT_OPEN_RIGHT_HTML_FILE";
+        $this->m_fHtml = fopen($dstring,"w");					// create and open right html file
+        if($this->m_fHtml == NULL) return "ERR_CANNOT_OPEN_RIGHT_HTML_FILE";
         
         // create header material for right html file
     
-        fprintf($m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
-        fprintf($m_fHtml,"<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n");
-        fprintf($m_fHtml,"<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n");
-        fprintf($m_fHtml,"<title>Comparison of %s with %s (Matched Words = %d)</title>\r\n",$m_szDocR,$m_szDocL,$compare->m_MatchingWordsPerfect);
-        fprintf($m_fHtml,"<base target='left'>\r\n");
-        fprintf($m_fHtml,"</head>\r\n");
-        fprintf($m_fHtml,"<body>\r\n");
+        fprintf($this->m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
+        fprintf($this->m_fHtml,"<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n");
+        fprintf($this->m_fHtml,"<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n");
+        fprintf($this->m_fHtml,"<title>Comparison of %s with %s (Matched Words = %d)</title>\r\n",$m_szDocR,$m_szDocL,$compare->m_MatchingWordsPerfect);
+        fprintf($this->m_fHtml,"<base target='left'>\r\n");
+        fprintf($this->m_fHtml,"</head>\r\n");
+        fprintf($this->m_fHtml,"<body>\r\n");
     
         $iReturn = $indoc->OpenDocument($this->m_pDocR->filename);	// open right document for word input
         if($iReturn > -1)
@@ -183,29 +186,29 @@ class generate_report{
         }
                     
         // generate text body of html file, with matching words underlined
+        $iReturn =  generate_report::DocumentToHtml($indoc,$compare->m_MatchMarkR,$compare->m_MatchAnchorR,$this->m_pDocR->m_WordsTotal,$hrefL); if($iReturn > -1) return $iReturn;
+        
+        $indoc->closeDocument();
     
-        $iReturn =  generate_report::DocumentToHtml($indoc,$this->m_MatchMarkR,$this->m_MatchAnchorR,$this->m_pDocR->m_WordsTotal,$hrefL); if($iReturn > -1) return $iReturn;
-        // $indoc.CloseDocument();
-    
-        fprintf($m_fHtml,"\n</body></html>\n");				// complete html file
-        fclose($m_fHtml); $m_fHtml=NULL;						// close html file
+        fprintf($this->m_fHtml,"\n</body></html>\n");				// complete html file
+        fclose($this->m_fHtml); $this->m_fHtml=NULL;						// close html file
         
         $dstring = $this->m_szReportFolder; 
         $dstring .= "\\" . $hrefB;
     
-        $m_fHtml=fopen($dstring,"w");					// create and open side-by-side html file
-        if($m_fHtml == NULL) return "ERR_CANNOT_OPEN_SIDE_BY_SIDE_HTML_FILE";
+        $this->m_fHtml=fopen($dstring,"w");					// create and open side-by-side html file
+        if($this->m_fHtml == NULL) return "ERR_CANNOT_OPEN_SIDE_BY_SIDE_HTML_FILE";
     
         // create side-by-side wrapper html file
     
-        fprintf($m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
-        fprintf($m_fHtml,"<html><title>Comparison of %s with %s (Matched Words = %d)</title>\n",$m_szDocR, $m_szDocL, $compare->m_MatchingWordsPerfect);
-        fprintf($m_fHtml,"<frameset cols=\"*,*\" frameborder=\"YES\" border=\"1\" framespacing=\"0\">");
-        fprintf($m_fHtml,"<frame src=\"%s\" name=\"left\">\n",$hrefL);
-        fprintf($m_fHtml,"<frame src=\"%s\" name=\"right\">\n",$hrefR);
-        fprintf($m_fHtml,"</frameset><body></body></html>");
+        fprintf($this->m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
+        fprintf($this->m_fHtml,"<html><title>Comparison of %s with %s (Matched Words = %d)</title>\n",$m_szDocR, $m_szDocL, $compare->m_MatchingWordsPerfect);
+        fprintf($this->m_fHtml,"<frameset cols=\"*,*\" frameborder=\"YES\" border=\"1\" framespacing=\"0\">");
+        fprintf($this->m_fHtml,"<frame src=\"%s\" name=\"left\">\n", $hrefL);
+        fprintf($this->m_fHtml,"<frame src=\"%s\" name=\"right\">\n",$hrefR);
+        fprintf($this->m_fHtml,"</frameset><body></body></html>");
     
-        fclose($m_fHtml); $m_fHtml=NULL;
+        fclose($this->m_fHtml); $this->m_fHtml=NULL;
     
         return -1;
     }
@@ -214,8 +217,8 @@ class generate_report{
     {
         $wordcount=0;								// current word number
 
-        $word="";								// current word
-        $tword[]="";								
+        $word='';								// current word
+        $tword='';								
         $DelimiterType=DEL_TYPE_WHITE;
 
         $xMatch=0;
@@ -231,7 +234,7 @@ class generate_report{
 
             if(($LastMatch!=$xMatch) || ($LastAnchor!=$xAnchor))	// check for a change of markup or anchor
             {
-                if($LastMatch==WORD_PERFECT) fprintf($this->this->m_fHtml,"</font>");	// close out red markups if they were active
+                if($LastMatch==WORD_PERFECT) fprintf($this->m_fHtml,"</font>");	// close out red markups if they were active
                 else if($LastMatch==WORD_FLAW) fprintf($this->m_fHtml,"</font></i>");	// close out green italics if they were active
                 else if($LastMatch==WORD_FILTERED)  fprintf($this->m_fHtml,"</font>");	// close out blue markups if they were active
 
@@ -260,8 +263,10 @@ class generate_report{
             while(true)
             {
                 if($DelimiterType == DEL_TYPE_EOF) return -1;			// shouldn't happen unless document changed during scan
-                $iReturn = $indoc->Words->vocab($word) ;//.GetWord($word,$DelimiterType); if($iReturn > -1) return $iReturn;	// get next word
-
+                $word='';
+                $iReturn = $indoc->Getword($word,$DelimiterType);		// get next word
+                if($iReturn > -1) return $iReturn;	
+                //Words->vocab($word)
                 $tword=$word;								// copy word to a temporary
 
                 if($this->settings->m_bIgnorePunctuation) Words::WordRemovePunctuation($tword);	// if ignore punctuation is active, remove punctuation
@@ -270,7 +275,6 @@ class generate_report{
                 if($this->settings->m_bIgnoreCase) Words::WordToLowerCase($tword);			// if ignore case is active, remove case
                 if($this->settings->m_bSkipLongWords & (strlen($tword) > $this->settings->m_SkipLength) ) continue;	// if skip too-long words is active, skip them
                 if($this->settings->m_bSkipNonwords & (!Words::WordCheck($tword)) ) continue;	// if skip nonwords is active, skip them
-
                 break;
             }
         
@@ -280,7 +284,7 @@ class generate_report{
                 // If problems with html characters test double encoding
                 for($i=0;$i<$wordLength;$i++) fprintf($this->m_fHtml,htmlspecialchars($word[$i])); // print the character, using UTF8 translation
                 	
-                if($DelimiterType == DEL_TYPE_WHITE) fprintf($this->m_fHtml," ");					// print a blank for white space
+                if($DelimiterType == DEL_TYPE_WHITE) fprintf($this->m_fHtml,'&nbsp;');					// print a blank for white space
                 else if($DelimiterType == DEL_TYPE_NEWLINE) fprintf($this->m_fHtml,"<br>");			// print a break for a new line
             }
         }
@@ -291,13 +295,13 @@ class generate_report{
         return -1;
     }
 
-    function FinishReports()
+    function FinishReports($compare)
     {
         $date =new DateTime();
         fprintf($this->m_fLog,"Finishing Report Files\n". $date->format($date::RSS) );
         fprintf($this->m_fMatchHtml,"</table>\n");
-        if($this->m_MatchingDocumentPairs == 0) fprintf($this->m_fMatchHtml,"<br>". $this->m_szSoftwareName ." found no matching pairs of documents.<br>You may want to lower the thresholds for matching and try again.<br>\n");
-        else fprintf($this->m_fMatchHtml,"<br>".$this->m_szSoftwareName." found ".$this->m_MatchingDocumentPairs." matching pairs of documents.<br>\n");
+        if($compare->m_MatchingDocumentPairs == 0) fprintf($this->m_fMatchHtml,"<br>". $this->m_szSoftwareName ." found no matching pairs of documents.<br>You may want to lower the thresholds for matching and try again.<br>\n");
+        else fprintf($this->m_fMatchHtml,"<br>".$this->m_szSoftwareName." found ".$compare->m_MatchingDocumentPairs." matching pairs of documents.<br>\n");
         fprintf($this->m_fMatchHtml,"</body></html>\n");
         fclose($this->m_fMatchHtml);
         $this->m_fMatchHtml=NULL;

@@ -12,8 +12,7 @@ include('./compare_functions.php');
 
 
 
-//open document
-//check if its valid
+
 class load_documents
 {
 
@@ -21,7 +20,7 @@ class load_documents
     public $documents = [];
     public $settings;
     public $wordsize=10000;
-    public $wordInc=10000;
+    public $wordInc=1000;
 
     function __construct(){
         $this->settings=new settings();
@@ -40,6 +39,7 @@ class load_documents
         //$documents.put();
         $doc1=new Document();
         $doc1->definePath("t01.txt");
+        // $doc1->definePath("text2.txt");
         $doc2=new Document();
         $doc2->definePath("t01e.txt");
         array_push($this->documents, $doc2);
@@ -77,7 +77,7 @@ class load_documents
 
         // echo "\n################################\n";
         // echo "Document:".$document->path . "\n";
-        echo "################################\n";
+        // echo "\n################################\n";
         // var_dump($document->file);
         if ($file) {
             while (!feof($file)) {
@@ -107,7 +107,9 @@ class load_documents
         $document->m_WordsTotal=$wordAmount;							// save number of wordAmount in document entry
 
         // var_dump($document->wordAmount); Fix wordAmount vocab
-        var_dump("Words2: ".$wordAmount); 
+        // echo("Words2: ".$wordAmount); 
+        // echo "\n################################";
+        
         // $wordAmount++; //maybe too small?
         // $document->pWordHash = [$wordAmount];        // allocate array for hash-coded wordAmount in doc entry
         // $document->pSortedWordHash = [$wordAmount];    // allocate array for sorted hash-coded wordAmount
@@ -156,7 +158,7 @@ class load_documents
             // echo ("setting firstHash: ".$document->firstHash . "\n");
         }
 
-        //Test output
+        // Test output
         // print_r("<h1>" . $document->wordNumber . "  Real " . $document->realwords . "</h1>");
         // fclose($file);
         // print_r("<h1> ERROR</h1>");
@@ -169,7 +171,11 @@ class load_documents
 
     //Guess how this works Probably
     //what it does is it takes 10000 Words of one document - wordAmount or characters?
-    //generates hashes for each word, then it sorts the hashes in a heap and then does it for the second document and then compares the heaps?
+    // generates hashes for each word in every document (sorted by occurance basically)
+    // then creates a sorted copy of the the hashes (sorted by hash value)
+    // and then compares the heaps?
+
+
     //then generate html by exporting the document and marking the saved findings
     //Excluding vocab functionality for now,
     //specific word hash function
@@ -183,7 +189,7 @@ class load_documents
 
 
 //Testcase 1
- $test = new load_documents();
- $test->testMain();
+$test = new load_documents();
+$test->testMain();
 
-//  echo file_get_contents("C:\\reports\\matches.htm");
+// echo file_get_contents("C:\\reports\\matches.html");

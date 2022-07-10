@@ -118,8 +118,6 @@ class words {
 
     public static function WordCheck($word)
     {
-        $wordlen=$word->length();
-
         $wordlen=strlen($word);
 
         if($wordlen < 1) return false;
@@ -128,7 +126,7 @@ class words {
 
         for($ccnt=1;$ccnt<$wordlen-1;$ccnt++)
         {
-            if(IntlChar::isalpha(($word[$$ccnt])) )continue;
+            if(IntlChar::isalpha(($word[$ccnt])) )continue;
             if( $word[$ccnt] == '-' ) continue;
             if( $word[$ccnt] == '\'' ) continue;
             return false;
