@@ -2,17 +2,14 @@
 
 namespace plagiarism_mcopyfind\compare;
 
-use Error;
 use ErrorException;
 use Exception;
 use IntlChar;
-use PDF2Text;
 
 const DEL_TYPE_NONE =0;
 const DEL_TYPE_WHITE = 1;
 const DEL_TYPE_NEWLINE = 2;
 const DEL_TYPE_EOF = 3;
-// const CONTENT_TYPE_DOCX = 2;
 
 const DOC_TYPE_UNDEFINED = 0;
 const DOC_TYPE_OLD = 1;
@@ -96,7 +93,7 @@ class Document
         else if ( strcmp($pstr,"docx") == 0 ) $this->m_contentType="CONTENT_TYPE_DOCX";
         else if ( strcmp($pstr,"doc") == 0 ) $this->m_contentType="CONTENT_TYPE_DOC";
         else if ( strcmp($pstr,"txt") == 0 ) $this->m_contentType="CONTENT_TYPE_TXT";
-        else if ( strcmp($pstr,"pdf") == 0 ) $this->m_contentType="CONTENT_TYPE_PDF";// for now //PDF";
+        else if ( strcmp($pstr,"pdf") == 0 ) $this->m_contentType="CONTENT_TYPE_PDF";
         else if ( strcmp($pstr,"url") == 0 ) $this->m_contentType="CONTENT_TYPE_URL";
         else $this->m_contentType="CONTENT_TYPE_UNKNOWN";
 
@@ -887,7 +884,7 @@ class Document
                 
                 if($this->m_char < 0 || $this->m_char == '') // check for EOF encountered
                 {
-                    $word[$wordLength]=0; // finish the $word off
+                    // $word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -906,7 +903,7 @@ class Document
                 {
                     if($this->m_gotWord) // make sure that we have a $word
                     {
-                        $word[$wordLength]=0; // finish the $word off
+                        // $word[$wordLength]=0; // finish the $word off
                         $this->m_gotChar=true;
                         return -1;
                     }
@@ -991,7 +988,7 @@ class Document
                 if($this->m_char == 0) $this->m_char=fgetc( $this->m_filep); // skip a single null character (but not multiple nulls)
                 if($this->m_char < 0 || $this->m_char == '') // check for EOF encountered
                 {
-                    $word[$wordLength]=0; // finish the $word off
+                    // $word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -1008,7 +1005,7 @@ class Document
                 else if ( (IntlChar::iscntrl($this->m_char) && $this->m_char < 0x80) || ($this->m_char == 0xff) ) // if we encounter a control character, restart the $word search
                 {
                     $word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
-                    $wordLength = 0;
+                    // $wordLength = 0;
                     $this->m_gotWord = false;
                     $this->m_gotDelimiter = false;
                     $delimiterType = DEL_TYPE_NONE;
@@ -1017,7 +1014,7 @@ class Document
                 {
                     if($this->m_gotWord) // make sure that we have a $word
                     {
-                        $word[$wordLength]=0; // finish the $word off
+                        // $word[$wordLength]=0; // finish the $word off
                         $this->m_gotChar=true;
                         return -1;
                     }
@@ -1126,7 +1123,7 @@ class Document
     
             while(true)
             {
-                $thisChar = $this->GetBytePdf(); //Txt(); //
+                $thisChar = $this->GetByteTxt();//Pdf(); //Txt(); //
                 if($thisChar < 0) return -1; // end of file reached?
                 else if(($thisChar & 0x80) == 0) // one-byte character?
                 {

@@ -1,9 +1,6 @@
 <?php
 namespace plagiarism_mcopyfind\compare;
 
-use Exception;
-use SplFixedArray;
-
 include('./document.php');
 include('./settings.php');
 include('./heapsort.php');
@@ -85,7 +82,7 @@ class load_documents
             if($wordNumber == $this->wordsize) {
                 $this->wordsize += $this->wordInc;
             }
-            $word='';//."\n");
+            $word='';
         }
 
         $wordAmount = $wordNumber;              // save number of wordAmount
