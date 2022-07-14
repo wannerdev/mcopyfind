@@ -2,6 +2,8 @@
 
 namespace plagiarism_mcopyfind\compare;
 
+use Error;
+use ErrorException;
 use Exception;
 use IntlChar;
 use PDF2Text;
@@ -19,7 +21,7 @@ const DOC_TYPE_NEW = 2;
 const WORDMAXIMUMLENGTH = 255;
 const WORDBUFFERLENGTH = 256;
 
-include('pdf2Text.php');
+
 
 class Document
 {
@@ -42,6 +44,9 @@ class Document
     public $m_bBasic_Characters; // how to open it (UTF-8 or not)?
 
     //Char and Byte attributes
+    public $m_BytePointerPdf=0;
+    public $m_ByteCountPdf=0;
+    
     public $m_ByteIndexDocx=0;
     public $m_ByteCountDocx=0;
     public $m_docxByteBuffer=[];
@@ -50,10 +55,10 @@ class Document
     public $m_char;
 
     public $m_pHttpFile;
-    public $m_bInternet;
-
-    public $file = null;
+    public $m_bInternet=false;
+    
     public $filename = null;
+    public $name = null;
 
     // public $wordNumber = 0;
     public $realwords = 0;
@@ -81,7 +86,8 @@ class Document
         // echo "------------";
         if( !fopen($pfilename,"r") ) throw new Exception("ERR_CANNOT_FIND_FILE"); // open fails if file is not found
 
-        $index=strpos($pfilename,'.'); // find $filename extention
+        $index=strpos($pfilename,'.'); // find $filename extension
+        $this->name = substr($pfilename,0,$index); // get $filename without extension
         $pstr=substr($pfilename,$index+1); // get extension 
         if($pstr == NULL) throw new Exception("ERR_CANNOT_FIND_FILE_EXTENSION"); // open fails if there is no file extension
         
@@ -90,7 +96,7 @@ class Document
         else if ( strcmp($pstr,"docx") == 0 ) $this->m_contentType="CONTENT_TYPE_DOCX";
         else if ( strcmp($pstr,"doc") == 0 ) $this->m_contentType="CONTENT_TYPE_DOC";
         else if ( strcmp($pstr,"txt") == 0 ) $this->m_contentType="CONTENT_TYPE_TXT";
-        else if ( strcmp($pstr,"pdf") == 0 ) $this->m_contentType="CONTENT_TYPE_PDF";
+        else if ( strcmp($pstr,"pdf") == 0 ) $this->m_contentType="CONTENT_TYPE_PDF";// for now //PDF";
         else if ( strcmp($pstr,"url") == 0 ) $this->m_contentType="CONTENT_TYPE_URL";
         else $this->m_contentType="CONTENT_TYPE_UNKNOWN";
 
@@ -104,15 +110,17 @@ class Document
     }
 
     function closeDocument(){
-        fclose($this->m_filep);
-        $this->m_filep = null;
+        if($this->m_filep != null){
+            fclose($this->m_filep);
+            $this->m_filep = null;
+        }
     }
 
     function OpenHtml($filename)
     {
         $this->m_filep = fopen($filename,"r");
         if($this->m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE");
-        $this->$this->m_haveFile = true;
+        $this->m_haveFile = true;
         $this->m_UTF8 = true; // assume that the html file is encoded in UTF-8
         return -1;
     }
@@ -199,8 +207,8 @@ class Document
     
                 // if(wcsstr(szreturn,L"text/html") != NULL) m_contentType=CONTENT_TYPE_HTML;
                 // else if(wcsstr(szreturn,L"text/plain") != NULL) m_contentType=CONTENT_TYPE_TXT;
-                // if(wcsstr(szreturn,L"UTF-8") != NULL) $this->$this->m_UTF8 = true;
-                // else $this->$this->m_UTF8 = false;
+                // if(wcsstr(szreturn,L"UTF-8") != NULL) $this->m_UTF8 = true;
+                // else $this->m_UTF8 = false;
     
                 // m_haveFile = true;
                 return -1;
@@ -242,48 +250,60 @@ class Document
         // }
         // unzOpenCurrentFile(m_docxZipArchive);
         // $this->m_haveFile = true;
-        // $this->$this->m_UTF8 = true;
+        // $this->m_UTF8 = true;
         // $this->m_ByteIndexDocx=0; // start at first byte
         // $this->m_ByteCountDocx=0; // there are currently zero $bytes
         // $this->m_filep = 1; // indicate that the file was found?
         return -1;
     }
 
-    /**
-         *       if($$m_pdftotext) // pdftotext program exists, so use it to pipe text to this program
-         *    assemble command line, e.g.: ""C:\\fullpath\\pdftotext.exe" -enc UTF-8 "C:\\anotherpath\\xin.pdf" - "
-         *   // where the final '-' indicates that the output should be piped to a readable input pipe
-         *   // both $filenames (pdftotext.exe and xxx.pdf) need to be in quotes, in case they contain spaces, and the entire command must also be in quotes.
-         *   $commandLine="\"\"". $$m_pdftotextFile  . "\"\" -enc UTF-8 \"" . $filename . "\" - \""; // assemble command 
-         *
-         *   if(($this->m_filep = _wpopen($commandLine,"r")) == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE"; // if the pipe don't form, command filed.
-         *   $this->m_haveFile = true;
-         *   $this->m_UTF8 = true;
-         *
-         *   return -1; // we should now have the text portion of the PDF file as a readable file attached to $this->m_filep
-         *}
-         * else // don't have pdftotext program avialable, so use default pdf function
-         */
-    function OpenPdf($filename)
-    { 
-        $this->m_filep = fstat($filename,"rb");
-        if($this->m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE"); // open fails if file didn't actually open
-        // if($_FILES['file']['type']=="application/pdf") {
-        $a = new PDF2Text();
-        $a->setFilename($filename);
-        $this->m_filep =$a->decodePDF();
-
+    function OpenRtf($filename)
+    {
+        $this->m_filep=fopen($filename,"r");
+        if($this->m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE");
         $this->m_haveFile = true;
-        $this->m_UTF8 = true;
+        $this->m_UTF8 = false;
+        return -1;
+    }
 
-        return $a->output();
+    function OpenPdf($filename) //https://www.pdftron.com/documentation/cli/guides/pdf2text/
+    { 
+        // echo ("Filename Openpdf:".$filename); 
+        $m_pdftotextFile= "C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\classes\\compare\\pdftotext.exe";
+        $m_path= "C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\classes\\compare\\";
+        $m_pdftotext= file_exists($m_pdftotextFile);
+        if($m_pdftotext){ 
+           // pdftotext program exists, so use it 
+           // generate txt file $commandLine=$m_pdftotextFile ." -enc UTF-8 " . $m_path. $filename ." " . $m_path."conv_". $this->name .".txt"; // assemble command
+           $commandLine=$m_pdftotextFile ." -enc UTF-8 " . $m_path. $filename ." -"; // assemble command
+        
+           if(($this->m_filep= popen($commandLine,"r")) == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE"); // if the pipe don't form, command filed.
+           
+        //    echo("STREAM:".stream_get_contents($this->m_filep));
+           //echo ("CMD: ".$commandLine);
+           //$this->filename = "conv_". $this->name .".txt";
+           //$this->name = "conv_". $this->name;
+           //$this->m_contentType = "DOCUMENT_TYPE_TEXT";
+           //return $this->OpenTxt($this->name.".txt");
+           $this->m_haveFile = true;
+           $this->m_UTF8 = true;
+           $this->m_pdftotext =true;
+
+           return -1; // we should now have the text portion of the PDF file as a readable file attached to $this->m_filep
+        }
+         else{ // don't have pdftotext program avialable, so use default pdf function
+            //don't
+         }
+
+        throw  new ErrorException("ERR_NO_PDFPROGRam");
     }
         
     function Getword(&$word,&$delimiterType)
     {
         if(!$this->m_haveFile) throw new Exception("ERR_NO_FILE_OPEN"); // if no file is open, failure
 
-        $word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
+        // $word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
+        // $word='';
         $wordLength = 0;
         $this->m_gotWord = false;
         $this->m_gotDelimiter = false;
@@ -294,7 +314,7 @@ class Document
         {
             while(true)
             {
-                if($this->$this->m_gotChar) $this->$this->m_gotChar = false; // check to see if we already have the next character
+                if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
                 else $this->m_char=$this->GetCharDocx();
                 
                 if($this->m_char < 0) // check for EOF encountered
@@ -462,14 +482,14 @@ class Document
                     else if(strcmp($ampBuffer,"euro") == 0) $this->m_char = 8364;
                     else continue; // if we couldn't figure out what this character is, skip it
 
-                    if($wordLength < $WORDMAXIMUMLENGTH)
+                    if($wordLength < WORDMAXIMUMLENGTH)
                     {
                         $word[$wordLength]=$this->m_char; // add this character to the $word
                         $wordLength++;
                         $this->m_gotWord=true;
                     }
                 }			
-                else if($wordLength < $WORDMAXIMUMLENGTH)
+                else if($wordLength < WORDMAXIMUMLENGTH)
                 {
                     $word[$wordLength]=$this->m_char; // add this character to the $word
                     $wordLength++;
@@ -551,8 +571,8 @@ class Document
                         strtolower($tagBody); // make the tag body all lower case
                         if(strstr($tagBody,"charset") > 0) // look for the $word charset
                         {
-                            if(strstr($tagBody,"utf-8") > 0) $this->$this->m_UTF8 = true; // look for utf-8
-                            else $this->$this->m_UTF8 = false; // otherwise we're in another charset and can't use the utf-8 decoding
+                            if(strstr($tagBody,"utf-8") > 0) $this->m_UTF8 = true; // look for utf-8
+                            else $this->m_UTF8 = false; // otherwise we're in another charset and can't use the utf-8 decoding
                         }
                     }
                     continue; // otherwise keep reading
@@ -688,14 +708,14 @@ class Document
                     else if(strcmp($ampBuffer,"euro") == 0) $this->m_char = 8364;
                     else continue; // if we couldn't figure out what this character is, skip it
 
-                    if($wordLength < $WORDMAXIMUMLENGTH)
+                    if($wordLength < WORDMAXIMUMLENGTH)
                     {
                         $word[$wordLength]=$this->m_char; // add this character to the $word
                         $wordLength++;
                         $this->m_gotWord=true;
                     }
                 }
-                else if($wordLength < $WORDMAXIMUMLENGTH)
+                else if($wordLength < WORDMAXIMUMLENGTH)
                 {
                     $word[$wordLength]=$this->m_char; // add this character to the $word
                     $wordLength++;
@@ -709,10 +729,10 @@ class Document
             {
                 if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
                 else $this->m_char=$this->GetCharTxt(); // otherwise, get the next character (normal or UTF-8)
-                
+               // echo("Char: ".$this->m_char. "\n");
                 if($this->m_char < 0 || $this->m_char =='' ) // check for EOF encountered 
                 {
-                    $word[$wordLength]=0; // finish the $word off
+                    // $word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -758,7 +778,7 @@ class Document
             while(true)
             {
                 if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
-                else $this->m_char=fgetc( $this->m_filep);
+                else $this->m_char=fgetc($this->m_filep);
                 
                 if($this->m_char == 0) $this->m_char=fgetc( $this->m_filep); // skip a single null character (but not multiple nulls)
                 
@@ -847,7 +867,7 @@ class Document
                         $this->m_gotChar=true;
                     }
                 }
-                else if( $wordLength < $WORDMAXIMUMLENGTH )
+                else if( $wordLength < WORDMAXIMUMLENGTH )
                 {
                     $word[$wordLength]=$this->m_char; // add this character to the $word
                     $wordLength++;
@@ -865,7 +885,7 @@ class Document
                     $this->m_char=$this->GetCharPdf();
                 }
                 
-                if($this->m_char < 0) // check for EOF encountered
+                if($this->m_char < 0 || $this->m_char == '') // check for EOF encountered
                 {
                     $word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
@@ -899,7 +919,7 @@ class Document
                 }
                 else if( ($this->m_char >= 0xfb00) && ($this->m_char <= 0xfb06) )	// check for ligatured charactures
                 {
-                    if($wordLength < $WORDMAXIMUMLENGTH-3)
+                    if($wordLength < WORDMAXIMUMLENGTH-3)
                     {
                         switch( $this->m_char )
                         {
@@ -953,7 +973,7 @@ class Document
                         $this->m_gotWord=true;
                     }
                 }
-                else if($wordLength < $WORDMAXIMUMLENGTH)
+                else if($wordLength < WORDMAXIMUMLENGTH)
                 {
                     $word[$wordLength]=$this->m_char; // add this character to the $word
                     $wordLength++;
@@ -969,7 +989,7 @@ class Document
                 else $this->m_char=fgetc($this->m_filep);
                 
                 if($this->m_char == 0) $this->m_char=fgetc( $this->m_filep); // skip a single null character (but not multiple nulls)
-                if($this->m_char < 0) // check for EOF encountered
+                if($this->m_char < 0 || $this->m_char == '') // check for EOF encountered
                 {
                     $word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
@@ -1008,7 +1028,7 @@ class Document
                         $this->m_gotChar=true;
                     }
                 }
-                else if( $wordLength < $WORDMAXIMUMLENGTH )
+                else if( $wordLength < WORDMAXIMUMLENGTH )
                 {
                     $word[$wordLength]=$this->m_char; // add this character to the $word
                     $wordLength++;
@@ -1106,7 +1126,7 @@ class Document
     
             while(true)
             {
-                $thisChar = $this->GetBytePdf();
+                $thisChar = $this->GetBytePdf(); //Txt(); //
                 if($thisChar < 0) return -1; // end of file reached?
                 else if(($thisChar & 0x80) == 0) // one-byte character?
                 {
@@ -1130,7 +1150,7 @@ class Document
                 else return -1; // either bad unicode or character is more than four $bytes long
                 for($i=1;$i<$bytes;$i++)
                 {
-                    $thisByte=$this->$this->GetBytePdf();
+                    $thisByte=$this->GetBytePdf();
                     if($thisByte < 0) return -1; // end of file reached prematurely?
                     $thisChar = ($thisChar << 6) | ($thisByte & 0x3F); // incorporate additional 6 bits
                 }

@@ -6,14 +6,14 @@ namespace plagiarism_mcopyfind\compare;
 class settings{
 
     const WORDBUFFERLENGTH=5;
+    // Settings which detects 92% - 95% in default case:
     //Settings
-    public $phraseLength = 3;
-    public $m_MismatchTolerance=2;
     public $m_PhraseLength = 6;
-    public $m_FilterPhraseLength = 6;
-    public $m_WordThreshold = 100;
-    public $m_SkipLength = 20;
+    public $m_WordThreshold = 80;
+    public $m_SkipLength = 0;
+    public $m_MismatchTolerance=2;
     public $m_MismatchPercentage = 80;
+    
     public $m_bBriefReport = false;
     public $m_bIgnoreCase = false;
     public $m_bIgnoreNumbers = false;
@@ -24,23 +24,3 @@ class settings{
     public $m_bBasic_Characters = false;
 }
 
-class defsettings{
-
-    const WORDBUFFERLENGTH=5;
-    //Settings
-    public static $phraseLength = 3;
-    public static $m_MismatchTolerance=2;
-    public static $m_PhraseLength = 6;
-    public static $m_FilterPhraseLength = 6;
-    public static $m_WordThreshold = 100;
-    public static $m_SkipLength = 20;
-    public static $m_MismatchPercentage = 80;
-    public static $m_bBriefReport = false;
-    public static $m_bIgnoreCase = false;
-    public static $m_bIgnoreNumbers = false;
-    public static $m_bIgnoreOuterPunctuation = false;
-    public static $m_bIgnorePunctuation = false;
-    public static $m_bSkipLongWords = false;
-    public static $m_bSkipNonwords = false;
-    public static $m_bBasic_Characters = false;
-}

@@ -2,6 +2,7 @@
 namespace plagiarism_mcopyfind\compare;
 
 use Exception;
+use SplFixedArray;
 
 include('./document.php');
 include('./settings.php');
@@ -9,8 +10,6 @@ include('./heapsort.php');
 include('./words.php');
 include('./generate_report.php');
 include('./compare_functions.php');
-
-
 
 
 class load_documents
@@ -37,27 +36,23 @@ class load_documents
         // echo $file;
         // echo $file2;
         //$documents.put();
+        
         $doc1=new Document();
-        $doc1->definePath("t01.txt");
-        // $doc1->definePath("text2.txt");
+        // $doc1->definePath("t01.txt");
+        $doc1->definePath("text1.pdf");
+        //TEST $doc1->definePath("text2.txt");
         $doc2=new Document();
-        $doc2->definePath("t01e.txt");
+        // $doc2->definePath("t01e.txt");
+        $doc2->definePath("text2.pdf");
+
+        $doc1->m_DocumentType=DOC_TYPE_NEW;
+        $doc2->m_DocumentType=DOC_TYPE_NEW;
+
         array_push($this->documents, $doc2);
         array_push($this->documents, $doc1);
-
-        
-        
-        // $reportGen= new generate_report($this->settings);
         
         $cmp = new compare_functions($this->settings, $this->documents);
-        //echo "Return value Runcoomp".
         $cmp->RunComparison($this);
-        // $cmp->ComparePair($this->documents[0],$this->documents[1]);
-
-        // $reportGen->DocumentToHtml($this->documents[0], $cmp->m_MatchMarkL, $cmp->m_MatchAnchorL, $cmp->wordAmount, $cmp->href);
-        // $reportGen->DocumentToHtml($this->documents[1], $cmp->m_MatchMarkR, $cmp->m_MatchAnchorR, $cmp->wordAmount, $cmp->href);
-        
-        // $reportGen->generateReport($this->documents[0], $matchanch,   $wordAmount, $href);
     }
 
     /**
@@ -65,57 +60,36 @@ class load_documents
      */
     function loadDocument($document)
     {
-        $file = fopen($document->filename,"r");
-        // echo("path  ". $document->path);
-        if(!$file)throw new Exception("ERROR: File not found");
 
         $wordNumber = 0;
         $wordAmount = 0;
         $hashes = [];
         $realwords = 0;
-
-
+        $word = '';
+        $DelimiterType = DEL_TYPE_NONE;
         // echo "\n################################\n";
         // echo "Document:".$document->path . "\n";
         // echo "\n################################\n";
         // var_dump($document->file);
-        if ($file) {
-            while (!feof($file)) {
-                $wordsPars = fgetcsv($file, 0, ' ');
-                if ($wordsPars) {
-                    foreach ($wordsPars as $element) {
-                        //  print_r($element. "<br><br>");
-                        $hashes[$wordNumber] = words::WordHash($element);
+        while ($DelimiterType != DEL_TYPE_EOF) {
+            $document->Getword($word,$DelimiterType);
+            //  $word .= '0';
+            $hashes[$wordNumber] = words::WordHash($word);
 
-                        if ($hashes[$wordNumber] != 1) {
-                            // print_r($hashes[$document->wordNumber] . "<br><br>");
-                            $realwords++;
-                        }
-                        $wordNumber++;
-                        if($wordNumber == $this->wordsize) {
-                            $this->wordsize += $this->wordInc;
-                        }
-                    }
-                }
+            // print_r("Word:".$word . "\n");
+            //     print_r("Hashes:".$hashes[$wordNumber] . "\n");
+            if ($hashes[$wordNumber] != 1) {
+                $realwords++;
             }
-            fclose($file);
-        } else {
-            throw new Exception("Error opening file");
-            return;
+            $wordNumber++;
+            if($wordNumber == $this->wordsize) {
+                $this->wordsize += $this->wordInc;
+            }
+            $word='';//."\n");
         }
-        $wordAmount = $wordNumber;   // save number of wordAmount
-        $document->m_WordsTotal=$wordAmount;							// save number of wordAmount in document entry
 
-        // var_dump($document->wordAmount); Fix wordAmount vocab
-        // echo("Words2: ".$wordAmount); 
-        // echo "\n################################";
-        
-        // $wordAmount++; //maybe too small?
-        // $document->pWordHash = [$wordAmount];        // allocate array for hash-coded wordAmount in doc entry
-        // $document->pSortedWordHash = [$wordAmount];    // allocate array for sorted hash-coded wordAmount
-        // $document->pSortedWordNumber = [$wordAmount];            // allocate array for sorted word numbers 
-        // $wordAmount--; //maybe too small?
-        // echo ("ARRAY SIZE:". count($document->pSortedWordHash));
+        $wordAmount = $wordNumber;              // save number of wordAmount
+        $document->m_WordsTotal=$wordAmount;	// save number of wordAmount in document entry
 
         for ($i = 0; $i < $wordAmount; $i++)            // loop for all the wordAmount in the document
         {
@@ -124,24 +98,27 @@ class load_documents
             $document->pSortedWordHash[$i] = $hashes[$i];        // copy over hash-coded wordAmount
         }
         // echo("START:");
-        // var_dump($document->pSortedWordHash);
+        //  var_dump($document->pSortedWordHash);
         $sorted = heapsort::HeapSorting($document->pSortedWordHash,				// sort hash-coded wordAmount (and word numbers)
                               $document->pSortedWordNumber, $wordAmount-1);
+        
         $document->pSortedWordHash = $sorted[0];
         $document->pSortedWordNumber = $sorted[1];
-        //var_dump($document->pSortedWordNumber);
-        // echo("END: \n\n\n\n");
-        //   var_dump($document->pSortedWordHash);
 
-        // foreach ($document->pSortedWordNumber as $element) {
-        //     echo ($element . "<br>");
-        // }
-        // echo ("<br><br>");
+        // Test output
+        //  print_r("<h1>" . $document->m_WordsTotal . "  Real " . $document->realwords . "</h1>");
+        // var_dump($document->pSortedWordNumber);
+        //  echo("END: \n\n\n\n");
+        //    var_dump($document->pSortedWordHash);
+        //foreach ($document->pSortedWordNumber as $element) {
+        //      echo ($element . "<br>");
+        //  }
+        //   echo ("<br><br>");
         // foreach ($document->pSortedWordHash as $element) {
-        //     echo ($element . "<br>");
+        //        echo ("sorted Hash".$element . "\n");
         // }
 
-        if ($this->settings->phraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
+        if ($this->settings->m_PhraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
         else                                                        // if phrase length is > 1 word, start at first word with more than 3 chars
         {
             $firstLong = 0;
@@ -153,20 +130,10 @@ class load_documents
                     break;
                 }
             }
-            $document->firstHash = $firstLong;                    // save the number of the first >3 letter word, or the first word
-            
+            $document->firstHash = $firstLong;                    // save the number of the first >3 letter word, or the first word            
             // echo ("setting firstHash: ".$document->firstHash . "\n");
         }
-
-        // Test output
-        // print_r("<h1>" . $document->wordNumber . "  Real " . $document->realwords . "</h1>");
-        // fclose($file);
-        // print_r("<h1> ERROR</h1>");
-        // rint_error("stop");
-    }
-
-    function CloseDocument($file){
-        fclose($file);
+        $document->CloseDocument();
     }
 
     //Guess how this works Probably

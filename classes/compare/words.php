@@ -134,31 +134,40 @@ class words {
         return true;
     }
 
-        /** Description of Hashing process
+    
+    public static function diff_WordHash($word)
+    {
+        $length = strlen($word);
+        if ($length == null || $length == 0) return 1;    // if word is null, return 1 as hash value
+        
+        // echo(" Word:" .$word."\n");
+        $hash = intval((hexdec(md5($word)))/(pow(2,120-($length))));
+        return $hash;
+    }
+
+    /** My description of Hashing process
      * inhash    zzzzzzzxxxxxxxxxxxxxxxxxxxxxxxxxxxx
      * ----------------------------------------------
      * 
      * inhash <7 xxxxxxxxxxxxxxxxxxxxxxxxxxx-0000000
-     * Logical or
+     * Logical or                                       =         xxxxxxxxxxxxxxxxxxxxxxxxxxxxzzzzzzz
      * inhash >25                           -zzzzzzz
-     * =         xxxxxxxxxxxxxxxxxxxxxxxxxxxxzzzzzzz
+     * 
      * Logical xor
+     *           xxxxxxxxxxxxxxxxxxxxxxxxxxxxzzzzzzz
      * char word                            -yyyyyyy
      * =         xxxxxxxxxxxxxxxxxxxxxxxxxxxxaaaaaaa
      */
     public static function WordHash($word)
     {
-        //unsigned long inhash;
-        //$inhash;
         $inhash = 0;
-        //$word .= " "; 
         $charcount = 0;
         $length = strlen($word);
         if ($length == null || $length == 0) return 1;    // if word is null, return 1 as hash value
         else while ($charcount != $length) {
-            $inhash = (($inhash << 7) | ($inhash >> 25)) ^ mb_ord($word[$charcount]);    // xor into the rotateleft(7) of inhash
+            $inhash = ((($inhash << 7) | ($inhash >> 25)) ^ mb_ord($word[$charcount]));    // xor into the rotateleft(7) of inhash
             $charcount++;                            // and increment the count of characters in the word
         }
-        return abs($inhash);
+    return abs($inhash);#
     }
 }
