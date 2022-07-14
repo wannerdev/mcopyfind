@@ -245,7 +245,7 @@ class generate_report{
                     }
                     if($xAnchor>0)
                     {
-                        if($this->m_bBriefReport && ($wordcount>0) ) fprintf($this->m_fHtml,"<br/>");	// print a paragraph mark for a new line
+                        if($this->m_bBriefReport && ($wordcount>0) ) fprintf($this->m_fHtml,"<br />");	// print a paragraph mark for a new line
                         fprintf($this->m_fHtml,"<a name='%i' href='%s#%i'>",$MatchAnchor[$wordcount],$href,$MatchAnchor[$wordcount]);	// start new anchor
                     }
                 }
@@ -264,7 +264,6 @@ class generate_report{
                 $word='';
                 $iReturn = $indoc->Getword($word,$DelimiterType);		// get next word
                 if($iReturn > -1) return $iReturn;	
-                //Words->vocab($word)
                 $tword=$word;								// copy word to a temporary
 
                 if($this->settings->m_bIgnorePunctuation) Words::WordRemovePunctuation($tword);	// if ignore punctuation is active, remove punctuation
@@ -288,8 +287,8 @@ class generate_report{
                 fprintf($this->m_fHtml,htmlspecialchars($word),false);
                 // print the character, using UTF8 translation
                 // PrintWCharAsHtmlUTF8
-                if($DelimiterType == DEL_TYPE_WHITE) fprintf($this->m_fHtml,'&nbsp;');					// print a blank for white space
-                else if($DelimiterType == DEL_TYPE_NEWLINE) fprintf($this->m_fHtml,'<br>');			// print a break for a new line
+                if($DelimiterType == DEL_TYPE_WHITE) fprintf($this->m_fHtml,'&nbsp;');					// print html white space
+                else if($DelimiterType == DEL_TYPE_NEWLINE) fprintf($this->m_fHtml,'<br />');			// print a break for a new line
             }
         }
         if($LastMatch==WORD_PERFECT) fprintf($this->m_fHtml,"</font>");	// close out red markups if they were active

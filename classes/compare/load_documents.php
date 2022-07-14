@@ -35,12 +35,12 @@ class load_documents
         //$documents.put();
         
         $doc1=new Document();
-        // $doc1->definePath("t01.txt");
-        $doc1->definePath("text1.pdf");
+        $doc1->definePath("t01.txt");
+        //$doc1->definePath("fund1.pdf");
         //TEST $doc1->definePath("text2.txt");
         $doc2=new Document();
-        // $doc2->definePath("t01e.txt");
-        $doc2->definePath("text2.pdf");
+        $doc2->definePath("t01e.txt");
+        //$doc2->definePath("fund2.pdf");
 
         $doc1->m_DocumentType=DOC_TYPE_NEW;
         $doc2->m_DocumentType=DOC_TYPE_NEW;

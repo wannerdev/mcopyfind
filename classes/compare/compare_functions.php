@@ -439,8 +439,6 @@ class compare_functions{
             $load->loadDocument($doc);
         }
 
-
-
         fprintf($this->reportGen->m_fLog,"Done Loading Documents\n\n");		// Finish loading step log
         fprintf($this->reportGen->m_fLog,"Starting to Compare Documents\n");		// Finish loading step log
 

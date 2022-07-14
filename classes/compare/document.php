@@ -5,6 +5,7 @@ namespace plagiarism_mcopyfind\compare;
 use ErrorException;
 use Exception;
 use IntlChar;
+use PHPCompatibility\Util\Tests\Core\IsNumericCalculationUnitTest;
 
 const DEL_TYPE_NONE =0;
 const DEL_TYPE_WHITE = 1;
@@ -299,7 +300,7 @@ class Document
     {
         if(!$this->m_haveFile) throw new Exception("ERR_NO_FILE_OPEN"); // if no file is open, failure
 
-        // $word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
+        // //$word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
         // $word='';
         $wordLength = 0;
         $this->m_gotWord = false;
@@ -314,9 +315,9 @@ class Document
                 if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
                 else $this->m_char=$this->GetCharDocx();
                 
-                if($this->m_char < 0) // check for EOF encountered
+                if($this->m_char < 0 || $this->m_char == false ) // check for EOF encountered
                 {
-                    $word[$wordLength]=0; // finish the $word off
+                    //$word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -328,9 +329,9 @@ class Document
                     while(true) // read in the entire tag, saving the tag name
                     {
                         $this->m_char=$this->GetCharDocx();
-                        if($this->m_char < 0) // check for EOF encountered
+                        if($this->m_char < 0 || $this->m_char == false) // check for EOF encountered
                         {
-                            $word[$wordLength]=0; // finsh the $word off;
+                            //$word[$wordLength]=0; // finsh the $word off;
                             $delimiterType = DEL_TYPE_EOF;
                             return -1;
                         }
@@ -360,7 +361,7 @@ class Document
                 {
                     if($ $this->m_gotWord) // make sure that we have a $word
                     {
-                        $word[$wordLength]=0; // finish the $word off
+                        //$word[$wordLength]=0; // finish the $word off
                         $this->m_gotChar=true;
                         return -1;
                     }
@@ -379,7 +380,7 @@ class Document
                     {
                         $this->m_char=$this->GetCharDocx(); // read the next character
                         if( (!IntlChar::isalnum($this->m_char)) && ($this->m_char != '#')) break; // keep reading until we hit a non-alphanumeric, which should be a ';')
-                        if ($this->m_char < 0) break; // we encountered an EOF before the end of the & code
+                        if ($this->m_char < 0 || $this->m_char == false) break; // we encountered an EOF before the end of the & code
                         if($ampBufferCount < 255)
                         {
                             $ampBuffer[$ampBufferCount] = $this->m_char;
@@ -508,9 +509,9 @@ class Document
                     $this->m_char=$this->GetCharHtml(); // get a character
                 }
 
-                if($this->m_char < 0) // check for EOF encountered
+                if($this->m_char < 0 || $this->m_char == false) // check for EOF encountered
                 {
-                    $word[$wordLength]=0; // finish the $word off
+                    //$word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -523,9 +524,9 @@ class Document
                     while(true) // read in the entire tag, saving the tag name
                     {
                         $this->m_char=$this->GetCharHtml();
-                        if($this->m_char < 0) // check for EOF encountered
+                        if($this->m_char < 0 || $this->m_char == false) // check for EOF encountered
                         {
-                            $word[$wordLength]=0; // finsh the $word off;
+                            //$word[$wordLength]=0; // finsh the $word off;
                             $delimiterType = DEL_TYPE_EOF;
                             return -1;
                         }
@@ -540,7 +541,7 @@ class Document
                             {
                                 $this->m_char=$this->GetCharHtml(); // read the next character
                                 if( ($this->m_char == '>') && ($dashes > 1) ) break; // we found the end of the comment
-                                if( $this->m_char < 0) break; // file ended without a completion of the comment
+                                if( $this->m_char < 0 || $this->m_char == false) break; // file ended without a completion of the comment
                                 else if( $this->m_char == '-') $dashes++; // we found a dash, so increment the count
                                 else $dashes = 0; // not a dash, so return the dash count to zero
                             }
@@ -585,7 +586,7 @@ class Document
                 {
                     if($this->m_gotWord) // make sure that we have a $word
                     {
-                        $word[$wordLength]=0; // finish the $word off
+                        //$word[$wordLength]=0; // finish the $word off
                         $this->m_gotChar=true;
                         return -1;
                     }
@@ -604,7 +605,7 @@ class Document
                     {
                         $this->m_char=$this->GetCharHtml(); // read the next character
                         if( (!IntlChar::isalnum($this->m_char)) && ($this->m_char != '#')) break; // keep reading until we hit a non-alphanumeric, which should be a ';')
-                        if( $this->m_char < 0) break; // we hit an EOF before the end of the & code
+                        if( $this->m_char < 0 || $this->m_char == false) break; // we hit an EOF before the end of the & code
                         if($ampBufferCount < 255)
                         {
                             $ampBuffer[$ampBufferCount] = $this->m_char;
@@ -727,9 +728,9 @@ class Document
                 if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
                 else $this->m_char=$this->GetCharTxt(); // otherwise, get the next character (normal or UTF-8)
                // echo("Char: ".$this->m_char. "\n");
-                if($this->m_char < 0 || $this->m_char =='' ) // check for EOF encountered 
+                if($this->m_char < 0 || $this->m_char == '' ) // check for EOF encountered 
                 {
-                    // $word[$wordLength]=0; // finish the $word off
+                    // //$word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -743,12 +744,12 @@ class Document
                     $delimiterType=max($delimiterType,DEL_TYPE_WHITE); // if delimiter isn't already at NEWLINE, set it to WHITE
                     $this->m_gotDelimiter=true;
                 }
-                else if( (IntlChar::iscntrl($this->m_char) && $this->m_char < 0x80) || ($this->m_char == 0xff) ) continue; // skip any other control characters
+                else if( (IntlChar::iscntrl($this->m_char) && ord($this->m_char ) < 0x80) || ($this->m_char == 0xff) ) continue; // skip any other control characters
                 else if($this->m_gotDelimiter) // have we just reached the end of one or more delimiters?
                 {
                     if($this->m_gotWord) // make sure that we have a $word
                     {
-                        // $word[$wordLength]=0; // finish the word off
+                        // //$word[$wordLength]=0; // finish the word off
                         $this->m_gotChar=true;
                         return -1;
                     }
@@ -777,9 +778,9 @@ class Document
                 if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
                 else $this->m_char=fgetc($this->m_filep);
                 
-                if($this->m_char == 0) $this->m_char=fgetc( $this->m_filep); // skip a single null character (but not multiple nulls)
+                if(ord($this->m_char )== 0) $this->m_char=fgetc( $this->m_filep); // skip a single null character (but not multiple nulls)
                 
-                if($this->m_char >= 0x80)	// convert extended ISO8559-1 characters into appropriate unicode characters
+                if(ord($this->m_char )>= 0x80)	// convert extended ISO8559-1 characters into appropriate unicode characters
                 {
                     switch( $this->m_char )
                     {
@@ -817,9 +818,9 @@ class Document
                     case 159: $this->m_char = 376; break;
                     }
                 }
-                else if($this->m_char < 0) // check for EOF encountered
+                else if(ord($this->m_char )< 0 || $this->m_char == false) // check for EOF encountered
                 {
-                    $word[$wordLength]=0; // finish the $word off
+                    //$word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -833,17 +834,17 @@ class Document
                     $delimiterType=max($delimiterType,DEL_TYPE_WHITE); // if delimiter isn't already at NEWLINE, set it to WHITE
                     $this->m_gotDelimiter=true;
                 }
-                else if ( IntlChar::iscntrl($this->m_char) && ($this->m_char < 0x80) ) // if we encounter a control character, restart the $word search
+                else if ( IntlChar::iscntrl($this->m_char) && (ord($this->m_char )< 0x80) ) // if we encounter a control character, restart the $word search
                 {
-                    $word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
+                    //$word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
                     $wordLength = 0;
                     $this->m_gotWord = false;
                     $this->m_gotDelimiter = false;
                     $delimiterType = DEL_TYPE_NONE;
                 }
-                else if($this->m_bBasic_Characters && ($this->m_char >= 0x80 )) // if we're using basic characters only and this is a non-basic character, restart the $word search
+                else if($this->m_bBasic_Characters && (ord($this->m_char )>= 0x80 )) // if we're using basic characters only and this is a non-basic character, restart the $word search
                 {
-                    $word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
+                    //$word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
                     $wordLength = 0;
                     $this->m_gotWord = false;
                     $this->m_gotDelimiter = false;
@@ -853,7 +854,7 @@ class Document
                 {
                     if($this->m_gotWord) // make sure that we have a $word
                     {
-                        $word[$wordLength]=0; // finish the $word off
+                        //$word[$wordLength]=0; // finish the $word off
                         $this->m_gotChar=true;
                         return -1;
                     }
@@ -881,10 +882,10 @@ class Document
                 {
                     $this->m_char=$this->GetCharPdf();
                 }
-                
-                if($this->m_char < 0 || $this->m_char == '') // check for EOF encountered
+                // || $this->m_char == false || $this->m_char == false
+                if($this->m_char < 0  ) // check for EOF encountered
                 {
-                    // $word[$wordLength]=0; // finish the $word off
+                    // //$word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -898,12 +899,12 @@ class Document
                     $delimiterType=max($delimiterType,DEL_TYPE_WHITE); // if delimiter isn't already at NEWLINE, set it to WHITE
                     $this->m_gotDelimiter=true;
                 }
-                else if( (IntlChar::iscntrl($this->m_char) && $this->m_char < 0x80) || ($this->m_char == 0xff) ) continue; // skip any other control characters
+                else if( (IntlChar::iscntrl($this->m_char) && ord($this->m_char) < 0x80) || (ord($this->m_char) == 0xff) ) continue; // skip any other control characters
                 else if($this->m_gotDelimiter) // have we just reached the end of one or more delimiters?
                 {
                     if($this->m_gotWord) // make sure that we have a $word
                     {
-                        // $word[$wordLength]=0; // finish the $word off
+                        // //$word[$wordLength]=0; // finish the $word off
                         $this->m_gotChar=true;
                         return -1;
                     }
@@ -914,7 +915,7 @@ class Document
                         $this->m_gotChar=true;
                     }
                 }
-                else if( ($this->m_char >= 0xfb00) && ($this->m_char <= 0xfb06) )	// check for ligatured charactures
+                else if( (ord($this->m_char) >= 0xfb00) && (ord($this->m_char) <= 0xfb06) )	// check for ligatured charactures
                 {
                     if($wordLength < WORDMAXIMUMLENGTH-3)
                     {
@@ -986,9 +987,10 @@ class Document
                 else $this->m_char=fgetc($this->m_filep);
                 
                 if($this->m_char == 0) $this->m_char=fgetc( $this->m_filep); // skip a single null character (but not multiple nulls)
-                if($this->m_char < 0 || $this->m_char == '') // check for EOF encountered
+                //|| $this->m_char == ''
+                if($this->m_char < 0 || $this->m_char == false ) // check for EOF encountered
                 {
-                    // $word[$wordLength]=0; // finish the $word off
+                    // //$word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -1002,9 +1004,9 @@ class Document
                     $delimiterType=max($delimiterType,DEL_TYPE_WHITE); // if delimiter isn't already at NEWLINE, set it to WHITE
                     $this->m_gotDelimiter=true;
                 }
-                else if ( (IntlChar::iscntrl($this->m_char) && $this->m_char < 0x80) || ($this->m_char == 0xff) ) // if we encounter a control character, restart the $word search
+                else if ( (IntlChar::iscntrl($this->m_char) && ord($this->m_char ) < 0x80) || ($this->m_char == 0xff) ) // if we encounter a control character, restart the $word search
                 {
-                    $word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
+                    //$word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
                     // $wordLength = 0;
                     $this->m_gotWord = false;
                     $this->m_gotDelimiter = false;
@@ -1014,7 +1016,7 @@ class Document
                 {
                     if($this->m_gotWord) // make sure that we have a $word
                     {
-                        // $word[$wordLength]=0; // finish the $word off
+                        // //$word[$wordLength]=0; // finish the $word off
                         $this->m_gotChar=true;
                         return -1;
                     }
@@ -1046,24 +1048,24 @@ class Document
         {
             $thisChar = $this->GetByteTxt();
             if($thisChar < 0) return -1; // end of file reached?
-            else if(($thisChar & 0x80) == 0) // one-byte character?
+            else if((ord($thisChar) & 0x80) == 0) // one-byte character?
             {
                 return $thisChar;
             }
-            else if(($thisChar & 0x20) == 0) // two-byte character?
+            else if((ord($thisChar) & 0x20) == 0) // two-byte character?
             {
                 $bytes=2;
-                $thisChar = ($thisChar & 0x1F);
+                $thisChar = (ord($thisChar) & 0x1F);
             }
-            else if(($thisChar & 0x10) == 0) // three-byte character?
+            else if((ord($thisChar) & 0x10) == 0) // three-byte character?
             {
                 $bytes=3;
-                $thisChar = ($thisChar & 0x0F);
+                $thisChar = (ord($thisChar) & 0x0F);
             }
-            else if(($thisChar & 0x08) == 0) // four-byte character?
+            else if((ord($thisChar) & 0x08) == 0) // four-byte character?
             {
                 $bytes=4;
-                $thisChar = ($thisChar & 0x07);
+                $thisChar = (ord($thisChar) & 0x07);
             }
             else return -1; // either bad unicode or character is more than four $bytes long
             for($i=1;$i<$bytes;$i++)
@@ -1084,24 +1086,24 @@ class Document
         {
             $thisChar = $this->GetByteHtml();
             if($thisChar < 0) return -1; // end of file reached?
-            else if(($thisChar & 0x80) == 0) // one-byte character?
+            else if((ord($thisChar) & 0x80) == 0) // one-byte character?
             {
                 return $thisChar;
             }
-            else if(($thisChar & 0x20) == 0) // two-byte character?
+            else if((ord($thisChar) & 0x20) == 0) // two-byte character?
             {
                 $bytes=2;
-                $thisChar = ($thisChar & 0x1F);
+                $thisChar = (ord($thisChar) & 0x1F);
             }
-            else if(($thisChar & 0x10) == 0) // three-byte character?
+            else if((ord($thisChar) & 0x10) == 0) // three-byte character?
             {
                 $bytes=3;
-                $thisChar = ($thisChar & 0x0F);
+                $thisChar = (ord($thisChar) & 0x0F);
             }
-            else if(($thisChar & 0x08) == 0) // four-byte character?
+            else if((ord($thisChar) & 0x08) == 0) // four-byte character?
             {
                 $bytes=4;
-                $thisChar = ($thisChar & 0x07);
+                $thisChar = (ord($thisChar) & 0x07);
             }
             else return -1; // either bad unicode or character is more than four $bytes long
             for($i=1;$i<$bytes;$i++)
@@ -1123,33 +1125,34 @@ class Document
     
             while(true)
             {
-                $thisChar = $this->GetByteTxt();//Pdf(); //Txt(); //
-                if($thisChar < 0) return -1; // end of file reached?
-                else if(($thisChar & 0x80) == 0) // one-byte character?
+                $thisChar = $this->GetBytePdf();
+                //if(!is_numeric($thisChar) )echo "Hier:". $thisChar;
+                if(ord($thisChar) < 0 || $thisChar == false || $thisChar == '' ) return -1; // end of file reached?
+                else if((ord($thisChar) & 0x80) == 0) // one-byte character?
                 {
                     return $thisChar;
                 }
-                else if(($thisChar & 0x20) == 0) // two-byte character?
+                else if((ord($thisChar) & 0x20) == 0) // two-byte character?
                 {
                     $bytes=2;
-                    $thisChar = ($thisChar & 0x1F);
+                    $thisChar = (ord($thisChar) & 0x1F);
                 }
-                else if(($thisChar & 0x10) == 0) // three-byte character?
+                else if((ord($thisChar) & 0x10) == 0) // three-byte character?
                 {
                     $bytes=3;
-                    $thisChar = ($thisChar & 0x0F);
+                    $thisChar = (ord($thisChar) & 0x0F);
                 }
-                else if(($thisChar & 0x08) == 0) // four-byte character?
+                else if((ord($thisChar) & 0x08) == 0) // four-byte character?
                 {
                     $bytes=4;
-                    $thisChar = ($thisChar & 0x07);
+                    $thisChar = (ord($thisChar) & 0x07);
                 }
                 else return -1; // either bad unicode or character is more than four $bytes long
                 for($i=1;$i<$bytes;$i++)
                 {
                     $thisByte=$this->GetBytePdf();
-                    if($thisByte < 0) return -1; // end of file reached prematurely?
-                    $thisChar = ($thisChar << 6) | ($thisByte & 0x3F); // incorporate additional 6 bits
+                    if(ord($thisByte) < 0) return -1; // end of file reached prematurely?
+                    $thisChar = ($thisChar << 6) | (ord($thisByte) & 0x3F); // incorporate additional 6 bits
                 }
                 return $thisChar;
             }
@@ -1173,24 +1176,24 @@ class Document
         {
             $thisChar = $this->GetByteDocx();
             if($thisChar < 0) return -1; // end of file reached?
-            else if(($thisChar & 0x80) == 0) // one-byte character?
+            else if((ord($thisChar) & 0x80) == 0) // one-byte character?
             {
                 return $thisChar;
             }
-            else if(($thisChar & 0x20) == 0) // two-byte character?
+            else if((ord($thisChar) & 0x20) == 0) // two-byte character?
             {
                 $bytes=2;
-                $thisChar = ($thisChar & 0x1F);
+                $thisChar = (ord($thisChar) & 0x1F);
             }
-            else if(($thisChar & 0x10) == 0) // three-byte character?
+            else if((ord($thisChar) & 0x10) == 0) // three-byte character?
             {
                 $bytes=3;
-                $thisChar = ($thisChar & 0x0F);
+                $thisChar = (ord($thisChar) & 0x0F);
             }
-            else if(($thisChar & 0x08) == 0) // four-byte character?
+            else if((ord($thisChar) & 0x08) == 0) // four-byte character?
             {
                 $bytes=4;
-                $thisChar = ($thisChar & 0x07);
+                $thisChar = (ord($thisChar) & 0x07);
             }
             else return -1; // either bad unicode or character is more than four $bytes long
             for($i=1;$i<$bytes;$i++)
