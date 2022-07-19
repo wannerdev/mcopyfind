@@ -1,12 +1,14 @@
 <?php
 namespace plagiarism_mcopyfind\compare;
 
-include('./document.php');
-include('./settings.php');
-include('./heapsort.php');
-include('./words.php');
-include('./generate_report.php');
-include('./compare_functions.php');
+// echo getcwd() . __DIR__; //working directory -> with namespace workdir changes
+require(__DIR__.'\document.php');
+require(__DIR__.'\settings.php');
+require(__DIR__.'\heapsort.php');
+require(__DIR__.'\words.php');
+require(__DIR__.'\generate_report.php');
+require(__DIR__.'\compare_functions.php');
+
 
 
 class load_documents
@@ -17,10 +19,11 @@ class load_documents
     public $settings;
     public $wordsize=10000;
     public $wordInc=1000;
+    public $wordsFunc;
 
     function __construct(){
-        $this->settings=new settings();
-        
+        $this->settings=new settings();        
+        $this->wordsFunc = new words();
     }
 
     function testMain()
@@ -34,13 +37,11 @@ class load_documents
         // echo $file2;
         //$documents.put();
         
-        $doc1=new Document();
-        $doc1->definePath("t01.txt");
-        //$doc1->definePath("fund1.pdf");
+        //$doc1=new document("t01.txt");
+        $doc1= new document("t01.pdf");//, $this->settings);
         //TEST $doc1->definePath("text2.txt");
-        $doc2=new Document();
-        $doc2->definePath("t01e.txt");
-        //$doc2->definePath("fund2.pdf");
+        //$doc2=new document("t01e.txt");
+        $doc2 = new document("t01e.pdf");//, $this->settings);
 
         $doc1->m_DocumentType=DOC_TYPE_NEW;
         $doc2->m_DocumentType=DOC_TYPE_NEW;
@@ -48,7 +49,7 @@ class load_documents
         array_push($this->documents, $doc2);
         array_push($this->documents, $doc1);
         
-        $cmp = new compare_functions($this->settings, $this->documents);
+        $cmp = new compare_functions($this->settings, $this->documents,-1);
         $cmp->RunComparison($this);
     }
 
@@ -71,17 +72,25 @@ class load_documents
         while ($DelimiterType != DEL_TYPE_EOF) {
             $document->Getword($word,$DelimiterType);
             //  $word .= '0';
-            $hashes[$wordNumber] = words::WordHash($word);
-
-            // print_r("Word:".$word . "\n");
-            //     print_r("Hashes:".$hashes[$wordNumber] . "\n");
-            if ($hashes[$wordNumber] != 1) {
-                $realwords++;
-            }
-            $wordNumber++;
+            if($this->settings->m_bIgnorePunctuation) $this->wordsFunc->WordRemovePunctuation($word);	// if ignore punctuation is active, remove punctuation
+            if($this->settings->m_bIgnoreOuterPunctuation) $this->wordsFunc->wordxouterpunct($word);	// if ignore outer punctuation is active, remove outer punctuation
+            if($this->settings->m_bIgnoreNumbers) $this->wordsFunc->WordRemoveNumbers($word);			// if ignore numbers is active, remove numbers
+            if($this->settings->m_bIgnoreCase) $this->wordsFunc->WordToLowerCase($word);				// if ignore case is active, remove case
+            if($this->settings->m_bSkipLongWords & (strlen($word) > $this->settings->m_SkipLength) ) continue;	// if skip too-long words is active, skip them
+            if($this->settings->m_bSkipNonwords & (!$this->wordsFunc->WordCheck($word)) ) continue;		// if skip nonwords is active, skip them
+    
+            // print_r("$word:".$word . "\n");
+            // print_r("Hashes:".$hashes[$wordNumber] . "\n");
+            // if ($hashes[$wordNumber] != 1) {
+            //     $realwords++;
+            // }
+            
             if($wordNumber == $this->wordsize) {
                 $this->wordsize += $this->wordInc;
             }
+
+            $hashes[$wordNumber] = words::WordHash($word);
+            $wordNumber++;
             $word='';
         }
 
@@ -95,7 +104,7 @@ class load_documents
             $document->pSortedWordHash[$i] = $hashes[$i];        // copy over hash-coded wordAmount
         }
         // echo("START:");
-        //  var_dump($document->pSortedWordHash);
+        // var_dump($document->pSortedWordHash);
         $sorted = heapsort::HeapSorting($document->pSortedWordHash,				// sort hash-coded wordAmount (and word numbers)
                               $document->pSortedWordNumber, $wordAmount-1);
         
@@ -103,14 +112,15 @@ class load_documents
         $document->pSortedWordNumber = $sorted[1];
 
         // Test output
-        //  print_r("<h1>" . $document->m_WordsTotal . "  Real " . $document->realwords . "</h1>");
+        // print_r("<h1>" . $document->m_WordsTotal . "  Real " . $document->realwords . "</h1>");
         // var_dump($document->pSortedWordNumber);
-        //  echo("END: \n\n\n\n");
-        //    var_dump($document->pSortedWordHash);
-        //foreach ($document->pSortedWordNumber as $element) {
-        //      echo ($element . "<br>");
-        //  }
-        //   echo ("<br><br>");
+        // echo("END: \n\n\n\n");
+        // var_dump($document->pSortedWordHash);
+        // foreach ($document->pSortedWordNumber as $element) {
+        //   echo ($element . "<br>");
+        // }
+
+        // echo ("<br><br>");
         // foreach ($document->pSortedWordHash as $element) {
         //        echo ("sorted Hash".$element . "\n");
         // }
@@ -121,7 +131,7 @@ class load_documents
             $firstLong = 0;
             for ($i = 1; $i < $wordAmount; $i++)                                    // loop for all the words in the document
             {
-                if (($document->pSortedWordHash[$i] & 0xFFC00000) != 0)    // if the word is longer than 3 letters, break
+                if ((ord($document->pSortedWordHash[$i]) & 0xFFC00000) != 0)    // if the word is longer than 3 letters, break
                 {
                     $firstLong = $i;
                     break;
@@ -130,7 +140,7 @@ class load_documents
             $document->firstHash = $firstLong;                    // save the number of the first >3 letter word, or the first word            
             // echo ("setting firstHash: ".$document->firstHash . "\n");
         }
-        $document->CloseDocument();
+        // $document->CloseDocument();
     }
 
     //Guess how this works Probably
@@ -148,12 +158,11 @@ class load_documents
     //needs page number with range of words
     //List of pages with start number of a page,
     // Comparing starts always at page+ header and ends at page-footer //before comparing you ask if the word is inside the page range
-    
 }
 
 
-//Testcase 1
-$test = new load_documents();
-$test->testMain();
 
-// echo file_get_contents("C:\\reports\\matches.html");
+//Testcase 1
+    $test = new load_documents();
+    $test->testMain();
+     file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");

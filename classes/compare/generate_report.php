@@ -11,6 +11,7 @@ class generate_report{
     public $settings;
     public $m_fLog; // handle for the log file
     public $m_StartTicks; //time when the comparison started
+    public $m_Time; //time it took to compare the documents
     // public $m_MatchingDocumentPairs=0; //number of matching document pairs
     public $m_szSoftwareName;
 
@@ -26,27 +27,44 @@ class generate_report{
     public $m_pDocS;				// All documents
     public $m_pDocL;				// Left document object
     public $m_pDocR;				// Right document object
+    public $reportid;		
 
-    public function __construct($_settings){
+    public function __construct($_settings, $_reportId){
+        $this->reportid = $_reportId;
         $this->wordHash = array();
         $this->wordNumber = 0;
         $this->realwords = 0;
-        $this->m_CompareStep=1000;
+        $this->m_CompareStep = 1000;
         if (PHP_OS_FAMILY === "Windows") {
-            $this->m_szReportFolder = "C:\\reports\\"; //path folder where the report will be saved 
+            //$this->m_szReportFolder = "C:\\reports\\"; //path folder where the report will be saved 
+            $this->m_szReportFolder = __DIR__."../../../reports/"; //path folder where the report will be saved 
+            //echo "Test:";
         } elseif (PHP_OS_FAMILY === "Linux") {  
             $this->m_szReportFolder = "/var/moodledata/mcopyfind/reports/"; //path folder 
-        }								
+        }
         $this->szfilename="wcopy.log";									// file 
         $this->m_szSoftwareName="Mcopyfind";
         $this->settings= $_settings;
-
+        // Styles from similarity texter 
+        // https://people.f4.htw-berlin.de/~weberwu/simtexter/
+        $this->colors =  array(
+            "#FFCDD2",
+            "#a5e6ed",
+            "#a7c6f2",
+            "#aff2be",
+            "#b8b8ff",
+            "#c2f598",
+            "#e6e181",
+            "#e8a3ff",
+            "#f29f9f",
+            "#f5cf9f"
+        );
         $this->SetupReport();
     }
 
+    
     function SetupReport(){
         $this->m_StartTicks =new DateTime();
-        //=$date->format($date::RSS);
         if(!is_dir($this->m_szReportFolder)){
             mkdir($this->m_szReportFolder, 0700);
         }
@@ -60,7 +78,7 @@ class generate_report{
         $this->m_fMatch= fopen($szfilename, "w");				// create and open main comparison report text file
         if($this->m_fMatch == NULL) return "ERR_CANNOT_OPEN_COMPARISON_REPORT_TXT_FILE";
     
-        $szfilename=$this->m_szReportFolder."matches.html";
+        $szfilename=$this->m_szReportFolder. strval($this->reportid) ."matches.html";
         $this->m_fMatchHtml=fopen( $szfilename, "w");			// create and open main comparison report html file
         if($this->m_fMatchHtml == NULL) return "ERR_CANNOT_OPEN_COMPARISON_REPORT_HTML_FILE";
         
@@ -82,24 +100,24 @@ class generate_report{
         fprintf($this->m_fMatchHtml,"<br>Most Imperfections to Allow: \n".$this->settings->m_MismatchTolerance);
         fprintf($this->m_fMatchHtml,"<br>Minimum %% of Matching Words: \n". $this->settings->m_MismatchPercentage);
         fprintf($this->m_fMatchHtml,"</blockquote><br><br><table border='1' cellpadding='5'><tr><td align='center'>Perfect Match</td><td align='center'>Overall Match</td><td align='center'>View Both Files</td><td align='center'>File L</td><td align='center'>File R</td></tr>");
-
     }
 
     function ReportMatchedPair(compare_functions $compare, $docL, $docR)
     {
-        		
-        $this->m_pDocL = $docL;				
+        $this->m_pDocL = $docL;
         $this->m_pDocR = $docR;
         $hrefL[1000]='';
         $hrefR[1000]='';					// href for the Left and Right html files
         $hrefB[1000]='';					// href from frame file for side-by-side viewing
         $dstring='';						// character buffer for document name strings
-    
-        $indoc = new document();			// CInputDocument class to handle inputting the document
-        $indoc->m_bBasic_Characters = $this->settings->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
-    
-        $iReturn=0;
-    
+        
+        //$indoc = new document($this->m_pDocL->m_filep,$this->m_pDocL->filename);			// CInputDocument class to handle inputting the document
+
+        $this->m_pDocL->m_bBasic_Characters = $this->settings->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
+        $this->m_pDocR->m_bBasic_Characters = $this->settings->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
+        
+        $iReturn = 0;
+        
         // report number of matching words in the Match and Log files
         $out =$compare->m_MatchingWordsPerfect." " . $compare->m_MatchingWordsTotalL ." ". $compare->m_MatchingWordsTotalR ." ". $this->m_pDocL->filename. "  " . $this->m_pDocR->filename . "\n";
         fprintf($this->m_fMatch, $out);
@@ -110,16 +128,18 @@ class generate_report{
         $m_szDocR = $this->m_pDocR->name; // use original naming
         $m_szDocL = $this->m_pDocL->name; // use original naming
 
-        $hrefL = $this->m_pDocL->name;					// generate name for right html filename
+        $hrefL = $this->m_pDocL->name;    // generate name for right html filename
         $hrefL.= "." . $this->m_pDocR->name.".html";
     
-        $hrefR = $this->m_pDocR->name;					// generate name for right html filename
+        $hrefR = $this->m_pDocR->name;	  // generate name for right html filename
         $hrefR.="." . $this->m_pDocL->name . ".html";
     
         $dstring = strval($compare->m_MatchingDocumentPairs);
         $hrefB = "SBS.".$this->m_pDocR->name . $this->m_pDocL->name . "_" . $dstring . ".html";
-    
-    
+
+        // new moodle_url('/plagiarism/mcopyfind/reports/submit_all_files.php', $params);
+        // $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind'));
+        
         $szPerfectMatch =($compare->m_MatchingWordsPerfect. " (" . round(100*$compare->m_MatchingWordsPerfect/$this->m_pDocL->m_WordsTotal,2)."% L, ".  round(100*$compare->m_MatchingWordsPerfect/$this->m_pDocR->m_WordsTotal,2)."% R)");
         $szOverallMatch=($compare->m_MatchingWordsTotalL . " (". round(100*$compare->m_MatchingWordsTotalL/$this->m_pDocL->m_WordsTotal,2). "%)L; " . $compare->m_MatchingWordsTotalR . "(" . round(100*$compare->m_MatchingWordsTotalR/$this->m_pDocR->m_WordsTotal,2)."%) R");
         fprintf($this->m_fMatchHtml,
@@ -142,25 +162,23 @@ class generate_report{
         fprintf($this->m_fHtml,"</head>\n");
         fprintf($this->m_fHtml,"<body>\n");
         
-        $indoc->filename = $this->m_pDocL->filename;
-        $indoc->OpenDocument();
 
         // generate text body of html file, with matching words underlined
-        $iReturn = generate_report::DocumentToHtml($indoc,$compare->m_MatchMarkL,$compare->m_MatchAnchorL,$this->m_pDocL->m_WordsTotal,$hrefR); if($iReturn > -1) return $iReturn;
+        $iReturn = generate_report::DocumentToHtml($this->m_pDocL,$compare->m_MatchMarkL,$compare->m_MatchAnchorL,$this->m_pDocL->m_WordsTotal,$hrefR); if($iReturn > -1) return $iReturn;
         
-        $indoc->CloseDocument();								// close document
+        // $this->m_pDocL->CloseDocument();					// close document
     
-        fprintf($this->m_fHtml,"\n</body></html>\n");				// complete html file
-        fclose($this->m_fHtml); $this->m_fHtml=NULL;						// close html file
+        fprintf($this->m_fHtml,"\n</body></html>\n");// complete html file
+        fclose($this->m_fHtml); $this->m_fHtml=NULL;// close html file
     
-        $dstring=$this->m_szReportFolder;						// generate full path for right html file
+        $dstring=$this->m_szReportFolder;			// generate full path for right html file
         $dstring .= "\\" . $hrefR;
-    
-        $this->m_fHtml = fopen($dstring,"w");					// create and open right html file
+        
+        $this->m_fHtml = fopen($dstring,"w");		// create and open right html file
         if($this->m_fHtml == NULL) return "ERR_CANNOT_OPEN_RIGHT_HTML_FILE";
         
         // create header material for right html file
-    
+        
         fprintf($this->m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
         fprintf($this->m_fHtml,"<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n");
         fprintf($this->m_fHtml,"<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n");
@@ -168,33 +186,35 @@ class generate_report{
         fprintf($this->m_fHtml,"<base target='left'>\r\n");
         fprintf($this->m_fHtml,"</head>\r\n");
         fprintf($this->m_fHtml,"<body>\r\n");
-    
-        // $iReturn = $indoc->OpenDocument($this->m_pDocR->filename);	// open right document for word input
         
-        $indoc->filename = $this->m_pDocR->filename;
-        $indoc->OpenDocument();
-        if($iReturn > -1)
-        {
-            $indoc->closeDocument();							// close document
-            return $iReturn;
-        }
-                    
+        
+        
+        // $this->m_pDocR = new document($this->m_pDocR->m_filep,$this->m_pDocR->filename);
+        // $indoc->m_filep = $this->m_pDocL->file;
+        // $indoc->filename = $this->m_pDocL->filename;	
+        //$iReturn =$indoc->definePath($this->m_pDocR->filename);
+        // if($iReturn > -1)
+        // {
+        //     $indoc->closeDocument();							// close document
+        //     return $iReturn;
+        // }
+        
         // generate text body of html file, with matching words underlined
-        $iReturn =  generate_report::DocumentToHtml($indoc,$compare->m_MatchMarkR,$compare->m_MatchAnchorR,$this->m_pDocR->m_WordsTotal,$hrefL); if($iReturn > -1) return $iReturn;
+        $iReturn =  generate_report::DocumentToHtml($this->m_pDocR, $compare->m_MatchMarkR,$compare->m_MatchAnchorR,$this->m_pDocR->m_WordsTotal,$hrefL); if($iReturn > -1) return $iReturn;
         
-        $indoc->closeDocument();
+        // $this->m_pDocR->closeDocument();
     
-        fprintf($this->m_fHtml,"\n</body></html>\n");				// complete html file
-        fclose($this->m_fHtml); $this->m_fHtml=NULL;						// close html file
+        fprintf($this->m_fHtml,"\n</body></html>\n");	// complete html file
+        fclose($this->m_fHtml); $this->m_fHtml=NULL;	// close html file
         
-        $dstring = $this->m_szReportFolder; 
+        $dstring = $this->m_szReportFolder;
         $dstring .= "\\" . $hrefB;
-    
-        $this->m_fHtml=fopen($dstring,"w");					// create and open side-by-side html file
+        
+        $this->m_fHtml = fopen($dstring,"w");					// create and open side-by-side html file
         if($this->m_fHtml == NULL) return "ERR_CANNOT_OPEN_SIDE_BY_SIDE_HTML_FILE";
-    
+        
         // create side-by-side wrapper html file
-    
+        
         fprintf($this->m_fHtml,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n");
         fprintf($this->m_fHtml,"<html><title>Comparison of %s with %s (Matched Words = %d)</title>\n",$m_szDocR, $m_szDocL, $compare->m_MatchingWordsPerfect);
         fprintf($this->m_fHtml,"<frameset cols=\"*,*\" frameborder=\"YES\" border=\"1\" framespacing=\"0\">");
@@ -212,7 +232,7 @@ class generate_report{
 
     function DocumentToHtml(Document $indoc,$MatchMark, $MatchAnchor, $words, $href)
     {
-        fprintf($this->m_fHtml,"<h1>%s</h1>\n",$indoc->filename);
+        fprintf($this->m_fHtml,"<h1>%s</h1>\n",$indoc->name);
         $wordcount=0;								// current word number
 
         $word='';								// current word
@@ -224,12 +244,13 @@ class generate_report{
         $LastMatch=WORD_UNMATCHED;
         $LastAnchor=0;
         $iReturn=0;
+        $cnt=0;
 
         for($wordcount=0;$wordcount<$words;$wordcount++)	// loop for every word
         {
             $xMatch=$MatchMark[$wordcount];
             $xAnchor=$MatchAnchor[$wordcount];
-
+            // var_dump($MatchAnchor);
             if(($LastMatch!=$xMatch) || ($LastAnchor!=$xAnchor))	// check for a change of markup or anchor
             {
                 if($LastMatch==WORD_PERFECT) fprintf($this->m_fHtml,"</font>");	// close out red markups if they were active
@@ -245,12 +266,16 @@ class generate_report{
                     }
                     if($xAnchor>0)
                     {
-                        if($this->m_bBriefReport && ($wordcount>0) ) fprintf($this->m_fHtml,"<br />");	// print a paragraph mark for a new line
-                        fprintf($this->m_fHtml,"<a name='%i' href='%s#%i'>",$MatchAnchor[$wordcount],$href,$MatchAnchor[$wordcount]);	// start new anchor
+                        if(($wordcount>0) ) fprintf($this->m_fHtml,"</P>\n<P>");	// print a paragraph mark for a new line
+                        //echo$MatchAnchor[$wordcount]
+                        fprintf($this->m_fHtml,"<a name='%s' href='%s#%s'>",$MatchAnchor[$wordcount],$href,$MatchAnchor[$wordcount]);	// start new anchor
                     }
                 }
 
-                if($xMatch==WORD_PERFECT) fprintf($this->m_fHtml,"<font color='#FF0000'>");	// start red for perfection
+                if($xMatch==WORD_PERFECT){
+                    fprintf($this->m_fHtml,"<font  color='#000000' style=\"background-color:".($this->colors[$cnt%10])."\">");	
+                    $cnt++;
+                } 
                 else if($xMatch==WORD_FLAW) fprintf($this->m_fHtml,"<i><font color='#007F00'>");	// start green italics for imperfection
                 else if($xMatch==WORD_FILTERED)  fprintf($this->m_fHtml,"<font color='#0000FF'>");	// start blue for filtered
             }
@@ -281,10 +306,11 @@ class generate_report{
             //   } //fprintf($this->m_fHtml,htmlspecialchars($word),false); // print the character, using UTF8 translation
             //for($i=0;$i<$wordLength;$i++)
 
-            if( (!$this->m_bBriefReport) || ($xMatch == WORD_PERFECT) || ($xMatch == WORD_FLAW) )
+            if( (!$this->m_bBriefReport) || ($xMatch == WORD_PERFECT) || ($xMatch == WORD_FLAW) || ($xMatch == WORD_FILTERED) )
             {
                 // $wordLength=strlen($word);						// find length of word
-                fprintf($this->m_fHtml,htmlspecialchars($word),false);
+                if(!$indoc->m_UTF8)$word=utf8_encode($word);
+                fprintf($this->m_fHtml,htmlspecialchars($word,false));
                 // print the character, using UTF8 translation
                 // PrintWCharAsHtmlUTF8
                 if($DelimiterType == DEL_TYPE_WHITE) fprintf($this->m_fHtml,'&nbsp;');					// print html white space
@@ -308,9 +334,9 @@ class generate_report{
         fprintf($this->m_fMatchHtml,"</body></html>\n");
         fclose($this->m_fMatchHtml);
         $this->m_fMatchHtml=NULL;
-        $m_Time= $date->getTimestamp() - $this->m_StartTicks->getTimestamp();
+        $this->m_Time= $date->getTimestamp() - $this->m_StartTicks->getTimestamp();
 
-        fprintf($this->m_fLog,"\nDone. Total Time:". strval($m_Time) ." seconds\n");
+        fprintf($this->m_fLog,"\nDone. Total Time:". strval($this->m_Time) ." seconds\n");
         fclose($this->m_fLog);
         $this->m_fLog=NULL;
         return;

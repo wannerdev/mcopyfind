@@ -63,6 +63,9 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         $userid = $linkarray['userid'];
         $file = $linkarray['file'];
         $output = '';
+        //todo generate link report by name
+        //.strval($file)
+        // $output = html_writer::tag('a', "./../../reports", array('class' => 'plagiarismreport'));
         //add link/information about this file to $output
          
         return $output;
@@ -102,7 +105,7 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
 
 
         $output = '';
-//$DB->set_debug(true);
+        //$DB->set_debug(true);
         //if ($config->upload == self::RUN_AUTO) {
             $modinfo = get_fast_modinfo($course);
             $cminfo = $modinfo->get_cm($cm->id);
@@ -139,13 +142,13 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         $params = array('cmid' => s($cm->id), 
                         'return' => urlencode($pageurl));
 
-        $submiturl = new moodle_url('/plagiarism/mcopyfind/classes/compare/load_documents.php');//reports/submit_all_files.php', $params);
+        $submiturl = new moodle_url('/plagiarism/mcopyfind/submit/submit_all_files.php', $params);
         $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind'));
         $output .= html_writer::empty_tag('br');
 
-        $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/compare/load_documents.php');
-        $output .= html_writer::link($compareurl, "test compare function");
-        $output .= html_writer::empty_tag('br');
+        // $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/compare/load_documents.php');
+        // $output .= html_writer::link($compareurl, "test compare function");
+        // $output .= html_writer::empty_tag('br');
 
         return $output;
     }

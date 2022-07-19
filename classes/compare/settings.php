@@ -6,14 +6,17 @@ namespace plagiarism_mcopyfind\compare;
 class settings{
 
     const WORDBUFFERLENGTH=5;
-    // Settings which detects 92% - 95% in default case:
     //Settings
     public $m_PhraseLength = 6;
     public $m_WordThreshold = 80;
     public $m_SkipLength = 0;
-    public $m_MismatchTolerance=2;
+    public $m_MismatchTolerance = 2;
     public $m_MismatchPercentage = 80;
-    
+
+    //Pdf ignore header and Footer margins
+    public $m_PdfHeader = 0;
+    public $m_PdfFooter = 0;
+
     public $m_bBriefReport = false;
     public $m_bIgnoreCase = false;
     public $m_bIgnoreNumbers = false;
@@ -22,5 +25,22 @@ class settings{
     public $m_bSkipLongWords = false;
     public $m_bSkipNonwords = false;
     public $m_bBasic_Characters = false;
+
+    
+    // Settings which detects 92% - 95% in default case:
+    // public $m_PhraseLength = 6;
+    // public $m_WordThreshold = 80;
+    // public $m_SkipLength = 0;
+    // public $m_MismatchTolerance=2;
+    // public $m_MismatchPercentage = 80;
+    
+    // public $m_bBriefReport = false;
+    // public $m_bIgnoreCase = false;
+    // public $m_bIgnoreNumbers = false;
+    // public $m_bIgnoreOuterPunctuation = false;
+    // public $m_bIgnorePunctuation = false;
+    // public $m_bSkipLongWords = false;
+    // public $m_bSkipNonwords = false;
+    // public $m_bBasic_Characters = false;
 }
 

@@ -49,14 +49,15 @@ class words {
 
     }   
 
-    public static function WordRemovePunctuation($word) //TODO return word
+    public static function WordRemovePunctuation($word)
     {        
         $wordlen=strlen($word);
         for($ccnt=0;$ccnt<$wordlen;$ccnt++)
         {
             if(IntlChar::ispunct($word[$ccnt]))
+            // substr_replace($word,'',$ccnt);
             {
-                for($icnt=$ccnt;$icnt<$wordlen;$icnt++) $word[$icnt]=$word[$icnt+1]; // move the null, too.
+                for($icnt=$ccnt;$icnt<$wordlen-1;$icnt++) $word[$icnt]=$word[$icnt+1]; // move the null, too.
                 $wordlen--;
                 $ccnt--;
             }
@@ -64,7 +65,7 @@ class words {
         return $word;
     }
 
-    public static function wordxouterpunct($word) //TODO return word
+    public static function wordxouterpunct($word) 
     {
         
         $wordlen=strlen($word);
@@ -91,25 +92,27 @@ class words {
 
     }
 
-    public static function WordRemoveNumbers($word)//TODO return word
+    public static function WordRemoveNumbers($word)
     {        
-        $wordlen=strlen($word);
-        for($ccnt=0;$ccnt<$wordlen;$ccnt++)
-        {
-            if(IntlChar::isdigit($word[$ccnt]))
-            {
-                for($icnt=$ccnt;$icnt<$wordlen;$icnt++) $word[$icnt]=$word[$icnt+1];	// move the null, too.
-                $wordlen--;
-                $ccnt--;
-            }
-        }
+        // $wordlen=strlen($word);
+        $word=preg_replace("/[0-9]+/","",$word);
+        // echo $word;
+        // for($ccnt=0;$ccnt<$wordlen;$ccnt++)
+        // {
+        //     if(IntlChar::isdigit($word[$ccnt]))
+        //     {
+        //         $word[$ccnt]="";//for($icnt=$ccnt;$icnt<$wordlen-1;$icnt++) $word[$icnt]=$word[$icnt+1];	// move the null, too.
+        //         $wordlen--;
+        //         $ccnt--;
+        //     }
+        // }
         return $word;
     }
 
     public static function WordToLowerCase($word) //TODO return word
     {
         $wordlen=strlen($word);
-        for($ccnt=0;$ccnt<$wordlen;$ccnt++)
+        for($ccnt=0;$ccnt<$wordlen-1;$ccnt++)
         {
             if(IntlChar::isupper($word[$ccnt])) $word[$ccnt]=IntlChar::tolower($word[$ccnt]);
         }

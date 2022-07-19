@@ -38,10 +38,10 @@ class compare_functions{
 
     public $reportGen;
 
-    function __construct($_settings, $docs){
+    function __construct($_settings, $docs, $_reportId){
 
         $this->m_pDocs = $docs;
-        $this->reportGen = new generate_report($_settings);
+        $this->reportGen = new generate_report($_settings, $_reportId);
         $this->m_Documents = count($docs);
         $this->m_CompareStep=1000;
         $this->settings= $_settings;
@@ -56,7 +56,7 @@ class compare_functions{
 
     function ComparePair(Document $docL,Document $docR)
     {
-        echo ("Comparing ".$docL->filename." and ".$docR->filename."\n");
+        echo ("Comparing ".$docL->filename." and ".$docR->filename."\n <br>" );
         fprintf($this->reportGen->m_fLog, "Comparing ".$docL->filename." and ".$docR->filename."\n");
         $wordNumberL=0;
         $wordNumberR=0;						// word number for left document and right document
@@ -94,7 +94,7 @@ class compare_functions{
         //
         // filter left document
         //
-        $wordNumberL=$docL->firstHash;						// start left at first >3 letter word
+        $wordNumberL=$docL->firstHash;						// start left at first >3 letter word 
         $wordNumberR=$docR->firstHash;						// start right at first >3 letter word$m
         $anchor=0;											// start with no html anchors assigned
         
@@ -424,8 +424,9 @@ class compare_functions{
     }
 
 
-    function RunComparison($load) {
-        // $DocL;$DocR;			// document number of left document and right document
+    function RunComparison() {
+        $load = new load_documents();
+        // $DocL;$DocR;			// left document and right document
         // $szMessage;			// status messages
         // $i;					// local index counter
         // $irvalue;
@@ -446,11 +447,12 @@ class compare_functions{
 	    $this->SetupProgressReports(DOC_TYPE_OLD,DOC_TYPE_NEW,DOC_TYPE_NEW);
         for($i =0; $i< $this->m_Documents; $i++ )  			// for all possible left documents
         {	
-            $DocL = $this->m_pDocs[$i];						// get left document
-            for($j =1; $j< $this->m_Documents; $j++ )  			// for all possible right documents
+            $DocL = $this->m_pDocs[$i];			
+            $DocL->OpenDocument();				// get left document
+            for($j =$i; $j< $this->m_Documents; $j++ )  			// for all possible right documents
             {
-                $DocR = $this->m_pDocs[$j];		
-                // cop line
+                $DocR = $this->m_pDocs[$j];
+                $DocR->OpenDocument();	
                 if($DocL == $DocR ) continue;				// skip if same document
 
                 if($g_abort){
@@ -482,8 +484,9 @@ class compare_functions{
                 
                     $szOverallMatch= $this->m_MatchingWordsTotalL . "(". round(100*$this->m_MatchingWordsTotalL/$DocL->m_WordsTotal,2) . "%%)L;" . "," . $this->m_MatchingWordsTotalR . "(". round(100*$this->m_MatchingWordsTotalR/$DocR->m_WordsTotal,2) . "%%)R";
                     //echo("Item:" . $szPerfectMatch . " ". $szOverallMatch . " " . $this->m_pDoc->m_szDocL . " " . $this->m_pDoc->m_szDocR . "\n");
-                    echo("Item:" . $szPerfectMatch . " ". $szOverallMatch . " " . $DocL->filename . " " . $DocR->filename . "\n");
+                    
                     $out="Item:" . $szPerfectMatch . " ". $szOverallMatch . " " . $DocL->filename . " " . $DocR->filename . "\n";
+                    echo($out. "<br>");
                     fprintf($this->reportGen->m_fLog, $out);
 
                     // $m_pReport->InsertItem(nItem,szPerfectMatch);
@@ -498,7 +501,7 @@ class compare_functions{
         fprintf($this->reportGen->m_fLog,"Done Comparing Documents\n\n");
         $this->reportGen->FinishReports($this);
 
-        $szMessage="Done. Total CPU Time:". $this->reportGen->m_StartTicks->format($this->reportGen->m_StartTicks::RSS) ." seconds";
+        $szMessage="Done. Total CPU Time:". strval($this->reportGen->m_Time) ." seconds\n<br>";
         echo($szMessage);
     }
 }

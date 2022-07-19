@@ -5,7 +5,6 @@ namespace plagiarism_mcopyfind\compare;
 use ErrorException;
 use Exception;
 use IntlChar;
-use PHPCompatibility\Util\Tests\Core\IsNumericCalculationUnitTest;
 
 const DEL_TYPE_NONE =0;
 const DEL_TYPE_WHITE = 1;
@@ -21,7 +20,7 @@ const WORDBUFFERLENGTH = 256;
 
 
 
-class Document
+class document
 {
 
     public $m_contentType = "TYPE_UNDEFINED"; // type of document: txt doc, pdf, etc.
@@ -63,10 +62,24 @@ class Document
     public $words =null;
     public $m_filep=null;
     public $m_fHtml=null;
+    public $isRes=false;
 
-    public function __construct()
+    public function __construct( $filename, $file=null)
     {
+        // $this->settings = $_settings;
         $this->words = new words();
+        $this->m_DocumentType=DOC_TYPE_NEW; //Assume it is not additional/ solution document
+       
+        if(is_resource($file) ){
+            $this->m_filep=$file;
+            $this->isRes=true;
+            $this->m_haveFile=true;
+            $this->filename=$filename;
+            $this->OpenDocument();
+        }else{
+            $this->definePath($filename);
+        }
+        
     }
 
     function definePath($infile){
@@ -82,7 +95,7 @@ class Document
         // echo "------------"; 
         // echo getcwd(); //working directory -> with namespace workdir changes
         // echo "------------";
-        if( !fopen($pfilename,"r") ) throw new Exception("ERR_CANNOT_FIND_FILE"); // open fails if file is not found
+        if( !$this->isRes && !fopen($pfilename,"r") ) throw new Exception("ERR_CANNOT_FIND_FILE"); // open fails if file is not found
 
         $index=strpos($pfilename,'.'); // find $filename extension
         $this->name = substr($pfilename,0,$index); // get $filename without extension
@@ -107,12 +120,12 @@ class Document
         else return $this->OpenUnknown($pfilename);;
     }
 
-    function closeDocument(){
-        if($this->m_filep != null){
-            fclose($this->m_filep);
-            $this->m_filep = null;
-        }
-    }
+    // function closeDocument(){
+    //     if($this->m_filep != null){
+    //         fclose($this->m_filep);
+    //         $this->m_filep = null;
+    //     }
+    // }
 
     function OpenHtml($filename)
     {
@@ -134,14 +147,16 @@ class Document
 
     function OpenTxt($filename)
     {
-        $this->m_filep = fopen($filename,"r");
+        if($this->m_filep == NULL)  {
+            $this->m_filep= fopen($filename,"r");
+        }
         if($this->m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE");
         $this->m_haveFile = true;
-        if(fgetc($this->m_filep) == 0xEF) // check for the BOM to indicate a utf-8 text file
+        if(ord(fgetc($this->m_filep)) == 0xEF) // check for the BOM to indicate a utf-8 text file
         {
-            if(fgetc($this->m_filep) == 0xBB)
+            if(ord(fgetc($this->m_filep)) == 0xBB)
             {
-                if(fgetc($this->m_filep) == 0xBF)
+                if(ord(fgetc($this->m_filep)) == 0xBF)
                 {
                     $this->m_UTF8 = true;  // found BOM; leave input pointing after the BOM
                     return -1;
@@ -264,12 +279,16 @@ class Document
         return -1;
     }
 
-    function OpenPdf($filename) //https://www.pdftron.com/documentation/cli/guides/pdf2text/
+    function OpenPdf($filename)
     { 
         // echo ("Filename Openpdf:".$filename); 
+
+        // $headerFooter= "-margint ".$this->settings->m_PdfHeader . " -marginb ".$this->settings->m_PdfFooter;
+        // $m_pdftotextFile= __DIR__."\\pdftotext.exe";
         $m_pdftotextFile= "C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\classes\\compare\\pdftotext.exe";
         $m_path= "C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\classes\\compare\\";
         $m_pdftotext= file_exists($m_pdftotextFile);
+        // echo $m_pdftotextFile;
         if($m_pdftotext){ 
            // pdftotext program exists, so use it 
            // generate txt file $commandLine=$m_pdftotextFile ." -enc UTF-8 " . $m_path. $filename ." " . $m_path."conv_". $this->name .".txt"; // assemble command
@@ -280,9 +299,6 @@ class Document
         //    echo("STREAM:".stream_get_contents($this->m_filep));
            //echo ("CMD: ".$commandLine);
            //$this->filename = "conv_". $this->name .".txt";
-           //$this->name = "conv_". $this->name;
-           //$this->m_contentType = "DOCUMENT_TYPE_TEXT";
-           //return $this->OpenTxt($this->name.".txt");
            $this->m_haveFile = true;
            $this->m_UTF8 = true;
            $this->m_pdftotext =true;
@@ -293,15 +309,15 @@ class Document
             //don't
          }
 
-        throw  new ErrorException("ERR_NO_PDFPROGRam");
+        throw  new ErrorException("ERR_NO_PDFPROGRAM");
     }
         
     function Getword(&$word,&$delimiterType)
     {
-        if(!$this->m_haveFile) throw new Exception("ERR_NO_FILE_OPEN"); // if no file is open, failure
+        if(!$this->m_haveFile || $this->m_filep==null) throw new Exception("ERR_NO_FILE_OPEN Filename:". $this->filename); // if no file is open, failure
 
         // //$word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
-        // $word='';
+        
         $wordLength = 0;
         $this->m_gotWord = false;
         $this->m_gotDelimiter = false;
@@ -725,15 +741,23 @@ class Document
         {
             while(true)
             {
-                if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
-                else $this->m_char=$this->GetCharTxt(); // otherwise, get the next character (normal or UTF-8)
-               // echo("Char: ".$this->m_char. "\n");
+                if($this->m_gotChar) $this->m_gotChar = false;  // check to see if we already have the next character
+                else $this->m_char=$this->GetCharTxt();         // otherwise, get the next character (normal or UTF-8)
+                // echo("Char: ".$this->m_char. "\n");
+                // if($this->m_char == '012' || ord($this->m_char) == 012 ){ // check for page break encountered 
+                //     echo "<h1>page break".$this->m_char."</h1>";
+                //     $this->m_pageBreak = true;
+                // }
                 if($this->m_char < 0 || $this->m_char == '' ) // check for EOF encountered 
                 {
                     // //$word[$wordLength]=0; // finish the $word off
+                    $word[$wordLength]=-1;    // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
+                //preg_split() Test this if there is time
+                // else if( array_size(preg_split('/\r\n|\r|\n/',$this->m_char) ) >1 ) // check for newline characters
+                //($this->m_char == PHP_EOL) ||
                 else if( ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
                 {
                     $delimiterType=DEL_TYPE_NEWLINE;
@@ -744,7 +768,7 @@ class Document
                     $delimiterType=max($delimiterType,DEL_TYPE_WHITE); // if delimiter isn't already at NEWLINE, set it to WHITE
                     $this->m_gotDelimiter=true;
                 }
-                else if( (IntlChar::iscntrl($this->m_char) && ord($this->m_char ) < 0x80) || ($this->m_char == 0xff) ) continue; // skip any other control characters
+                else if( (IntlChar::iscntrl($this->m_char) && ord($this->m_char ) < 0x80) || (ord($this->m_char) == 0xff) ) continue; // skip any other control characters
                 else if($this->m_gotDelimiter) // have we just reached the end of one or more delimiters?
                 {
                     if($this->m_gotWord) // make sure that we have a $word
@@ -1038,6 +1062,7 @@ class Document
 	    return -1;
     }
 
+    //Char functions
 
     function GetCharTxt()
     {
