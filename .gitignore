@@ -1,5 +1,5 @@
-.html
-.htm
-.log
-.txt
-.pdf
+*.html
+*.htm
+*.log
+*.txt
+*.pdf
