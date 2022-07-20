@@ -8,15 +8,11 @@ class settings{
     const WORDBUFFERLENGTH=5;
     //Settings
     public $m_PhraseLength = 6;
-    public $m_WordThreshold = 80;
+    public $m_WordThreshold = 100;
     public $m_SkipLength = 0;
-    public $m_MismatchTolerance = 2;
-    public $m_MismatchPercentage = 80;
-
-    //Pdf ignore header and Footer margins
-    public $m_PdfHeader = 0;
-    public $m_PdfFooter = 0;
-
+    public $m_MismatchTolerance=0;
+    public $m_MismatchPercentage = 100;
+    
     public $m_bBriefReport = false;
     public $m_bIgnoreCase = false;
     public $m_bIgnoreNumbers = false;

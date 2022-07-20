@@ -37,11 +37,11 @@ class load_documents
         // echo $file2;
         //$documents.put();
         
-        //$doc1=new document("t01.txt");
-        $doc1= new document("t01.pdf");//, $this->settings);
+        $doc1=new Document("fund1.pdf");
+        //$doc1->definePath("fund1.pdf");
         //TEST $doc1->definePath("text2.txt");
-        //$doc2=new document("t01e.txt");
-        $doc2 = new document("t01e.pdf");//, $this->settings);
+        $doc2=new Document("fund2.pdf");
+        //$doc2->definePath("fund2.pdf");
 
         $doc1->m_DocumentType=DOC_TYPE_NEW;
         $doc2->m_DocumentType=DOC_TYPE_NEW;
