@@ -63,6 +63,7 @@ class document
     public $m_filep=null;
     public $m_fHtml=null;
     public $isRes=false;
+    public $settings;
 
     public function __construct( $filename, $file=null)
     {
@@ -70,16 +71,21 @@ class document
         $this->words = new words();
         $this->m_DocumentType=DOC_TYPE_NEW; //Assume it is not additional/ solution document
        
+        //If we have the resource by moodle
         if(is_resource($file) ){
             $this->m_filep=$file;
             $this->isRes=true;
             $this->m_haveFile=true;
             $this->filename=$filename;
             $this->OpenDocument();
-        }else{
+        }else{ //If we have the file by path
             $this->definePath($filename);
         }
         
+    }
+
+    function setSettings($_settings){
+        $this->settings = $_settings;
     }
 
     function definePath($infile){
@@ -283,16 +289,22 @@ class document
     { 
         // echo ("Filename Openpdf:".$filename); 
 
-        // $headerFooter= "-margint ".$this->settings->m_PdfHeader . " -marginb ".$this->settings->m_PdfFooter;
-        // $m_pdftotextFile= __DIR__."\\pdftotext.exe";
-        $m_pdftotextFile= "C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\classes\\compare\\pdftotext.exe";
+        $m_pdftotextFile= __DIR__."\\pdftotext.exe";
         $m_path= "C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\classes\\compare\\";
         $m_pdftotext= file_exists($m_pdftotextFile);
         // echo $m_pdftotextFile;
         if($m_pdftotext){ 
            // pdftotext program exists, so use it 
+           // Add header and footer remove margins
+            $headerFooter= "";
+            if(settings::$pdfHeader!=0 ){
+                $headerFooter= "-margint ". strval(settings::$pdfHeader);
+            }
+            if(settings::$pdfFooter !=0){
+                $headerFooter .= " -marginb ". strval(settings::$pdfFooter);
+            }
            // generate txt file $commandLine=$m_pdftotextFile ." -enc UTF-8 " . $m_path. $filename ." " . $m_path."conv_". $this->name .".txt"; // assemble command
-           $commandLine=$m_pdftotextFile ." -enc UTF-8 " . $m_path. $filename ." -"; // assemble command
+           $commandLine=$m_pdftotextFile ." -enc UTF-8 ". $headerFooter." ". $m_path. $filename ." -"; // assemble command
         
            if(($this->m_filep= popen($commandLine,"r")) == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE"); // if the pipe don't form, command filed.
            

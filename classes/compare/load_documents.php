@@ -16,13 +16,13 @@ class load_documents
 
     //set wordNumber to 0
     public $documents = [];
-    public $settings;
+    // public $settings;
     public $wordsize=10000;
     public $wordInc=1000;
     public $wordsFunc;
 
     function __construct(){
-        $this->settings=new settings();        
+        // $this->settings=new settings();        
         $this->wordsFunc = new words();
     }
 
@@ -49,7 +49,7 @@ class load_documents
         array_push($this->documents, $doc2);
         array_push($this->documents, $doc1);
         
-        $cmp = new compare_functions($this->settings, $this->documents,-1);
+        $cmp = new compare_functions( $this->documents,-1);
         $cmp->RunComparison($this);
     }
 
@@ -72,12 +72,12 @@ class load_documents
         while ($DelimiterType != DEL_TYPE_EOF) {
             $document->Getword($word,$DelimiterType);
             //  $word .= '0';
-            if($this->settings->m_bIgnorePunctuation) $this->wordsFunc->WordRemovePunctuation($word);	// if ignore punctuation is active, remove punctuation
-            if($this->settings->m_bIgnoreOuterPunctuation) $this->wordsFunc->wordxouterpunct($word);	// if ignore outer punctuation is active, remove outer punctuation
-            if($this->settings->m_bIgnoreNumbers) $this->wordsFunc->WordRemoveNumbers($word);			// if ignore numbers is active, remove numbers
-            if($this->settings->m_bIgnoreCase) $this->wordsFunc->WordToLowerCase($word);				// if ignore case is active, remove case
-            if($this->settings->m_bSkipLongWords & (strlen($word) > $this->settings->m_SkipLength) ) continue;	// if skip too-long words is active, skip them
-            if($this->settings->m_bSkipNonwords & (!$this->wordsFunc->WordCheck($word)) ) continue;		// if skip nonwords is active, skip them
+            if(settings::$m_bIgnorePunctuation) $this->wordsFunc->WordRemovePunctuation($word);	// if ignore punctuation is active, remove punctuation
+            if(settings::$m_bIgnoreOuterPunctuation) $this->wordsFunc->wordxouterpunct($word);	// if ignore outer punctuation is active, remove outer punctuation
+            if(settings::$m_bIgnoreNumbers) $this->wordsFunc->WordRemoveNumbers($word);			// if ignore numbers is active, remove numbers
+            if(settings::$m_bIgnoreCase) $this->wordsFunc->WordToLowerCase($word);				// if ignore case is active, remove case
+            if(settings::$m_bSkipLongWords & (strlen($word) > settings::$m_SkipLength) ) continue;	// if skip too-long words is active, skip them
+            if(settings::$m_bSkipNonwords & (!$this->wordsFunc->WordCheck($word)) ) continue;		// if skip nonwords is active, skip them
     
             // print_r("$word:".$word . "\n");
             // print_r("Hashes:".$hashes[$wordNumber] . "\n");
@@ -125,7 +125,7 @@ class load_documents
         //        echo ("sorted Hash".$element . "\n");
         // }
 
-        if ($this->settings->m_PhraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
+        if (settings::$m_PhraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
         else                                                        // if phrase length is > 1 word, start at first word with more than 3 chars
         {
             $firstLong = 0;
@@ -140,7 +140,6 @@ class load_documents
             $document->firstHash = $firstLong;                    // save the number of the first >3 letter word, or the first word            
             // echo ("setting firstHash: ".$document->firstHash . "\n");
         }
-        // $document->CloseDocument();
     }
 
     //Guess how this works Probably

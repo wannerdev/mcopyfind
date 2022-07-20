@@ -29,7 +29,7 @@ class generate_report{
     public $m_pDocR;				// Right document object
     public $reportid;		
 
-    public function __construct($_settings, $_reportId){
+    public function __construct( $_reportId){
         $this->reportid = $_reportId;
         $this->wordHash = array();
         $this->wordNumber = 0;
@@ -44,7 +44,6 @@ class generate_report{
         }
         $this->szfilename="wcopy.log";									// file 
         $this->m_szSoftwareName="Mcopyfind";
-        $this->settings= $_settings;
         // Styles from similarity texter 
         // https://people.f4.htw-berlin.de/~weberwu/simtexter/
         $this->colors =  array(
@@ -83,22 +82,22 @@ class generate_report{
         if($this->m_fMatchHtml == NULL) return "ERR_CANNOT_OPEN_COMPARISON_REPORT_HTML_FILE";
         
         fprintf($this->m_fMatchHtml,"<html><title>File Comparison Report</title><body><H2>File Comparison Report</H2>\n");
-        fprintf($this->m_fMatchHtml,"<H3>Produced by ". $this->m_szSoftwareName ." with These Settings:</H3><br><blockquote>Shortest Phrase to Match: ".$this->settings->m_PhraseLength ."\n");
-        fprintf($this->m_fMatchHtml,"<br>Fewest Matches to Report: ".$this->settings->m_WordThreshold."\n");
-        if($this->settings->m_bIgnorePunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Punctuation: Yes\n");
+        fprintf($this->m_fMatchHtml,"<H3>Produced by ". $this->m_szSoftwareName ." with These Settings:</H3><br><blockquote>Shortest Phrase to Match: ".settings::$m_PhraseLength ."\n");
+        fprintf($this->m_fMatchHtml,"<br>Fewest Matches to Report: ".settings::$m_WordThreshold."\n");
+        if(settings::$m_bIgnorePunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Punctuation: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Ignore Punctuation: No\n");
-        if($this->settings->m_bIgnoreOuterPunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Outer Punctuation: Yes\n");
+        if(settings::$m_bIgnoreOuterPunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Outer Punctuation: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Ignore Outer Punctuation: No\n");
-        if($this->settings->m_bIgnoreNumbers) fprintf($this->m_fMatchHtml,"<br>Ignore Numbers: Yes\n");
+        if(settings::$m_bIgnoreNumbers) fprintf($this->m_fMatchHtml,"<br>Ignore Numbers: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Ignore Numbers: No\n");
-        if($this->settings->m_bIgnoreCase) fprintf($this->m_fMatchHtml,"<br>Ignore Letter Case: Yes\n");
+        if(settings::$m_bIgnoreCase) fprintf($this->m_fMatchHtml,"<br>Ignore Letter Case: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Ignore Letter Case: No\n");
-        if($this->settings->m_bSkipNonwords) fprintf($this->m_fMatchHtml,"<br>Skip Non-Words: Yes\n");
+        if(settings::$m_bSkipNonwords) fprintf($this->m_fMatchHtml,"<br>Skip Non-Words: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Skip Non-Words: No\n");
-        if($this->settings->m_bSkipLongWords) fprintf($this->m_fMatchHtml,"<br>Skip Words Longer Than %d Characters: Yes\n".$this->settings->m_SkipLength);
+        if(settings::$m_bSkipLongWords) fprintf($this->m_fMatchHtml,"<br>Skip Words Longer Than %d Characters: Yes\n".settings::$m_SkipLength);
         else fprintf($this->m_fMatchHtml,"<br>Skip Long Words: No\n");
-        fprintf($this->m_fMatchHtml,"<br>Most Imperfections to Allow: \n".$this->settings->m_MismatchTolerance);
-        fprintf($this->m_fMatchHtml,"<br>Minimum %% of Matching Words: \n". $this->settings->m_MismatchPercentage);
+        fprintf($this->m_fMatchHtml,"<br>Most Imperfections to Allow: \n".settings::$m_MismatchTolerance);
+        fprintf($this->m_fMatchHtml,"<br>Minimum %% of Matching Words: \n". settings::$m_MismatchPercentage);
         fprintf($this->m_fMatchHtml,"</blockquote><br><br><table border='1' cellpadding='5'><tr><td align='center'>Perfect Match</td><td align='center'>Overall Match</td><td align='center'>View Both Files</td><td align='center'>File L</td><td align='center'>File R</td></tr>");
     }
 
@@ -113,8 +112,8 @@ class generate_report{
         
         //$indoc = new document($this->m_pDocL->m_filep,$this->m_pDocL->filename);			// CInputDocument class to handle inputting the document
 
-        $this->m_pDocL->m_bBasic_Characters = $this->settings->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
-        $this->m_pDocR->m_bBasic_Characters = $this->settings->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
+        $this->m_pDocL->m_bBasic_Characters = settings::$m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
+        $this->m_pDocR->m_bBasic_Characters = settings::$m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
         
         $iReturn = 0;
         
@@ -291,12 +290,12 @@ class generate_report{
                 if($iReturn > -1) return $iReturn;	
                 $tword=$word;								// copy word to a temporary
 
-                if($this->settings->m_bIgnorePunctuation) Words::WordRemovePunctuation($tword);	// if ignore punctuation is active, remove punctuation
-                if($this->settings->m_bIgnoreOuterPunctuation) Words::wordxouterpunct($tword);	// if ignore outer punctuation is active, remove outer punctuation
-                if($this->settings->m_bIgnoreNumbers) Words::WordRemoveNumbers($tword);			// if ignore numbers is active, remove numbers
-                if($this->settings->m_bIgnoreCase) Words::WordToLowerCase($tword);			// if ignore case is active, remove case
-                if($this->settings->m_bSkipLongWords & (strlen($tword) > $this->settings->m_SkipLength) ) continue;	// if skip too-long words is active, skip them
-                if($this->settings->m_bSkipNonwords & (!Words::WordCheck($tword)) ) continue;	// if skip nonwords is active, skip them
+                if(settings::$m_bIgnorePunctuation) Words::WordRemovePunctuation($tword);	// if ignore punctuation is active, remove punctuation
+                if(settings::$m_bIgnoreOuterPunctuation) Words::wordxouterpunct($tword);	// if ignore outer punctuation is active, remove outer punctuation
+                if(settings::$m_bIgnoreNumbers) Words::WordRemoveNumbers($tword);			// if ignore numbers is active, remove numbers
+                if(settings::$m_bIgnoreCase) Words::WordToLowerCase($tword);			// if ignore case is active, remove case
+                if(settings::$m_bSkipLongWords & (strlen($tword) > settings::$m_SkipLength) ) continue;	// if skip too-long words is active, skip them
+                if(settings::$m_bSkipNonwords & (!Words::WordCheck($tword)) ) continue;	// if skip nonwords is active, skip them
                 break;
             }
         
