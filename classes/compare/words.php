@@ -148,7 +148,7 @@ class words {
         return $hash;
     }
 
-    /** My description of Hashing process
+    /** Description of this Hashing process
      * inhash    zzzzzzzxxxxxxxxxxxxxxxxxxxxxxxxxxxx
      * ----------------------------------------------
      * 
@@ -171,6 +171,6 @@ class words {
             $inhash = ((($inhash << 7) | ($inhash >> 25)) ^ mb_ord($word[$charcount]));    // xor into the rotateleft(7) of inhash
             $charcount++;                            // and increment the count of characters in the word
         }
-    return abs($inhash);#
+        return abs($inhash);#
     }
 }

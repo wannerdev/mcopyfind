@@ -210,7 +210,7 @@ class compare_functions{
                     $lastLp=$lastL-1;							// pointer to last perfect match left
                     $lastRp=$lastR-1;							// pointer to last perfect match right
                     $MatchingWordsPerfect=$lastLp-$firstLp+1;	// save number of perfect matche;
-                    if(settings::$m_MismatchTolerance > 0)				// are we accepting imperfect matches?
+                    if(load_documents::getSettings()->m_MismatchTolerance > 0)				// are we accepting imperfect matches?
                     {
 
                         $firstLx=$firstLp;					// save pointer to word before first perfect match left
@@ -243,7 +243,7 @@ class compare_functions{
 
                             // we're at a flaw, so increase the flaw count
                             $flaws++;
-                            if( $flaws > settings::$m_MismatchTolerance ) break;	// check for maximum $flaws reached
+                            if( $flaws > load_documents::getSettings()->m_MismatchTolerance ) break;	// check for maximum $flaws reached
 
                             if( ($firstL-1) >= 0 )					// check one word earlier on left (if it exists)
                             {
@@ -251,7 +251,7 @@ class compare_functions{
                                 
                                 if( $docL->m_pWordHash[$firstL-1] == $docR->m_pWordHash[$firstR] )
                                 {
-                                    if( PercentMatching($firstL-1,$firstR,$lastLx,$lastRx,$MatchingWordsPerfect+1) < settings::$m_MismatchPercentage ) break;	// are we getting too imperfect?
+                                    if( PercentMatching($firstL-1,$firstR,$lastLx,$lastRx,$MatchingWordsPerfect+1) < load_documents::getSettings()->m_MismatchPercentage ) break;	// are we getting too imperfect?
                                     $this->m_MatchMarkTempL[$firstL]=WORD_FLAW;	// markup non-matching word in left temporary list
                                     $firstL--;						// move up on left to skip over the flaw
                                     $MatchingWordsPerfect++;			// increment perfect match count;
@@ -272,7 +272,7 @@ class compare_functions{
 
                                 if( $docL->m_pWordHash[$firstL] == $docR->m_pWordHash[$firstR-1] )
                                 {
-                                    if( PercentMatching($firstL,$firstR-1,$lastLx,$lastRx,$MatchingWordsPerfect+1) < settings::$m_MismatchPercentage ) break;	// are we getting too imperfect?
+                                    if( PercentMatching($firstL,$firstR-1,$lastLx,$lastRx,$MatchingWordsPerfect+1) < load_documents::getSettings()->m_MismatchPercentage ) break;	// are we getting too imperfect?
                                     $this->m_MatchMarkTempR[$firstR]=WORD_FLAW;	// markup non-matching word in right temporary list
                                     $firstR--;						// move up on right to skip over the flaw
                                     $MatchingWordsPerfect++;			// increment perfect match count;
@@ -287,7 +287,7 @@ class compare_functions{
                                 }
                             }
 
-                            if( PercentMatching($firstL-1,$firstR-1,$lastLx,$lastRx,$MatchingWordsPerfect) < settings::$m_MismatchPercentage ) break;	// are we getting too imperfect?
+                            if( PercentMatching($firstL-1,$firstR-1,$lastLx,$lastRx,$MatchingWordsPerfect) < load_documents::getSettings()->m_MismatchPercentage ) break;	// are we getting too imperfect?
                             $this->m_MatchMarkTempL[$firstL]=WORD_FLAW;		// markup word in left temporary list
                             $this->m_MatchMarkTempR[$firstR]=WORD_FLAW;		// markup word in right temporary list
                             $firstL--;								// move up on left
@@ -317,7 +317,7 @@ class compare_functions{
                             }
                             $flaws++;
                             fprintf($this->reportGen->m_fLog,'Flaw found ' . $flaws   . "\n");
-                            if( $flaws == settings::$m_MismatchTolerance ) break;	// check for maximum $flaws reached
+                            if( $flaws == load_documents::getSettings()->m_MismatchTolerance ) break;	// check for maximum $flaws reached
 
                             if( ($lastL+1) < $docL->m_WordsTotal )		// check one word later on left (if it exists)
                             {
@@ -325,7 +325,7 @@ class compare_functions{
                                 
                                 if( $docL->m_pWordHash[$lastL+1] == $docR->m_pWordHash[$lastR] )
                                 {
-                                    if( PercentMatching($firstLx,$firstRx,$lastL+1,$lastR,$MatchingWordsPerfect+1) < settings::$m_MismatchPercentage ) break;	// are we getting too imperfect?
+                                    if( PercentMatching($firstLx,$firstRx,$lastL+1,$lastR,$MatchingWordsPerfect+1) < load_documents::getSettings()->m_MismatchPercentage ) break;	// are we getting too imperfect?
                                         $this->m_MatchMarkTempL[$lastL]=WORD_FLAW;		// marku; non-matching word in left temporary list
                                         $lastL++;						// move down on;left to skip over the flaw
                                         $MatchingWordsPerfect++;			// increment perfect match count;
@@ -344,7 +344,7 @@ class compare_functions{
                                 if( $this->m_MatchMarkR[$lastR+1] != WORD_UNMATCHED ) break;	// make sure we haven't already matched this word
                                 if( $docL->m_pWordHash[$lastL] == $docR->m_pWordHash[$lastR+1] )
                                 {
-                                    if( PercentMatching($firstLx,$firstRx,$lastL,$lastR+1,$MatchingWordsPerfect+1) < settings::$m_MismatchPercentage ) break;	// are we getting too imperfect?
+                                    if( PercentMatching($firstLx,$firstRx,$lastL,$lastR+1,$MatchingWordsPerfect+1) < load_documents::getSettings()->m_MismatchPercentage ) break;	// are we getting too imperfect?
                                         $this->m_MatchMarkTempR[$lastR]=WORD_FLAW;		// mar;up non-matching word in right temporary list
                                         $lastR++;						// move down ;n right to skip over the flaw
                                         $MatchingWordsPerfect++;			// increment perfect match count;
@@ -359,14 +359,14 @@ class compare_functions{
                             
                                 }
                             }
-                            if( PercentMatching($firstLx,$firstRx,$lastL+1,$lastR+1,$MatchingWordsPerfect) < settings::$m_MismatchPercentage ) break;	// are we getting too imperfect?
+                            if( PercentMatching($firstLx,$firstRx,$lastL+1,$lastR+1,$MatchingWordsPerfect) < load_documents::getSettings()->m_MismatchPercentage ) break;	// are we getting too imperfect?
                             $this->m_MatchMarkTempL[$lastL]=WORD_FLAW;		// marku; word in left temporary list
                             $this->m_MatchMarkTempR[$lastR]=WORD_FLAW;		// mark;p word in right temporary list
                             $lastL++;								// move down on left
                             $lastR++;								// move;down on right
                         }				
                     }
-                    if( $MatchingWordsPerfect >= settings::$m_PhraseLength )	// check that phrase has enough perfect matches in it to mark
+                    if( $MatchingWordsPerfect >= load_documents::getSettings()->m_PhraseLength )	// check that phrase has enough perfect matches in it to mark
                     {
                         $anchor++;									// increment anchor count
                         for($i=$firstLp;$i<=$lastLp;$i++)				// loop for all left matched words
@@ -472,7 +472,7 @@ class compare_functions{
                     // $m_pProgress->SetPos(int((100.0*double(m_pDoc->m_Compares))/double(m_pDoc->m_TotalCompares)));
                 }
                 
-                if($this->m_MatchingWordsPerfect>=settings::$m_WordThreshold)		// if there are enough matches to report,
+                if($this->m_MatchingWordsPerfect>=load_documents::getSettings()->m_WordThreshold)		// if there are enough matches to report,
                 {
                     $this->m_MatchingDocumentPairs++;				// increment count of matched pairs of documents
                     $this->reportGen->ReportMatchedPair($this,$DocL,$DocR);

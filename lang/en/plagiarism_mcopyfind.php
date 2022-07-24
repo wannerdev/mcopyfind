@@ -29,4 +29,5 @@ $string['mcopyfindexplain'] = 'For more information on this plugin see: ';
 $string['mcopyfind'] = 'Mcopyfind a plagiarism plugin';
 $string['usemcopyfind'] ='Enable Mcopyfind';
 $string['savedconfigsuccess'] = 'Plagiarism Settings Saved';
-$string['submit_all_files'] = 'Compare all';
+$string['compare_all_files'] = 'Compare all';
+$string['usemcopyfind'] = 'Enable Mcopyfind';

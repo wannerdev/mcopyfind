@@ -103,8 +103,8 @@ class assignments {
 
                 // Momentan erstmal nur die reports speichern.
                 // vlt nur metadaten sammeln wie hash und id.  
-                // dies wirft die frage auf wie die daten gespeichert werden , soll mcoipyfind die daten alle kopieren?
-                // Wenn Dateien aus externen quellen kommen und die dateien nicht in der db sind, dann müssen sie in die db geschrieben werden.  
+                // dies wirft die frage auf wie die daten gespeichert werden , soll mcopyfind die daten alle kopieren?
+                // Wenn Dateien aus externen Quellen kommen und die Dateien nicht in der db sind, dann müssen sie in die db geschrieben werden.  
             }
             // Add content hash in docIn compare functions to add them to the list of compared files.
             // Maybe create hash pairs which were already compared and save these in the DB.
@@ -115,8 +115,8 @@ class assignments {
             
             // $reportId = $reportId->id;
             $reportId = 0;
-            $cmp = new compare_functions(new settings(), $corpus,$reportId);
-            echo $cmp->RunComparison();
+            $cmp = new compare_functions($corpus,$reportId);
+            $cmp->RunComparison();
             // throw new \Exception("All files");
         }
     }

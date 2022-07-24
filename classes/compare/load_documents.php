@@ -16,32 +16,35 @@ class load_documents
 
     //set wordNumber to 0
     public $documents = [];
-    // public $settings;
+    private static $settings;
     public $wordsize=10000;
     public $wordInc=1000;
     public $wordsFunc;
 
     function __construct(){
-        // $this->settings=new settings();        
+        self::$settings=new settings();        
         $this->wordsFunc = new words();
+    }
+
+    static function getSettings(){
+        if(self::$settings == null){
+            self::$settings = new settings();
+            echo("Settings not loaded, using defaults");
+        }
+        return self::$settings; 
     }
 
     function testMain()
     {
-        //loop until EOF
         //count wordAmount  - counting settings
         // echo getcwd(); //working directory -> with namespace workdir changes
-        // $file = fopen("t01e.txt", "r");
-        // $file2 = fopen("t01.txt", "r");
-        // echo $file;
-        // echo $file2;
-        //$documents.put();
         
         $doc1=new Document("fund1.pdf");
+        // $doc1=new Document("t01.txt");
         //$doc1->definePath("fund1.pdf");
-        //TEST $doc1->definePath("text2.txt");
+
         $doc2=new Document("fund2.pdf");
-        //$doc2->definePath("fund2.pdf");
+        // $doc2=new Document("t01e.txt");
 
         $doc1->m_DocumentType=DOC_TYPE_NEW;
         $doc2->m_DocumentType=DOC_TYPE_NEW;
@@ -70,14 +73,17 @@ class load_documents
         // echo "\n################################\n";
         // var_dump($document->file);
         while ($DelimiterType != DEL_TYPE_EOF) {
+            $word='';
             $document->Getword($word,$DelimiterType);
-            //  $word .= '0';
             if(settings::$m_bIgnorePunctuation) $this->wordsFunc->WordRemovePunctuation($word);	// if ignore punctuation is active, remove punctuation
             if(settings::$m_bIgnoreOuterPunctuation) $this->wordsFunc->wordxouterpunct($word);	// if ignore outer punctuation is active, remove outer punctuation
             if(settings::$m_bIgnoreNumbers) $this->wordsFunc->WordRemoveNumbers($word);			// if ignore numbers is active, remove numbers
             if(settings::$m_bIgnoreCase) $this->wordsFunc->WordToLowerCase($word);				// if ignore case is active, remove case
-            if(settings::$m_bSkipLongWords & (strlen($word) > settings::$m_SkipLength) ) continue;	// if skip too-long words is active, skip them
-            if(settings::$m_bSkipNonwords & (!$this->wordsFunc->WordCheck($word)) ) continue;		// if skip nonwords is active, skip them
+            // echo "WOrd: ".$word."\n";
+            // echo "WOrdlength: ".strlen($word);
+            if(settings::$m_bSkipLongWords & (strlen($word) > settings::$m_SkipLength) )continue;	// if skip too-long words is active, skip them
+            if(settings::$m_bSkipNonwords & (!$this->wordsFunc->WordCheck($word)) )continue;		// if skip nonwords is active, skip them
+            
     
             // print_r("$word:".$word . "\n");
             // print_r("Hashes:".$hashes[$wordNumber] . "\n");
@@ -91,7 +97,7 @@ class load_documents
 
             $hashes[$wordNumber] = words::WordHash($word);
             $wordNumber++;
-            $word='';
+            // echo "WOrd: ".$word."\n";
         }
 
         $wordAmount = $wordNumber;              // save number of wordAmount
@@ -162,6 +168,6 @@ class load_documents
 
 
 //Testcase 1
-    $test = new load_documents();
-    $test->testMain();
-     file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
+     $test = new load_documents();
+     $test->testMain();
+      file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");

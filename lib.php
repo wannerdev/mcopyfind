@@ -97,39 +97,10 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         global $PAGE, $DB, $CFG;
 
         //called at top of submissions/grading pages - allows printing of admin style links or updating status
-        
-        
-        // if ($config->isEnabled == self::RUN_NO) {
-        //     return '';
-        // }
-
-
+   
         $output = '';
-        //$DB->set_debug(true);
-        //if ($config->upload == self::RUN_AUTO) {
-            $modinfo = get_fast_modinfo($course);
-            $cminfo = $modinfo->get_cm($cm->id);
-            if ($cminfo->modname != 'assignment' && $cminfo->modname != 'assign') {
-                // Not an assignment - auto submission to plagscan will not work
-                $output .= 'onlyassignmentwarning';//get_string('onlyassignmentwarning', 'plagiarism_plagscan');
-            } else {
-                if ($cminfo->modname == 'assignment') {
-                    $timedue = $DB->get_field('assignment', 'timedue', array('id' => $cm->instance));
-                } else {
-                    $timedue = $DB->get_field('assign', 'duedate', array('id' => $cm->instance));
-                }
-                if (!$timedue) {
-                    // No deadline set - auto submission will never happen
-                    $output .= "nodeadlinewarning";//get_string('nodeadlinewarning', 'plagiarism_plagscan');
-                } else {
-                    if ($timedue < 0) {
-                        $output .= "autodescriptionsubmitted".userdate(0, get_string('strftimedatetimeshort')) ;//get_string('autodescriptionsubmitted', 'plagiarism_plagscan', userdate($run->complete, get_string('strftimedatetimeshort')));
-                    } else {
-                        $output .= 'autodescription';//get_string('autodescription', 'plagiarism_plagscan');
-                    }
-                }
-            }
-            $output .= '<br/>';
+        // $DB->set_debug(true);
+
         
    
         $pageurl = $PAGE->url;
@@ -141,9 +112,11 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         $output .= html_writer::empty_tag('br');
         $params = array('cmid' => s($cm->id), 
                         'return' => urlencode($pageurl));
-
+                     
         $submiturl = new moodle_url('/plagiarism/mcopyfind/submit/submit_all_files.php', $params);
-        $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind'));
+        $output .= "<a class=\"btn btn-outline-secondary \" role=\"button\" > ". " MCopy settings"."</a>";
+        $output .= "<a class=\"btn btn-secondary \" role=\"button\"    href=\"" .$submiturl. "\"> ".get_string('compare_all_files', 'plagiarism_mcopyfind')."</a>";
+        // $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind',"btn btn-primary"));
         $output .= html_writer::empty_tag('br');
 
         // $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/compare/load_documents.php');

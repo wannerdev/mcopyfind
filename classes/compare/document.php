@@ -297,15 +297,12 @@ class document
            // pdftotext program exists, so use it 
            // Add header and footer remove margins
             $headerFooter= "";
-            if(settings::$pdfHeader!=0 ){
-                $headerFooter= "-margint ". strval(settings::$pdfHeader);
-            }
-            if(settings::$pdfFooter !=0){
-                $headerFooter .= " -marginb ". strval(settings::$pdfFooter);
+            if(load_documents::getSettings()->pdfHeader!=0 || load_documents::getSettings()->pdfFooter !=0 ){
+                $headerFooter= "-margint ". strval(load_documents::getSettings()->pdfHeader)." -marginb ". strval(load_documents::getSettings()->pdfFooter)." ";
             }
            // generate txt file $commandLine=$m_pdftotextFile ." -enc UTF-8 " . $m_path. $filename ." " . $m_path."conv_". $this->name .".txt"; // assemble command
-           $commandLine=$m_pdftotextFile ." -enc UTF-8 ". $headerFooter." ". $m_path. $filename ." -"; // assemble command
-        
+           $commandLine=$m_pdftotextFile ." -enc UTF-8 ". $headerFooter ."-eol dos ". $m_path. $filename. " -"; // assemble command
+            // echo $commandLine;
            if(($this->m_filep= popen($commandLine,"r")) == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE"); // if the pipe don't form, command filed.
            
         //    echo("STREAM:".stream_get_contents($this->m_filep));
@@ -328,7 +325,7 @@ class document
     {
         if(!$this->m_haveFile || $this->m_filep==null) throw new Exception("ERR_NO_FILE_OPEN Filename:". $this->filename); // if no file is open, failure
 
-        // //$word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
+        //$word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
         
         $wordLength = 0;
         $this->m_gotWord = false;
@@ -751,8 +748,11 @@ class document
         }
         else if( $this->m_contentType == "CONTENT_TYPE_TXT" )
         {
+            // $chars =0;
+            
             while(true)
             {
+                // echo ("Newline characters:". strval($chars) . "\n");
                 if($this->m_gotChar) $this->m_gotChar = false;  // check to see if we already have the next character
                 else $this->m_char=$this->GetCharTxt();         // otherwise, get the next character (normal or UTF-8)
                 // echo("Char: ".$this->m_char. "\n");
@@ -769,11 +769,12 @@ class document
                 }
                 //preg_split() Test this if there is time
                 // else if( array_size(preg_split('/\r\n|\r|\n/',$this->m_char) ) >1 ) // check for newline characters
-                //($this->m_char == PHP_EOL) ||
-                else if( ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
+                // (sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1 )   ||
+                else if(sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1  || ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
                 {
                     $delimiterType=DEL_TYPE_NEWLINE;
                     $this->m_gotDelimiter=true;
+                    $chars++;
                 }
                 else if(IntlChar::isspace($this->m_char)) // check for white space
                 {
@@ -911,6 +912,7 @@ class document
         }
         else if( $this->m_contentType == "CONTENT_TYPE_PDF" )
         {
+            $chars=0;
             while(true)
             {
                 if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
@@ -921,11 +923,11 @@ class document
                 // || $this->m_char == false || $this->m_char == false
                 if($this->m_char < 0  ) // check for EOF encountered
                 {
-                    // //$word[$wordLength]=0; // finish the $word off
+                    // $word[$wordLength]='0'; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
-                else if( ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
+                else if( sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1 || ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
                 {
                     $delimiterType=DEL_TYPE_NEWLINE;
                     $this->m_gotDelimiter=true;
@@ -940,7 +942,7 @@ class document
                 {
                     if($this->m_gotWord) // make sure that we have a $word
                     {
-                        // //$word[$wordLength]=0; // finish the $word off
+                        // $word[$wordLength]='0'; // finish the $word off
                         $this->m_gotChar=true;
                         return -1;
                     }
@@ -1017,59 +1019,61 @@ class document
             }
             else // unknown type, so read $bytes
             {
-            while(true)
-            {
-                if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
-                else $this->m_char=fgetc($this->m_filep);
-                
-                if($this->m_char == 0) $this->m_char=fgetc( $this->m_filep); // skip a single null character (but not multiple nulls)
-                //|| $this->m_char == ''
-                if($this->m_char < 0 || $this->m_char == false ) // check for EOF encountered
+                while(true)
                 {
-                    // //$word[$wordLength]=0; // finish the $word off
-                    $delimiterType = DEL_TYPE_EOF;
-                    return -1;
-                }
-                else if( ($this->m_char == '\n') || ($this->m_char == '\r')) // check for newline characters
-                {
-                    $delimiterType=DEL_TYPE_NEWLINE;
-                    $this->m_gotDelimiter=true;
-                }
-                else if( ($this->m_char == '\t') || ($this->m_char == ' ')) // check for tab or space characters
-                {
-                    $delimiterType=max($delimiterType,DEL_TYPE_WHITE); // if delimiter isn't already at NEWLINE, set it to WHITE
-                    $this->m_gotDelimiter=true;
-                }
-                else if ( (IntlChar::iscntrl($this->m_char) && ord($this->m_char ) < 0x80) || ($this->m_char == 0xff) ) // if we encounter a control character, restart the $word search
-                {
-                    //$word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
-                    // $wordLength = 0;
-                    $this->m_gotWord = false;
-                    $this->m_gotDelimiter = false;
-                    $delimiterType = DEL_TYPE_NONE;
-                }
-                else if($this->m_gotDelimiter) // have we just reached the end of one or more delimiters?
-                {
-                    if($this->m_gotWord) // make sure that we have a $word
+                    if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
+                    else $this->m_char=fgetc($this->m_filep);
+                    
+                    if($this->m_char == 0) $this->m_char=fgetc( $this->m_filep); // skip a single null character (but not multiple nulls)
+                    //|| $this->m_char == ''
+                    if($this->m_char < 0 || $this->m_char == false ) // check for EOF encountered
                     {
-                        // //$word[$wordLength]=0; // finish the $word off
-                        $this->m_gotChar=true;
+                        $word[$wordLength]=0; // finish the $word off
+                        $delimiterType = DEL_TYPE_EOF;
                         return -1;
                     }
-                    else // these were preliminary delimiters and we will ignore them
+                    else if( ($this->m_char == '\n') || ($this->m_char == '\r')) // check for newline characters
                     {
-                        $delimiterType=DEL_TYPE_NONE;
-                        $this->m_gotDelimiter=false;
-                        $this->m_gotChar=true;
+                        $delimiterType=DEL_TYPE_NEWLINE;
+                        $this->m_gotDelimiter=true;
                     }
-                }
-                else if( $wordLength < WORDMAXIMUMLENGTH )
-                {
-                    $word[$wordLength]=$this->m_char; // add this character to the $word
-                    $wordLength++;
-                    $this->m_gotWord=true;
-                }
-            }	    
+                    else if( ($this->m_char == '\t') || ($this->m_char == ' ')) // check for tab or space characters
+                    {
+                        $delimiterType=max($delimiterType,DEL_TYPE_WHITE); // if delimiter isn't already at NEWLINE, set it to WHITE
+                        $this->m_gotDelimiter=true;
+                    }
+                    else if ( (IntlChar::iscntrl($this->m_char) && ord($this->m_char ) < 0x80) || ($this->m_char == 0xff) ) // if we encounter a control character, restart the $word search
+                    {
+                        $word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
+                        $word[$wordLength]=0; // finish the $word off
+                        $wordLength = 0;
+                        $this->m_gotWord = false;
+                        $this->m_gotDelimiter = false;
+                        $delimiterType = DEL_TYPE_NONE;
+                    }
+                    else if($this->m_gotDelimiter) // have we just reached the end of one or more delimiters?
+                    {
+                        if($this->m_gotWord) // make sure that we have a $word
+                        {
+                            // //$word[$wordLength]=0; // finish the $word off
+                            $word[$wordLength]=0; // finish the $word off
+                            $this->m_gotChar=true;
+                            return -1;
+                        }
+                        else // these were preliminary delimiters and we will ignore them
+                        {
+                            $delimiterType=DEL_TYPE_NONE;
+                            $this->m_gotDelimiter=false;
+                            $this->m_gotChar=true;
+                        }
+                    }
+                    else if( $wordLength < WORDMAXIMUMLENGTH )
+                    {
+                        $word[$wordLength]=$this->m_char; // add this character to the $word
+                        $wordLength++;
+                        $this->m_gotWord=true;
+                    }
+                }	    
         }
 	    return -1;
     }
