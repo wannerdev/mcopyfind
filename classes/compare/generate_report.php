@@ -232,6 +232,7 @@ class generate_report{
     function DocumentToHtml(Document $indoc,$MatchMark, $MatchAnchor, $words, $href)
     {
         fprintf($this->m_fHtml,"<h1>%s</h1>\n",$indoc->name);
+        fprintf($this->m_fHtml,"<p>");
         $wordcount=0;								// current word number
 
         $word='';								// current word
@@ -267,7 +268,8 @@ class generate_report{
                     {
                         if(($wordcount>0) ) fprintf($this->m_fHtml,"</P>\n<P>");	// print a paragraph mark for a new line
                         //echo$MatchAnchor[$wordcount]
-                        fprintf($this->m_fHtml,"<a name='%s' href='%s#%s'>",$MatchAnchor[$wordcount],$href,$MatchAnchor[$wordcount]);	// start new anchor
+                        fprintf($this->m_fHtml,"<a name='%s' style=\"text-decoration: none;word-wrap: break-word;
+                        text-align: justify;\" href='%s#%s'>",$MatchAnchor[$wordcount],$href,$MatchAnchor[$wordcount]);	// start new anchor
                     }
                 }
 
@@ -320,6 +322,7 @@ class generate_report{
         else if($LastMatch==WORD_FLAW) fprintf($this->m_fHtml,"</font></i>");	// close out green italics if they were active
         else if($LastMatch==WORD_FILTERED)  fprintf($this->m_fHtml,"</font>");	// close out blue markups if they were active
         if($LastAnchor>0) fprintf($this->m_fHtml,"</a>");	// close out any active anchor
+        fprintf($this->m_fHtml,"</p>");
         return -1;
     }
     

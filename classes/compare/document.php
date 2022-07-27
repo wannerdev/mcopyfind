@@ -774,7 +774,7 @@ class document
                 {
                     $delimiterType=DEL_TYPE_NEWLINE;
                     $this->m_gotDelimiter=true;
-                    $chars++;
+                    // $chars++;
                 }
                 else if(IntlChar::isspace($this->m_char)) // check for white space
                 {
