@@ -79,6 +79,20 @@ class assignments {
         return null;
     }
 
+    function cleanReports(){
+         // Clean report folder
+         $folder_path = "../reports";
+            
+         // List of name of files inside
+         // specified folder
+         $files = glob($folder_path.'\*'); 
+         // Deleting all the files in the list
+         foreach($files as $file) {
+             // Delete the given file
+             if(is_file($file))unlink($file); 
+         }
+    }
+
     /**
      * Case where all assignments have to be compared
      */
@@ -103,7 +117,7 @@ class assignments {
             
             $submissions = $DB->get_records('assign_submission', array('assignment' => $cm->instance));
  
-
+            $this->cleanReports();
             $corpus =array();
             $hashes = array();
 
@@ -149,6 +163,7 @@ class assignments {
                     break;
                 }
             }
+           
             
 
             foreach ($files as $file) {
@@ -184,8 +199,6 @@ class assignments {
             $reportId = $reportRec->id;
             $cmp = new compare_functions($corpus,$reportId);
             $mix = $cmp->RunComparison();
-            // echo("What?\n".$mix[1]."\n");
-            // var_dump($mix);
 
             $matches= $mix[0];
             $reportfile = $mix[1];

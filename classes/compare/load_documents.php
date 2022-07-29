@@ -49,7 +49,9 @@ class load_documents
     public $wordInc=1000;
     public $wordsFunc;
 
-    function __construct($_settings){
+    function __construct($_settings=null){
+        $_settings = new settings();
+        if($_settings==null)$this->settings =new settings();
         $this->settings=$_settings;        
         $this->wordsFunc = new words();
     }
@@ -79,7 +81,7 @@ class load_documents
         
         if($irvalue > -1)
         {
-            echo ErrorcodeToString($irvalue);
+            // echo $this->ErrorcodeToString($irvalue);
         }
         
     }
@@ -199,98 +201,102 @@ class load_documents
     //needs page number with range of words
     //List of pages with start number of a page,
     // Comparing starts always at page+ header and ends at page-footer //before comparing you ask if the word is inside the page range
-}
 
- function ErrorcodeToString($irvalue){
-    switch($irvalue) {
-        case ERR_CANNOT_OPEN_FILE :
-            $errorString=("Error: Could not open file during comparison process");
-            break;
-        case ERR_CANNOT_ALLOCATE_WORKING_HASH_ARRAY :
-            $errorString=("Error: Could not allocate working space for hash array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_ALLOCATE_HASH_ARRAY :
-            $errorString=("Error: Could not allocate hash array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_ALLOCATE_SORTED_HASH_ARRAY :
-            $errorString=("Error: Could not allocate sorted hash array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_ALLOCATE_SORTED_NUMBER_ARRAY :
-            $errorString=("Error: Could not allocate sorted number array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_OPEN_LOG_FILE :
-            $errorString=("Error: Could not open log file during comparison process");
-            break;
-        case ERR_CANNOT_OPEN_COMPARISON_REPORT_TXT_FILE :
-            $errorString=("Error: Could not open comparison report text file during comparison process");
-            break;
-        case ERR_CANNOT_OPEN_COMPARISON_REPORT_HTML_FILE :
-            $errorString=("Error: Could not open comparioson report html file during comparison process");
-            break;
-        case ERR_CANNOT_ALLOCATE_LEFT_MATCH_MARKERS :
-            $errorString=("Error: Could not allocate left match marker array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_ALLOCATE_RIGHT_MATCH_MARKERS :
-            $errorString=("Error: Could not allocate right match marker array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_ALLOCATE_LEFTA_MATCH_MARKERS :
-            $errorString=("Error: Could not allocate leftA match marker array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_ALLOCATE_RIGHTA_MATCH_MARKERS :
-            $errorString=("Error: Could not allocate rightA match marker array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_ALLOCATE_LEFTT_MATCH_MARKERS :
-            $errorString=("Error: Could not allocate leftT match marker array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_ALLOCATE_RIGHTT_MATCH_MARKERS :
-            $errorString=("Error: Could not allocate rightT match marker array during comparison process. Possibly out of memory.");
-            break;
-        case ERR_CANNOT_OPEN_LEFT_HTML_FILE :
-            $errorString=("Error: Could not open left html file during comparison process");
-            break;
-        case ERR_CANNOT_OPEN_LEFT_DOCUMENT_FILE :
-            $errorString=("Error: Could not open left document file during comparison process");
-            break;
-        case ERR_CANNOT_OPEN_RIGHT_HTML_FILE :
-            $errorString=("Error: Could not open right html file during comparison process");
-            break;
-        case ERR_CANNOT_OPEN_RIGHT_DOCUMENT_FILE :
-            $errorString=("Error: Could not open right document file during comparison process");
-            break;
-        case ERR_CANNOT_OPEN_SIDE_BY_SIDE_HTML_FILE :
-            $errorString=("Error: Could not open side-by-side html file during comparison process");
-            break;
-        case ERR_CANNOT_ACCESS_URL :
-            $errorString=("Error: URL could not be accessed");
-            break;
-        case ERR_NO_FILE_OPEN :
-            $errorString=("Software Bug: Trying to read from a file that is not open");
-            break;
-        case ERR_CANNOT_FIND_FILE :
-            $errorString=("Error: File could not be found");
-            break;
-        case ERR_CANNOT_FIND_FILE_EXTENSION :
-            $errorString=("Error: File is missing an extension and its type cannot be determined");
-            break;
-        case ERR_BAD_DOCX_FILE :
-            $errorString=("Error: This docx file cannot be read properly");
-            break;
-        case ERR_BAD_PDF_FILE :
-            $errorString=("Error: This pdf file cannot be read properly");
-            break;
-        case ERR_CANNOT_FIND_URL_LINK :
-            $errorString=("Error: URL link cannot be found");
-            break;
-        case ERR_CANNOT_OPEN_INPUT_FILE :
-            $errorString=("Error: File cannot be opened, perhaps because it is already opened by other software");
-            break;
-        default :
-            $errorString=("Error Occurred During Comparison Process .$irvalue ");
+
+  function ErrorcodeToString($irvalue){
+     $errorString = "";
+     switch($irvalue) {
+         case ERR_CANNOT_OPEN_FILE :
+             $errorString="Error: Could not open file during comparison process";
+             break;
+         case ERR_CANNOT_ALLOCATE_WORKING_HASH_ARRAY :
+             $errorString="Error: Could not allocate working space for hash array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_ALLOCATE_HASH_ARRAY :
+             $errorString="Error: Could not allocate hash array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_ALLOCATE_SORTED_HASH_ARRAY :
+             $errorString="Error: Could not allocate sorted hash array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_ALLOCATE_SORTED_NUMBER_ARRAY :
+             $errorString="Error: Could not allocate sorted number array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_OPEN_LOG_FILE :
+             $errorString="Error: Could not open log file during comparison process";
+             break;
+         case ERR_CANNOT_OPEN_COMPARISON_REPORT_TXT_FILE :
+             $errorString="Error: Could not open comparison report text file during comparison process";
+             break;
+         case ERR_CANNOT_OPEN_COMPARISON_REPORT_HTML_FILE :
+             $errorString="Error: Could not open comparioson report html file during comparison process";
+             break;
+         case ERR_CANNOT_ALLOCATE_LEFT_MATCH_MARKERS :
+             $errorString="Error: Could not allocate left match marker array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_ALLOCATE_RIGHT_MATCH_MARKERS :
+             $errorString="Error: Could not allocate right match marker array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_ALLOCATE_LEFTA_MATCH_MARKERS :
+             $errorString="Error: Could not allocate leftA match marker array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_ALLOCATE_RIGHTA_MATCH_MARKERS :
+             $errorString="Error: Could not allocate rightA match marker array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_ALLOCATE_LEFTT_MATCH_MARKERS :
+             $errorString="Error: Could not allocate leftT match marker array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_ALLOCATE_RIGHTT_MATCH_MARKERS :
+             $errorString="Error: Could not allocate rightT match marker array during comparison process. Possibly out of memory.";
+             break;
+         case ERR_CANNOT_OPEN_LEFT_HTML_FILE :
+             $errorString="Error: Could not open left html file during comparison process";
+             break;
+         case ERR_CANNOT_OPEN_LEFT_DOCUMENT_FILE :
+             $errorString="Error: Could not open left document file during comparison process";
+             break;
+         case ERR_CANNOT_OPEN_RIGHT_HTML_FILE :
+             $errorString="Error: Could not open right html file during comparison process";
+             break;
+         case ERR_CANNOT_OPEN_RIGHT_DOCUMENT_FILE :
+             $errorString="Error: Could not open right document file during comparison process";
+             break;
+         case ERR_CANNOT_OPEN_SIDE_BY_SIDE_HTML_FILE :
+             $errorString="Error: Could not open side-by-side html file during comparison process";
+             break;
+         case ERR_CANNOT_ACCESS_URL :
+             $errorString="Error: URL could not be accessed";
+             break;
+         case ERR_NO_FILE_OPEN :
+             $errorString="Software Bug: Trying to read from a file that is not open";
+             break;
+         case ERR_CANNOT_FIND_FILE :
+             $errorString="Error: File could not be found";
+             break;
+         case ERR_CANNOT_FIND_FILE_EXTENSION :
+             $errorString="Error: File is missing an extension and its type cannot be determined";
+             break;
+         case ERR_BAD_DOCX_FILE :
+             $errorString="Error: This docx file cannot be read properly";
+             break;
+         case ERR_BAD_PDF_FILE :
+             $errorString="Error: This pdf file cannot be read properly";
+             break;
+         case ERR_CANNOT_FIND_URL_LINK :
+             $errorString="Error: URL link cannot be found";
+             break;
+         case ERR_CANNOT_OPEN_INPUT_FILE :
+             $errorString="Error: File cannot be opened, perhaps because it is already opened by other software";
+             break;
+         default :
+             $errorString="Error Occurred During Comparison Process ".strval($irvalue);
+             break;
         }
         return $errorString;
- }
+     }
+
+}
 
 //Testcase 1
-//  $test = new load_documents();
-//  $test->testMain();
-//  file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
+// $test = new load_documents();
+// $test->testMain();
+// file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");

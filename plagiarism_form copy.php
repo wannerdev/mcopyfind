@@ -2,7 +2,7 @@
 
 require_once($CFG->dirroot.'/lib/formslib.php');
 
-class plagiarism_setup_form extends moodleform {
+class plagiarism_settings_form extends moodleform {
 
 // Define the form
     function definition () {
@@ -10,19 +10,15 @@ class plagiarism_setup_form extends moodleform {
 
         $mform =& $this->_form;
         
-        // todo write this correctly
-        //$mform->setDefault('mcopyfind_enabled', get_string('true','plagiarism_mcopyfind'));
-        
-        $mform->addElement('html', get_string('mcopyfindexplain', 'plagiarism_mcopyfind'));
-        $mform->addElement('checkbox', 'mcopyfind_use', get_string('usemcopyfind', 'plagiarism_mcopyfind'));
-        //comparison settings should be course specific
-        //settings should be an object to give the runcomparison class
-        // needs to be loaded before the comparison is run
-
-
-        $mform->addElement('textarea', 'mcopyfind_student_disclosure', get_string('studentdisclosure','plagiarism_mcopyfind'),'wrap="virtual" rows="6" cols="50"');
-        $mform->addHelpButton('mcopyfind_student_disclosure', 'studentdisclosure', 'plagiarism_mcopyfind');
-        $mform->setDefault('mcopyfind_student_disclosure', get_string('studentdisclosuredefault','plagiarism_mcopyfind'));
+        $radioarray=array();
+        $attributes=[];
+        $radioarray[] = $mform->createElement('radio', 'preset', '', get_string('Default recommended'), 0, $attributes);
+        $radioarray[] = $mform->createElement('radio', 'preset', '', get_string('Minor edit'), 1, $attributes);
+        $radioarray[] = $mform->createElement('radio', 'preset', '', get_string('Absolute Matching'), 2, $attributes);
+        $radioarray[] = $mform->createElement('radio', 'preset', '', get_string('Remove Header and Footer'), 3, $attributes);
+        $mform->setDefault('preset', 0);
+        //$radioarray[] = $mform->createElement('radio', 'preset', '', get_string('Remove Header and Footer'), 0, $attributes);
+        $mform->addGroup($radioarray, 'radioar', '', array(' '), false);
         $this->add_action_buttons(false);
     }
 }
