@@ -51,6 +51,8 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
     const ONLINE_TEXT = 1;
     const ONLINE_TEXT_NO = 0;
 
+    public $file=null;
+
      /**
      * hook to allow plagiarism specific information to be displayed beside a submission 
      * @param array  $linkarraycontains all relevant information for the plugin to generate a link
@@ -115,8 +117,10 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
                      
         $submiturl = new moodle_url('/plagiarism/mcopyfind/submit/submit_all_files.php', $params);
         $output .= "<a class=\"btn btn-outline-secondary \" role=\"button\" > ". " MCopy settings"."</a>";
-        $output .= "<a class=\"btn btn-secondary \" role=\"button\"    href=\"" .$submiturl. "\"> ".get_string('compare_all_files', 'plagiarism_mcopyfind')."</a>";
+        $output .= "<a class=\"btn btn-secondary\" role=\"button\" target=\"_blank\" href=\"" .$submiturl. "\"> ".get_string('compare_all_files', 'plagiarism_mcopyfind')."</a>";
         // $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind',"btn btn-primary"));
+    
+        
         $output .= html_writer::empty_tag('br');
 
         // $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/compare/load_documents.php');
@@ -133,6 +137,98 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
     public function cron() {
         //do any scheduled task stuff
     }
+}
+
+/**
+ * Serve the files from the mcopyfind file areas.
+ *
+ * @param stdClass $course the course object
+ * @param stdClass $cm the course module object
+ * @param stdClass $context the context
+ * @param string $filearea the name of the file area
+ * @param array $args extra arguments (itemid, path)
+ * @param bool $forcedownload whether or not force download
+ * @param array $options additional options affecting the file serving
+ * @return bool false if the file not found, just send the file otherwise and do not return anything
+ */
+function plagiarism_mcopyfind_pluginfile(
+    $course,
+    $cm,
+    $context,
+    string $filearea,
+    array $args,
+    bool $forcedownload,
+    array $options = []
+): bool {
+    global $DB;
+    //throw new Exception("EXECUTING HANDLER");
+    // echo ("HANDLERRR");
+    // Check the contextlevel is as expected - if your plugin is a block, this becomes CONTEXT_BLOCK, etc.
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        return false;
+    }
+
+    // Make sure the filearea is one of those used by the plugin.
+    if ($filearea !== 'report' ) {
+        return false;
+    }
+
+    // Make sure the user is logged in and has access to the module (plugins that are not course modules should leave out the 'cm' part).
+    require_login($course, true, $cm);
+
+    // Check the relevant capabilities - these may vary depending on the filearea being accessed.
+    // if (!has_capability('plagiarism/mcopyfind:create', $context)) {
+    //     return false;
+    // }
+
+    // The args is an array containing [itemid, path].
+    // Fetch the itemid from the path.
+    $itemid = array_shift($args);
+
+    // The itemid can be used to check access to a record, and ensure that the
+    // record belongs to the specifeid context. For example:
+    if ($filearea === 'report') {
+        $report = $DB->get_record('plagiarism_mcopyfind_report', ['id' => $itemid]);
+        // if ($report->mcopyfind !== $context->instanceid) {
+            // This post does not belong to the requested context.
+            // return false;
+        // }
+
+        // You may want to perform additional checks here, for example:
+        // - ensure that if the record relates to a grouped activity, that this
+        //   user has access to it
+        // - check whether the record is hidden
+        // - check whether the user is allowed to see the record for some other
+        //   reason.
+
+        // If, for any reason, the user does not hve access, you can return
+        // false here.
+    }
+
+    // For a plugin which does not specify the itemid, you may want to use:
+    // $itemid = null; //to make your code more consistent.
+
+    // Extract the filename / filepath from the $args array.
+    $filename = array_pop($args); // The last item in the $args array.
+    if (empty($args)) {
+        // $args is empty => the path is '/'.
+        $filepath = '/';
+    } else {
+        // $args contains the remaining elements of the filepath.
+        $filepath = '/' . implode('/', $args) . '/';
+    }
+
+    // Retrieve the file from the Files API.
+    $fs = get_file_storage();
+    $file = $fs->get_file($context->id, 'plagiarism_mcopyfind', $filearea, $itemid, $filepath, $filename);
+    // $file=$fs->get_area_files($context->id, 'plagiarism_mcopyfind', 'report', $itemid);
+    if (!$file) {
+        // The file does not exist.
+        return send_file_not_found();
+    }
+    $daySecs = 60*60*24;
+    // We can now send the file back to the browser - in this case with a cache lifetime of 1 day and no filtering.
+    send_stored_file($file, $daySecs, 0, $forcedownload, $options);
 }
 
 function mcopyfind_event_file_uploaded($eventdata) {

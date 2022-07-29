@@ -71,11 +71,28 @@ $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
 $notification = \core\output\notification::NOTIFY_SUCCESS;
 
 $sub = new assignments();
-$sub->access_all_files($cm, $context);
+$fs = get_file_storage();
 
-// echo file_get_contents("C:\\reports\\matches.html");
+$file=$sub->access_all_files($cm, $context);
 
+$url="no file";
+if($file != null){
+    $url = moodle_url::make_pluginfile_url(
+        $file->get_contextid(),
+        $file->get_component(),
+        $file->get_filearea(),
+        $file->get_itemid(),
+        $file->get_filepath(),
+        $file->get_filename(),
+        false                     // Do not force download of the file.
+    );
+  
+}
 
 // $return = $return . "&action=submit_all";
-// $return = urldecode($return);
-// redirect($return);
+//$return = urldecode($return);
+
+//$report = new moodle_url();
+// $url->param('target',$blan = '_blank');
+//redirect($return);
+ redirect($url);

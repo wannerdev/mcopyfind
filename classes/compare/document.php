@@ -65,14 +65,26 @@ class document
     public $isRes=false;
     public $settings;
 
-    public function __construct( $filename, $file=null)
+    public function __construct( $filename,  $_settings=null,$file=null, $isAdd=false)
     {
-        // $this->settings = $_settings;
-        $this->words = new words();
-        $this->m_DocumentType=DOC_TYPE_NEW; //Assume it is not additional/ solution document
-       
-        //If we have the resource by moodle
-        if(is_resource($file) ){
+        if($_settings instanceof settings)
+        {
+            $this->settings = $_settings;
+        }
+        else
+        {
+            $this->settings = settings::getdefaultSettings();
+        }
+
+        $this->words = new words(); //not used atm
+        if(!$isAdd){
+            $this->m_DocumentType=DOC_TYPE_NEW; //Assume it is not additional/ solution document
+        }else{
+            $this->m_DocumentType=DOC_TYPE_OLD;
+        }
+        //If we got the resource from moodle
+        if(is_resource($file) ){ //|| is_string($file)
+            // $file->
             $this->m_filep=$file;
             $this->isRes=true;
             $this->m_haveFile=true;
@@ -297,8 +309,8 @@ class document
            // pdftotext program exists, so use it 
            // Add header and footer remove margins
             $headerFooter= "";
-            if(load_documents::getSettings()->pdfHeader!=0 || load_documents::getSettings()->pdfFooter !=0 ){
-                $headerFooter= "-margint ". strval(load_documents::getSettings()->pdfHeader)." -marginb ". strval(load_documents::getSettings()->pdfFooter)." ";
+            if($this->settings->pdfHeader!=0 || $this->settings->pdfFooter !=0 ){
+                $headerFooter= "-margint ". strval($this->settings->pdfHeader)." -marginb ". strval($this->settings->pdfFooter)." ";
             }
            // generate txt file $commandLine=$m_pdftotextFile ." -enc UTF-8 " . $m_path. $filename ." " . $m_path."conv_". $this->name .".txt"; // assemble command
            $commandLine=$m_pdftotextFile ." -enc UTF-8 ". $headerFooter ."-eol dos ". $m_path. $filename. " -"; // assemble command

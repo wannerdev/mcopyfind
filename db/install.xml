@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="plagiarism/mcopyfind/db" VERSION="20220718" COMMENT="XMLDB file for Moodle plagiarism/mcopyfind"
+<XMLDB PATH="plagiarism/mcopyfind/db" VERSION="20220728" COMMENT="XMLDB file for Moodle plagiarism/mcopyfind"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -12,20 +12,45 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="report" COMMENT="Report information of matches and id">
+    <TABLE NAME="plagiarism_mcopyfind_report" COMMENT="Report information of matches and id">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="matches" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="settings" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="fileid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="File id from report"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_fileid" TYPE="foreign" FIELDS="fileid" REFTABLE="files" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="match" COMMENT="A match of two documents and their contenthashes.">
+    <TABLE NAME="plagiarism_mcopyfind_config" COMMENT="contains mcopyfind specific settings for each course module">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="percent" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="cm" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="upload" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="When to upload to plagscan (never, manually, automatically)"/>
+        <FIELD NAME="complete" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The timestamp of when the automatic upload was last done"/>
+        <FIELD NAME="username" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="The username of the user whose account should be used for uploading files from this assignment"/>
+        <FIELD NAME="nondisclosure" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Flag to mark nondisclosure documents."/>
+        <FIELD NAME="show_report_to_students" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Flag to show the report to students"/>
+        <FIELD NAME="show_students_links" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Flag to show links or PlagLevel to students"/>
+        <FIELD NAME="ownerid" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The id of the owner who created the submission"/>
+        <FIELD NAME="submissionid" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Unique PlagScan submission ID"/>
+        <FIELD NAME="enable_online_text" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Enable Plagiarism check for online text (not file)"/>
+        <FIELD NAME="exclude_from_repository" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Flag to exclude submissions from the repository"/>
+        <FIELD NAME="exclude_self_matches" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Indicates if should flag the submissions from the same user across multiple submission attempts"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="cm" TYPE="foreign" FIELDS="cm" REFTABLE="course_modules" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="plagiarism_mcopyfind_match" COMMENT="A match of two documents and their contenthashes.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="perfectmatch" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="overalmatch" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="contenthashl" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="contenthashr" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>

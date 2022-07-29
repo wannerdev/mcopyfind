@@ -27,10 +27,11 @@ class generate_report{
     public $m_pDocS;				// All documents
     public $m_pDocL;				// Left document object
     public $m_pDocR;				// Right document object
-    public $reportid;		
+    public $reportId;		
 
-    public function __construct( $_reportId){
-        $this->reportid = $_reportId;
+    public function __construct( $_reportId, $_settings){
+        $this->reportId = $_reportId;
+        $this->settings = $_settings;
         $this->wordHash = array();
         $this->wordNumber = 0;
         $this->realwords = 0;
@@ -77,27 +78,27 @@ class generate_report{
         $this->m_fMatch= fopen($szfilename, "w");				// create and open main comparison report text file
         if($this->m_fMatch == NULL) return "ERR_CANNOT_OPEN_COMPARISON_REPORT_TXT_FILE";
     
-        $szfilename=$this->m_szReportFolder. strval($this->reportid) ."matches.html";
+        $szfilename=$this->m_szReportFolder. strval($this->reportId) ."matches.html";
         $this->m_fMatchHtml=fopen( $szfilename, "w");			// create and open main comparison report html file
         if($this->m_fMatchHtml == NULL) return "ERR_CANNOT_OPEN_COMPARISON_REPORT_HTML_FILE";
         
         fprintf($this->m_fMatchHtml,"<html><title>File Comparison Report</title><body><H2>File Comparison Report</H2>\n");
-        fprintf($this->m_fMatchHtml,"<H3>Produced by ". $this->m_szSoftwareName ." with These Settings:</H3><br><blockquote>Shortest Phrase to Match: ".load_documents::getSettings()->m_PhraseLength ."\n");
-        fprintf($this->m_fMatchHtml,"<br>Fewest Matches to Report: ".load_documents::getSettings()->m_WordThreshold."\n");
-        if(load_documents::getSettings()->m_bIgnorePunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Punctuation: Yes\n");
+        fprintf($this->m_fMatchHtml,"<H3>Produced by ". $this->m_szSoftwareName ." with These Settings:</H3><br><blockquote>Shortest Phrase to Match: ".$this->settings->m_PhraseLength ."\n");
+        fprintf($this->m_fMatchHtml,"<br>Fewest Matches to Report: ".$this->settings->m_WordThreshold."\n");
+        if($this->settings->m_bIgnorePunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Punctuation: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Ignore Punctuation: No\n");
-        if(load_documents::getSettings()->m_bIgnoreOuterPunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Outer Punctuation: Yes\n");
+        if($this->settings->m_bIgnoreOuterPunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Outer Punctuation: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Ignore Outer Punctuation: No\n");
-        if(load_documents::getSettings()->m_bIgnoreNumbers) fprintf($this->m_fMatchHtml,"<br>Ignore Numbers: Yes\n");
+        if($this->settings->m_bIgnoreNumbers) fprintf($this->m_fMatchHtml,"<br>Ignore Numbers: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Ignore Numbers: No\n");
-        if(load_documents::getSettings()->m_bIgnoreCase) fprintf($this->m_fMatchHtml,"<br>Ignore Letter Case: Yes\n");
+        if($this->settings->m_bIgnoreCase) fprintf($this->m_fMatchHtml,"<br>Ignore Letter Case: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Ignore Letter Case: No\n");
-        if(load_documents::getSettings()->m_bSkipNonwords) fprintf($this->m_fMatchHtml,"<br>Skip Non-Words: Yes\n");
+        if($this->settings->m_bSkipNonwords) fprintf($this->m_fMatchHtml,"<br>Skip Non-Words: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Skip Non-Words: No\n");
-        if(load_documents::getSettings()->m_bSkipLongWords) fprintf($this->m_fMatchHtml,"<br>Skip words longer than ".load_documents::getSettings()->m_SkipLength." characters: Yes\n");
+        if($this->settings->m_bSkipLongWords) fprintf($this->m_fMatchHtml,"<br>Skip words longer than ".$this->settings->m_SkipLength." characters: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Skip Long Words: No\n");
-        fprintf($this->m_fMatchHtml,"<br>Most Imperfections to Allow: \n".load_documents::getSettings()->m_MismatchTolerance);
-        fprintf($this->m_fMatchHtml,"<br>Minimum %% of Matching Words: \n". load_documents::getSettings()->m_MismatchPercentage);
+        fprintf($this->m_fMatchHtml,"<br>Most Imperfections to Allow: \n".$this->settings->m_MismatchTolerance);
+        fprintf($this->m_fMatchHtml,"<br>Minimum %% of Matching Words: \n". $this->settings->m_MismatchPercentage);
         fprintf($this->m_fMatchHtml,"</blockquote><br><br><table border='1' cellpadding='5'><tr><td align='center'>Perfect Match</td><td align='center'>Overall Match</td><td align='center'>View Both Files</td><td align='center'>File L</td><td align='center'>File R</td></tr>");
     }
 
@@ -110,10 +111,9 @@ class generate_report{
         $hrefB[1000]='';					// href from frame file for side-by-side viewing
         $dstring='';						// character buffer for document name strings
         
-        //$indoc = new document($this->m_pDocL->m_filep,$this->m_pDocL->filename);			// CInputDocument class to handle inputting the document
-
-        $this->m_pDocL->m_bBasic_Characters = load_documents::getSettings()->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
-        $this->m_pDocR->m_bBasic_Characters = load_documents::getSettings()->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
+        
+        $this->m_pDocL->m_bBasic_Characters = $this->settings->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
+        $this->m_pDocR->m_bBasic_Characters = $this->settings->m_bBasic_Characters;		// inform the input document about whether we're using Basic Characters only
         
         $iReturn = 0;
         
@@ -129,16 +129,17 @@ class generate_report{
 
         $hrefL = $this->m_pDocL->name;    // generate name for right html filename
         $hrefL.= "." . $this->m_pDocR->name.".html";
+        $hrefL = $this->reportId . $hrefL;
     
         $hrefR = $this->m_pDocR->name;	  // generate name for right html filename
         $hrefR.="." . $this->m_pDocL->name . ".html";
+        $hrefR = $this->reportId . $hrefR;
     
-        $dstring = strval($compare->m_MatchingDocumentPairs);
-        $hrefB = "SBS.".$this->m_pDocR->name . $this->m_pDocL->name . "_" . $dstring . ".html";
 
-        // new moodle_url('/plagiarism/mcopyfind/reports/submit_all_files.php', $params);
-        // $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind'));
-        
+        $dstring = strval($compare->m_MatchingDocumentPairs);
+        $hrefB = $this->reportId."SBS.".$this->m_pDocR->name . $this->m_pDocL->name . "_" . $dstring . ".html";
+
+   
         $szPerfectMatch =($compare->m_MatchingWordsPerfect. " (" . round(100*$compare->m_MatchingWordsPerfect/$this->m_pDocL->m_WordsTotal,2)."% L, ".  round(100*$compare->m_MatchingWordsPerfect/$this->m_pDocR->m_WordsTotal,2)."% R)");
         $szOverallMatch=($compare->m_MatchingWordsTotalL . " (". round(100*$compare->m_MatchingWordsTotalL/$this->m_pDocL->m_WordsTotal,2). "%)L; " . $compare->m_MatchingWordsTotalR . "(" . round(100*$compare->m_MatchingWordsTotalR/$this->m_pDocR->m_WordsTotal,2)."%) R");
         fprintf($this->m_fMatchHtml,
@@ -292,12 +293,12 @@ class generate_report{
                 if($iReturn > -1) return $iReturn;	
                 $tword=$word;								// copy word to a temporary
 
-                if(load_documents::getSettings()->m_bIgnorePunctuation) Words::WordRemovePunctuation($tword);	// if ignore punctuation is active, remove punctuation
-                if(load_documents::getSettings()->m_bIgnoreOuterPunctuation) Words::wordxouterpunct($tword);	// if ignore outer punctuation is active, remove outer punctuation
-                if(load_documents::getSettings()->m_bIgnoreNumbers) Words::WordRemoveNumbers($tword);			// if ignore numbers is active, remove numbers
-                if(load_documents::getSettings()->m_bIgnoreCase) Words::WordToLowerCase($tword);			// if ignore case is active, remove case
-                if(load_documents::getSettings()->m_bSkipLongWords & (strlen($tword) > load_documents::getSettings()->m_SkipLength) ) continue;	// if skip too-long words is active, skip them
-                if(load_documents::getSettings()->m_bSkipNonwords & (!Words::WordCheck($tword)) ) continue;	// if skip nonwords is active, skip them
+                if($this->settings->m_bIgnorePunctuation) Words::WordRemovePunctuation($tword);	// if ignore punctuation is active, remove punctuation
+                if($this->settings->m_bIgnoreOuterPunctuation) Words::wordxouterpunct($tword);	// if ignore outer punctuation is active, remove outer punctuation
+                if($this->settings->m_bIgnoreNumbers) Words::WordRemoveNumbers($tword);			// if ignore numbers is active, remove numbers
+                if($this->settings->m_bIgnoreCase) Words::WordToLowerCase($tword);			// if ignore case is active, remove case
+                if($this->settings->m_bSkipLongWords & (strlen($tword) > $this->settings->m_SkipLength) ) continue;	// if skip too-long words is active, skip them
+                if($this->settings->m_bSkipNonwords & (!Words::WordCheck($tword)) ) continue;	// if skip nonwords is active, skip them
                 break;
             }
         
@@ -335,12 +336,13 @@ class generate_report{
         else fprintf($this->m_fMatchHtml,"<br>".$this->m_szSoftwareName." found ".$compare->m_MatchingDocumentPairs." matching pairs of documents.<br>\n");
         fprintf($this->m_fMatchHtml,"</body></html>\n");
         fclose($this->m_fMatchHtml);
+        $result= $this->m_fMatchHtml;
         $this->m_fMatchHtml=NULL;
         $this->m_Time= $date->getTimestamp() - $this->m_StartTicks->getTimestamp();
 
         fprintf($this->m_fLog,"\nDone. Total Time:". strval($this->m_Time) ." seconds\n");
         fclose($this->m_fLog);
         $this->m_fLog=NULL;
-        return;
+        return $result;
     }
 }

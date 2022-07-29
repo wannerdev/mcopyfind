@@ -26,10 +26,15 @@
 
 namespace plagiarism_mcopyfind\compare;
 
+use context_system;
+use Exception;
+use moodle_url;
+use stdClass;
+use stored_file;
 
 class assignments {
 
-
+    private $settings;
     /**
      * Constructor of the plagiarism assignments class
      * 
@@ -43,13 +48,44 @@ class assignments {
     }
 
 
+    public function get_file_breadcrumbs(\stored_file $file): ?array {
+        $browser = get_file_browser();
+        $context = context_system::instance();
+    
+        $fileinfo = $browser->get_file_info(
+            \context::instance_by_id($file->get_contextid()),
+            $file->get_component(),
+            $file->get_filearea(),
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename()
+        );
+    
+        if ($fileinfo) {
+            // Build a Breadcrumb trail
+            $level = $fileinfo->get_parent();
+            while ($level) {
+                $path[] = [
+                    'name' => $level->get_visible_name(),
+                ];
+                $level = $level->get_parent();
+            }
+    
+            $path = array_reverse($path);
+    
+            return $path;
+        }
+    
+        return null;
+    }
 
     /**
      * Case where all assignments have to be compared
      */
     public function access_all_files($cm, $context) {
-        global $CFG, $DB;
+        global $CFG, $DB, $USER;
         
+        require_login();
         // $submitted = $DB->get_records_select('plagiarism_mcopyfind', 'cmid = :cmid',
         //   array('cmid' => $cm->id), '', 'filehash');   
 
@@ -89,14 +125,39 @@ class assignments {
                 }
             }
             
+            $preset = 2; //todo load from config, set via radio buttons in lib file
+
+            //Compare settings
+            switch($preset){
+                default :{
+                    $this->settings= new settings();
+                    break;
+                }
+                case 2:{
+                    $this->settings= new settings();
+                    $this->settings= $this->settings->getMinorEditSettings();
+                    break;
+                }
+                case 3:{
+                    $this->settings= new settings();
+                    $this->settings= $this->settings->getPDFHeaderandFooterSettings();
+                    break;
+                }
+                case  4:{
+                    $this->settings= new settings();
+                    $this->settings= $this->settings->getAbsoluteMatching();
+                    break;
+                }
+            }
             
-            // var_dump($files);
+
             foreach ($files as $file) {
                 $filename = $file->get_filename();
                 $userid = $file->get_userid();
                 $pathnamehash = $file->get_pathnamehash();
                 $file = get_file_storage()->get_file_by_hash($pathnamehash)->get_content_file_handle();
-                $document = new document( $filename, $file);
+                // var_dump($file);
+                $document = new document( $filename, $this->settings,$file);
 
                 array_push($corpus, $document);
                 // array_push($hashes, $pathnamehash);
@@ -109,16 +170,105 @@ class assignments {
             // Add content hash in docIn compare functions to add them to the list of compared files.
             // Maybe create hash pairs which were already compared and save these in the DB.
           
-            //insert new report to database to get reportId
-            // $reportId = $DB->insert_record('plagiarism_mcopyfind_report', array('cmid' => $cm->id));
+            $insert = new \stdClass();
+            //get logged in user
+            $insert->userid = $USER->id;
 
+            //to do check if files already compared, report already in database?
+
+            //insert new report to database to get reportId
+            $id = $DB->insert_record('plagiarism_mcopyfind_report', $insert);
+            //get dummy report to database to get a reportId
+            $reportRec = $DB->get_record('plagiarism_mcopyfind_report',array('id'=>$id));
             
-            // $reportId = $reportId->id;
-            $reportId = 0;
+            $reportId = $reportRec->id;
             $cmp = new compare_functions($corpus,$reportId);
-            $cmp->RunComparison();
-            // throw new \Exception("All files");
+            $mix = $cmp->RunComparison();
+            // echo("What?\n".$mix[1]."\n");
+            // var_dump($mix);
+
+            $matches= $mix[0];
+            $reportfile = $mix[1];
+            $size=count($matches);
+            $fs = get_file_storage();
+            if($size >0){
+                
+                foreach($matches as $match) {
+                    $matchR = new stdClass();
+                    $matchR->id = $match[0];
+                    $matchR->perfectmatch = $match[1];
+                    $matchR->overalmatch   = $match[2];
+                    $matchR->contenthashl   = $match[3];
+                    $matchR->contenthashr = $match[4];
+                    
+                    $index=strpos($match[3],'.'); 
+                    $fileLname = substr($match[3],0,$index);
+                    $index=strpos($match[4],'.'); 
+                    $fileRname = substr($match[4],0,$index);
+                    $file_recordM = array(
+                        'contextid' => $context->id,
+                        'component' => 'plagiarism_mcopyfind',
+                        'filearea' => 'report',
+                        'itemid' => $reportId,
+                        'filepath' => '/',
+                        'filename' => $reportId.'SBS.'. $fileRname .$fileLname.'_1.html',
+                    );
+                    $file = $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId."SBS.". $fileRname. $fileLname.'_1.html');
+                    $file_recordM['filename'] =$reportId.$fileLname.'.'.$fileRname.'.html';
+
+                    $file = $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId. $fileLname.'.'.$fileRname.'.html');
+                    $file_recordM['filename'] =$reportId.$fileRname.'.'.$fileLname.'.html';
+                    $file = $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId. $fileRname.'.'.$fileLname.'.html');
+                    $url = moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $file->get_itemid(),
+                        $file->get_filepath(),
+                        $file->get_filename(),
+                        false                     // Do not force download of the file.
+                    );
+                    
+                    $id = $DB->insert_record('plagiarism_mcopyfind_match', $matchR);
+                }
+                // Add report file into moodle file storage.
+                $file_record = array(
+                    'contextid' => $context->id,
+                    'component' => 'plagiarism_mcopyfind',
+                    'filearea' => 'report',
+                    'itemid' => $reportId,
+                    'filepath' => '/',
+                    'filename' => $reportId.'matches.html',
+                );
+
+                // $fs-> $fs->create_file_from_pathname($file_record,'C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\'.$reportId.'matches.html')
+                //return $fs->create_file_from_pathname($file_record,'C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\'.$reportId.'matches.html');
+                
+                 $file = $fs->create_file_from_pathname($file_record ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/". $reportId.'matches.html');
+                //$reportfile
+                // var_dump($fileid);
+                // if($fileid == null)throw new Exception("WTF");
+
+                //todo update report record with fileid
+                $reportRec->fileid = $file->get_id();// itemid;
+                //$DB->// update_record('plagiarism_mcopyfind_report', $reportRec);
+
+                //$DB->set_field('plagiarism_mcopyfind_report', 'fileid',  array('fileid' => $fileid));
+                // $DB->set_field('plagiarism_mcopyfind_report', 'fileid',  array('fileid' => $fileid->file_record->itemid), array('id' => $repid->id));
+                
+                // echo("Something worked".var_dump($this->get_file_breadcrumbs($file)));
+                // $fs->get_file($context->id,'plagiarism_mcopyfind','report', $reportId, '/', $reportId.'matches.html');
+                return $file ;
+            }else{     
+                // $fs->delete_area_files($context->id, 'plagiarism_mcopyfind', 'report', $reportId);           
+                $DB->delete_records('plagiarism_mcopyfind_report', array('id'=>$reportId));
+                // No Match found
+                return;
+            }
+        }else{
+            //Wrong context
+            return;
         }
     }
-    
+
 }

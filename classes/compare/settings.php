@@ -5,8 +5,9 @@ namespace plagiarism_mcopyfind\compare;
 
  class settings{
 
+
     const WORDBUFFERLENGTH=5;
-    //Settings
+    //default Settings, absolute matching with skipping words
     public  $m_PhraseLength = 6;
     public  $m_WordThreshold = 100;
     public  $m_SkipLength = 20;
@@ -23,7 +24,10 @@ namespace plagiarism_mcopyfind\compare;
     public  $m_bSkipNonwords = false;
     public  $m_bBasic_Characters = false;
 
-
+    static function getdefaultSettings(){
+        // log("Settings not loaded, using defaults <br>");
+        return new settings(); 
+    }
 
     function getMinorEditSettings(){
         $settings = new settings();
@@ -86,5 +90,7 @@ namespace plagiarism_mcopyfind\compare;
         $settings->m_bBasic_Characters = false;
         return $settings;
     }
+
+   
 }
 

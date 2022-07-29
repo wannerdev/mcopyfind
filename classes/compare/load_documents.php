@@ -44,23 +44,17 @@ class load_documents
 
     //set wordNumber to 0
     public $documents = [];
-    private static $settings;
+    private $settings;
     public $wordsize=10000;
     public $wordInc=1000;
     public $wordsFunc;
 
-    function __construct(){
-        self::$settings=new settings();        
+    function __construct($_settings){
+        $this->settings=$_settings;        
         $this->wordsFunc = new words();
     }
 
-    static function getSettings(){
-        if(self::$settings == null){
-            self::$settings = new settings();
-            echo("Settings not loaded, using defaults");
-        }
-        return self::$settings; 
-    }
+
 
     function testMain()
     {
@@ -90,9 +84,7 @@ class load_documents
         
     }
 
-    /**
-     * Maybe make static to improve performance later
-     */
+    
     function loadDocument($document)
     {
 
@@ -109,14 +101,14 @@ class load_documents
         while ($DelimiterType != DEL_TYPE_EOF) {
             $word='';
             $document->Getword($word,$DelimiterType);
-            if(load_documents::getSettings()->m_bIgnorePunctuation) $this->wordsFunc->WordRemovePunctuation($word);	// if ignore punctuation is active, remove punctuation
-            if(load_documents::getSettings()->m_bIgnoreOuterPunctuation) $this->wordsFunc->wordxouterpunct($word);	// if ignore outer punctuation is active, remove outer punctuation
-            if(load_documents::getSettings()->m_bIgnoreNumbers) $this->wordsFunc->WordRemoveNumbers($word);			// if ignore numbers is active, remove numbers
-            if(load_documents::getSettings()->m_bIgnoreCase) $this->wordsFunc->WordToLowerCase($word);				// if ignore case is active, remove case
+            if($this->settings->m_bIgnorePunctuation) $this->wordsFunc->WordRemovePunctuation($word);	// if ignore punctuation is active, remove punctuation
+            if($this->settings->m_bIgnoreOuterPunctuation) $this->wordsFunc->wordxouterpunct($word);	// if ignore outer punctuation is active, remove outer punctuation
+            if($this->settings->m_bIgnoreNumbers) $this->wordsFunc->WordRemoveNumbers($word);			// if ignore numbers is active, remove numbers
+            if($this->settings->m_bIgnoreCase) $this->wordsFunc->WordToLowerCase($word);				// if ignore case is active, remove case
             // echo "WOrd: ".$word."\n";
             // echo "WOrdlength: ".strlen($word);
-            if(load_documents::getSettings()->m_bSkipLongWords & (strlen($word) > load_documents::getSettings()->m_SkipLength) )continue;	// if skip too-long words is active, skip them
-            if(load_documents::getSettings()->m_bSkipNonwords & (!$this->wordsFunc->WordCheck($word)) )continue;		// if skip nonwords is active, skip them
+            if($this->settings->m_bSkipLongWords & (strlen($word) > $this->settings->m_SkipLength) )continue;	// if skip too-long words is active, skip them
+            if($this->settings->m_bSkipNonwords & (!$this->wordsFunc->WordCheck($word)) )continue;		// if skip nonwords is active, skip them
             
     
             // print_r("$word:".$word . "\n");
@@ -175,7 +167,7 @@ class load_documents
         //          echo ("".$element . " ");
         //  }
 
-        if (load_documents::getSettings()->m_PhraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
+        if ($this->settings->m_PhraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
         else                                                        // if phrase length is > 1 word, start at first word with more than 3 chars
         {
             $firstLong = 0;
@@ -299,6 +291,6 @@ class load_documents
  }
 
 //Testcase 1
-// $test = new load_documents();
-// $test->testMain();
-// file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
+//  $test = new load_documents();
+//  $test->testMain();
+//  file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
