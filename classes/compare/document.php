@@ -165,7 +165,7 @@ class document
 
     function OpenTxt($filename)
     {
-        if($this->m_filep == NULL)  {
+        if($this->m_filep == NULL)  { // no resource given
             $this->m_filep= fopen($filename,"r");
         }
         if($this->m_filep == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE");
@@ -177,12 +177,14 @@ class document
                 if(ord(fgetc($this->m_filep)) == 0xBF)
                 {
                     $this->m_UTF8 = true;  // found BOM; leave input pointing after the BOM
+                    if($this->isRes)fseek($this->m_filep,0,SEEK_SET);
                     return -1;
                 }
             }
         }
         $this->m_UTF8 = false;
         fseek($this->m_filep,0,SEEK_SET); // not a utf-8 text file, so rewind to the beginning
+        
         return -1;
     }
 
@@ -759,9 +761,7 @@ class document
             }
         }
         else if( $this->m_contentType == "CONTENT_TYPE_TXT" )
-        {
-            // $chars =0;
-            
+        {            
             while(true)
             {
                 // echo ("Newline characters:". strval($chars) . "\n");
@@ -779,14 +779,10 @@ class document
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
-                //preg_split() Test this if there is time
-                // else if( array_size(preg_split('/\r\n|\r|\n/',$this->m_char) ) >1 ) // check for newline characters
-                // (sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1 )   ||
                 else if(sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1  || ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
                 {
                     $delimiterType=DEL_TYPE_NEWLINE;
                     $this->m_gotDelimiter=true;
-                    // $chars++;
                 }
                 else if(IntlChar::isspace($this->m_char)) // check for white space
                 {

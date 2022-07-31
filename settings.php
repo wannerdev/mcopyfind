@@ -47,9 +47,9 @@ if ($mform->is_cancelled()) {
 echo $OUTPUT->header();
 
 if (($data = $mform->get_data()) && confirm_sesskey()) {
-    if (!isset($data->mcopyfind_use)) {
-            $data->mcopyfind_use = 0;
-    }
+    // if (!isset($data->mcopyfind_use)) {
+    //         $data->mcopyfind_use = 0;
+    // }
     foreach ($data as $field=>$value) {
         if (strpos($field, 'mcopyfind')===0) {
             if ($tiiconfigfield = $DB->get_record('config_plugins', array('name'=>$field, 'plugin'=>'plagiarism'))) {

@@ -79,16 +79,48 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
      * @return string
      */
     public function print_disclosure($cmid) {
-        global $OUTPUT;
+        global $OUTPUT,$DB;
         $plagiarismsettings = (array)get_config('plagiarism');
         //TODO: check if this cmid has plagiarism enabled.
-        echo $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
-        $formatoptions = new stdClass;
-        $formatoptions->noclean = true;
-        echo format_text($plagiarismsettings['mcopyfind_student_disclosure'], FORMAT_MOODLE, $formatoptions);
-        echo $OUTPUT->box_end();
+        $outputhtml = '';
+
+        if ($plagiarismsettings = $this->get_settings()) {
+             if (!empty($plagiarismsettings['mcopyfind_student_disclosure'])) {
+
+                 $params = array('cm' => $cmid, 'name' => 'use_mcopyfind');
+                 $showdisclosure = $DB->get_field('plagiarism_mcopyfind_config', 'value', $params);
+                 if ($showdisclosure) {
+                     $outputhtml .= $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
+                     $formatoptions = new stdClass;
+                     $formatoptions->noclean = true;
+                     $outputhtml .= format_text($plagiarismsettings['mcopyfind_student_disclosure'], FORMAT_MOODLE, $formatoptions);
+                     $outputhtml .= $OUTPUT->box_end();
+                 }
+             }
+         }
+         return $outputhtml;
+        // echo $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
+        // $formatoptions = new stdClass;
+        // $formatoptions->noclean = true;
+        // echo format_text($plagiarismsettings['mcopyfind_student_disclosure'], FORMAT_MOODLE, $formatoptions);
+        // echo $OUTPUT->box_end();
     }
 
+    /**
+     * This function should be used to initialise settings and check if plagiarism is enabled
+     * *
+     * @return mixed - false if not enabled, or returns an array of relevant settings.
+     */
+    public function get_settings() {
+        global $DB;
+        $plagiarismsettings = (array)get_config('plagiarism');
+        //check if mcopyfind is enabled.
+        if (isset($plagiarismsettings['mcopyfind_use']) ) {
+            return $plagiarismsettings;
+        } else {
+            return false;
+        }
+    }
     /**
      * hook to allow status of submitted files to be updated - called on grading/report pages.
      *
@@ -135,7 +167,22 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
      *
      */
     public function cron() {
-        //do any scheduled task stuff
+        //do any scheduled task stuff        
+        cleanReports();
+    }
+}
+
+function cleanReports(){
+    // Clean report folder
+    $folder_path = "reports";
+       
+    // List of name of files inside
+    // specified folder
+    $files = glob($folder_path.'\*'); 
+    // Deleting all the files in the list
+    foreach($files as $file) {
+        // Delete the given file
+        if(is_file($file))unlink($file); 
     }
 }
 

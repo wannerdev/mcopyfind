@@ -67,27 +67,29 @@ class words {
 
     public static function wordxouterpunct($word) 
     {
+        $word=preg_replace("/.+/","",$word);
+        $word=preg_replace("/,+/","",$word);
         
-        $wordlen=strlen($word);
-        for($ccnt=0;$ccnt<$wordlen;$ccnt++)
-        {
-            if(IntlChar::ispunct($word[$ccnt]))
-            {
-                for($icnt=$ccnt;$icnt<$wordlen;$icnt++)	$word[$icnt]=$word[$icnt+1]; // move the null, too.
-                $wordlen--;
-                $ccnt--;
-            }
-            else break;
-        }
-        for($ccnt=$wordlen-1;$ccnt>=0;$ccnt--)
-        {
-            if(IntlChar::ispunct($word[$ccnt]))
-            {
-                for($icnt=$ccnt;$icnt<$wordlen;$icnt++) $word[$icnt]=$word[$icnt+1];	// move the null, too.
-                $wordlen--;
-            }
-            else break;
-        }
+        // $wordlen=strlen($word);
+        // for($ccnt=0;$ccnt<$wordlen;$ccnt++)
+        // {
+        //     if(IntlChar::ispunct($word[$ccnt]))
+        //     {
+        //         for($icnt=$ccnt;$icnt<$wordlen;$icnt++)	$word[$icnt]=$word[$icnt+1]; // move the null, too.
+        //         $wordlen--;
+        //         $ccnt--;
+        //     }
+        //     else break;
+        // }
+        // for($ccnt=$wordlen-1;$ccnt>=0;$ccnt--)
+        // {
+        //     if(IntlChar::ispunct($word[$ccnt]))
+        //     {
+        //         for($icnt=$ccnt;$icnt<$wordlen;$icnt++) $word[$icnt]=$word[$icnt+1];	// move the null, too.
+        //         $wordlen--;
+        //     }
+        //     else break;
+        // }
         return $word;
 
     }
@@ -109,7 +111,7 @@ class words {
         return $word;
     }
 
-    public static function WordToLowerCase($word) //TODO return word
+    public static function WordToLowerCase($word)
     {
         $wordlen=strlen($word);
         for($ccnt=0;$ccnt<$wordlen-1;$ccnt++)

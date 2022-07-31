@@ -25,6 +25,7 @@ $string['pluginname'] = 'plagiarism_mcopyfind';
 $string['studentdisclosuredefault']  ='All files uploaded will be submitted to a plagiarism detection service';
 $string['studentdisclosure'] = 'Student Disclosure';
 $string['studentdisclosure_help'] = 'This text will be displayed to all students on the file upload page.';
+$string['mcopyfind_student_disclosure'] = 'Agree to compare this with mcopyfind.';
 $string['mcopyfindexplain'] = 'For more information on this plugin see: ';
 $string['mcopyfind'] = 'Mcopyfind a plagiarism plugin';
 $string['usemcopyfind'] ='Enable Mcopyfind';

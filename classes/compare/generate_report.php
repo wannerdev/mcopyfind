@@ -291,6 +291,7 @@ class generate_report{
                 $word='';
                 $iReturn = $indoc->Getword($word,$DelimiterType);		// get next word
                 if($iReturn > -1) return $iReturn;	
+                $word=utf8_decode($word);
                 $tword=$word;								// copy word to a temporary
 
                 if($this->settings->m_bIgnorePunctuation) Words::WordRemovePunctuation($tword);	// if ignore punctuation is active, remove punctuation
@@ -302,7 +303,7 @@ class generate_report{
                 break;
             }
         
-            // if (!generate_report::is_utf8($word))$word=utf8_encode($word);
+            // if (!generate_report::is_utf8($word))
             // for($i=0;$i<$wordLength;$i++){                    
             //     fprintf($this->m_fHtml, htmlspecialchars($word[$i])); 
             //   } //fprintf($this->m_fHtml,htmlspecialchars($word),false); // print the character, using UTF8 translation

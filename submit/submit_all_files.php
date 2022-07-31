@@ -75,7 +75,7 @@ $fs = get_file_storage();
 
 $file=$sub->access_all_files($cm, $context);
 
-$url="no file";
+$url=urldecode($return);
 if($file != null){
     $url = moodle_url::make_pluginfile_url(
         $file->get_contextid(),

@@ -42,6 +42,7 @@ class assignments {
      */
     function __construct($notinstance = false) {
         $this->config = get_config('plagiarism_mcopyfind');
+        $this->settings = settings::getdefaultSettings();
         if ($notinstance) {
             $this->username = false;
         }
@@ -79,20 +80,6 @@ class assignments {
         return null;
     }
 
-    function cleanReports(){
-         // Clean report folder
-         $folder_path = "../reports";
-            
-         // List of name of files inside
-         // specified folder
-         $files = glob($folder_path.'\*'); 
-         // Deleting all the files in the list
-         foreach($files as $file) {
-             // Delete the given file
-             if(is_file($file))unlink($file); 
-         }
-    }
-
     /**
      * Case where all assignments have to be compared
      */
@@ -117,7 +104,6 @@ class assignments {
             
             $submissions = $DB->get_records('assign_submission', array('assignment' => $cm->instance));
  
-            $this->cleanReports();
             $corpus =array();
             $hashes = array();
 
@@ -140,29 +126,8 @@ class assignments {
             }
             
             $preset = 2; //todo load from config, set via radio buttons in lib file
-
-            //Compare settings
-            switch($preset){
-                default :{
-                    $this->settings= new settings();
-                    break;
-                }
-                case 2:{
-                    $this->settings= new settings();
-                    $this->settings= $this->settings->getMinorEditSettings();
-                    break;
-                }
-                case 3:{
-                    $this->settings= new settings();
-                    $this->settings= $this->settings->getPDFHeaderandFooterSettings();
-                    break;
-                }
-                case  4:{
-                    $this->settings= new settings();
-                    $this->settings= $this->settings->getAbsoluteMatching();
-                    break;
-                }
-            }
+            $this->settings->setPreset($preset);
+           
            
             
 
@@ -190,6 +155,8 @@ class assignments {
             $insert->userid = $USER->id;
 
             //to do check if files already compared, report already in database?
+            // compare contenthash for each document with the contenthashes in matches?
+            //if there is one check if the matched hash is one of the other documents
 
             //insert new report to database to get reportId
             $id = $DB->insert_record('plagiarism_mcopyfind_report', $insert);
@@ -197,7 +164,7 @@ class assignments {
             $reportRec = $DB->get_record('plagiarism_mcopyfind_report',array('id'=>$id));
             
             $reportId = $reportRec->id;
-            $cmp = new compare_functions($corpus,$reportId);
+            $cmp = new compare_functions($corpus,$reportId, $this->settings);
             $mix = $cmp->RunComparison();
 
             $matches= $mix[0];
@@ -264,13 +231,6 @@ class assignments {
 
                 //todo update report record with fileid
                 $reportRec->fileid = $file->get_id();// itemid;
-                //$DB->// update_record('plagiarism_mcopyfind_report', $reportRec);
-
-                //$DB->set_field('plagiarism_mcopyfind_report', 'fileid',  array('fileid' => $fileid));
-                // $DB->set_field('plagiarism_mcopyfind_report', 'fileid',  array('fileid' => $fileid->file_record->itemid), array('id' => $repid->id));
-                
-                // echo("Something worked".var_dump($this->get_file_breadcrumbs($file)));
-                // $fs->get_file($context->id,'plagiarism_mcopyfind','report', $reportId, '/', $reportId.'matches.html');
                 return $file ;
             }else{     
                 // $fs->delete_area_files($context->id, 'plagiarism_mcopyfind', 'report', $reportId);           

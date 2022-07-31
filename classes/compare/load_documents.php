@@ -76,12 +76,12 @@ class load_documents
         array_push($this->documents, $doc2);
         array_push($this->documents, $doc1);
         
-        $cmp = new compare_functions( $this->documents,-1);
+        $cmp = new compare_functions( $this->documents,-1,2);
         $irvalue =$cmp->RunComparison($this);
         
-        if($irvalue > -1)
+        if($irvalue instanceof int && $irvalue > -1)
         {
-            // echo $this->ErrorcodeToString($irvalue);
+            echo $this->ErrorcodeToString($irvalue);
         }
         
     }
@@ -94,12 +94,15 @@ class load_documents
         $wordAmount = 0;
         $hashes = [];
         $realwords = 0;
-        $word = '';
+        $word='';
         $DelimiterType = DEL_TYPE_NONE;
         // echo "\n################################\n";
         // echo "Document:".$document->path . "\n";
         // echo "\n################################\n";
         // var_dump($document->file);
+        // if($document->isRes){
+        //     $document->Getword($word,$DelimiterType);
+        // }
         while ($DelimiterType != DEL_TYPE_EOF) {
             $word='';
             $document->Getword($word,$DelimiterType);
@@ -123,6 +126,7 @@ class load_documents
                 $this->wordsize += $this->wordInc;
             }
 
+            // var_dump($word);
             $hashes[$wordNumber] = words::WordHash($word);
             
             // print_r("Word:".$word . "\n");
@@ -162,13 +166,12 @@ class load_documents
         // for($i=0; $i< count($document->pSortedWordHash); $i++) {
         //     echo ("".$document->pSortedWordHash[$i] . "\n");
         // }
-        //echo ("".$document->pSortedWordHash->s . "\n");
+        // echo ("". strval($document->pSortedWordHash) . "\n");
         // sort($document->pSortedWordHash);
-        //  var_dump($document->pSortedWordHash);
-        //  foreach ($document->pSortedWordHash as $element) {
-        //          echo ("".$element . " ");
-        //  }
-
+        // var_dump($document->pSortedWordHash);
+        // foreach ($document->pSortedWordHash as $element) {
+        //           echo ("".$element . " ");
+        // }
         if ($this->settings->m_PhraseLength == 1) $document->firstHash = 0;        // if phraselength is 1 word, compare even the shortest words
         else                                                        // if phrase length is > 1 word, start at first word with more than 3 chars
         {
@@ -186,26 +189,11 @@ class load_documents
         }
     }
 
-    //Guess how this works Probably
-    //what it does is it takes 10000 Words of one document - wordAmount or characters?
-    // generates hashes for each word in every document (sorted by occurance basically)
-    // then creates a sorted copy of the the hashes (sorted by hash value)
-    // and then compares the heaps?
-
-
-    //then generate html by exporting the document and marking the saved findings
-    //Excluding vocab functionality for now,
-    //specific word hash function
-
-    //Improvment idea define header and footer to ignore
-    //needs page number with range of words
-    //List of pages with start number of a page,
-    // Comparing starts always at page+ header and ends at page-footer //before comparing you ask if the word is inside the page range
 
 
   function ErrorcodeToString($irvalue){
      $errorString = "";
-     switch($irvalue) {
+     switch(intval($irvalue)) {
          case ERR_CANNOT_OPEN_FILE :
              $errorString="Error: Could not open file during comparison process";
              break;
@@ -288,7 +276,7 @@ class load_documents
              $errorString="Error: File cannot be opened, perhaps because it is already opened by other software";
              break;
          default :
-             $errorString="Error Occurred During Comparison Process ".strval($irvalue);
+             $errorString="Error Occurred During Comparison Process ";
              break;
         }
         return $errorString;
@@ -297,6 +285,6 @@ class load_documents
 }
 
 //Testcase 1
-// $test = new load_documents();
-// $test->testMain();
-// file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
+//  $test = new load_documents();
+//  $test->testMain();
+//  file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
