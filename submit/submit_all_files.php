@@ -90,9 +90,7 @@ if($file != null){
 }
 
 //$return = $return . "&action=".$url;
-$return = urldecode($return);
+//$return = urldecode($return);
 
-//$report = new moodle_url();
-// $url->param('target',$blan = '_blank');
-redirect($return);
-//redirect($url);
+//redirect($return);
+redirect($url);

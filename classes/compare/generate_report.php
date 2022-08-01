@@ -81,11 +81,11 @@ class generate_report{
         $szfilename=$this->m_szReportFolder. strval($this->reportId) ."matches.html";
         $this->m_fMatchHtml=fopen( $szfilename, "w");			// create and open main comparison report html file
         if($this->m_fMatchHtml == NULL) return "ERR_CANNOT_OPEN_COMPARISON_REPORT_HTML_FILE";
+        fprintf($this->m_fMatchHtml,"<div id=\"report\">");
         
-        fprintf($this->m_fMatchHtml,"<html><title>File Comparison Report</title><body><H2>File Comparison Report</H2>\n");
+        fprintf($this->m_fMatchHtml,"<html><head><title>File Comparison Report</title></head><body><H2>File Comparison Report</H2>\n");
         fprintf($this->m_fMatchHtml,"<H3>Produced by ". $this->m_szSoftwareName ." with These Settings:</H3><br><blockquote>Shortest Phrase to Match: ".$this->settings->m_PhraseLength ."\n");
-        fprintf($this->m_fMatchHtml,"<button class=\"btn btn-outline \" onclick=\"window.print();\">".get_string('print', 'plagiarism_mcopyfind'). "</button>");
-
+ 
         fprintf($this->m_fMatchHtml,"<br>Fewest Matches to Report: ".$this->settings->m_WordThreshold."\n");
 
         if($this->settings->m_bIgnorePunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Punctuation: Yes\n");
@@ -339,6 +339,10 @@ class generate_report{
         fprintf($this->m_fMatchHtml,"</table>\n");
         if($compare->m_MatchingDocumentPairs == 0) fprintf($this->m_fMatchHtml,"<br>". $this->m_szSoftwareName ." found no matching pairs of documents.<br>You may want to lower the thresholds for matching and try again.<br>\n");
         else fprintf($this->m_fMatchHtml,"<br>".$this->m_szSoftwareName." found ".$compare->m_MatchingDocumentPairs." matching pairs of documents.<br>\n");
+        fprintf($this->m_fMatchHtml,"</div>");
+        fprintf($this->m_fMatchHtml,"<br>");
+        fprintf($this->m_fMatchHtml,"<button class=\"btn btn-outline \" onclick=\"window.print('#report');\">".get_string('print', 'plagiarism_mcopyfind'). "</button>");
+
         fprintf($this->m_fMatchHtml,"</body></html>\n");
         fclose($this->m_fMatchHtml);
         $this->m_fMatchHtml=NULL;

@@ -142,15 +142,14 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         if($pagination != -1){
             $pageurl->param('page', $pagination);
         }
-        $preset=1;
         $output .= html_writer::empty_tag('br');
         $params = array('cmid' => s($cm->id), 
-                        'return' => urlencode($pageurl),
-                        'preset' => s($preset));
+                        'return' => urlencode($pageurl)); // 'preset' => s($preset)
                      
         $submiturl = new moodle_url('/plagiarism/mcopyfind/submit/submit_all_files.php', $params);
         $incPreset = new moodle_url('/plagiarism/mcopyfind/submit/preset.php');
         //todo load user config preset
+        $preset=1;
          // get mcopyfind config preset from database, something like:        
         // $preset = $DB->get_field('plagiarism_mcopyfind_config', 'preset',array('id' => $cm->instance));
 

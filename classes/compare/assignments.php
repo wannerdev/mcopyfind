@@ -83,7 +83,7 @@ class assignments {
     /**
      * Case where all assignments have to be compared
      */
-    public function access_all_files($cm, $context, $preset) {
+    public function access_all_files($cm, $context) {
         global $CFG, $DB, $USER;
         
         require_login();
@@ -125,7 +125,7 @@ class assignments {
                 }
             }
             
-            // $preset = 1; //todo load from config, set via radio buttons in lib file
+             $preset = 2; //todo load from config, set via radio buttons in lib file
             $this->settings=$this->settings->getPreset($preset);
            //Preset 1 = 23,6%
            //Preset 2 = 91,91%
@@ -174,6 +174,7 @@ class assignments {
             $fs = get_file_storage();
             if($size >0){
                 
+                //Push each report Match data into DB
                 foreach($matches as $match) {
                     $matchR = new stdClass();
                     $matchR->id = $match[0];
@@ -200,15 +201,7 @@ class assignments {
                     $file = $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId. $fileLname.'.'.$fileRname.'.html');
                     $file_recordM['filename'] =$reportId.$fileRname.'.'.$fileLname.'.html';
                     $file = $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId. $fileRname.'.'.$fileLname.'.html');
-                    $url = moodle_url::make_pluginfile_url(
-                        $file->get_contextid(),
-                        $file->get_component(),
-                        $file->get_filearea(),
-                        $file->get_itemid(),
-                        $file->get_filepath(),
-                        $file->get_filename(),
-                        false                     // Do not force download of the file.
-                    );
+
                     
                     $id = $DB->insert_record('plagiarism_mcopyfind_match', $matchR);
                 }
@@ -222,19 +215,12 @@ class assignments {
                     'filename' => $reportId.'matches.html',
                 );
 
-                // $fs-> $fs->create_file_from_pathname($file_record,'C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\'.$reportId.'matches.html')
-                //return $fs->create_file_from_pathname($file_record,'C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\'.$reportId.'matches.html');
-                
                  $file = $fs->create_file_from_pathname($file_record ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/". $reportId.'matches.html');
-                //$reportfile
-                // var_dump($fileid);
-                // if($fileid == null)throw new Exception("WTF");
 
                 //todo update report record with fileid
                 $reportRec->fileid = $file->get_id();// itemid;
                 return $file ;
-            }else{     
-                // $fs->delete_area_files($context->id, 'plagiarism_mcopyfind', 'report', $reportId);           
+            }else{              
                 $DB->delete_records('plagiarism_mcopyfind_report', array('id'=>$reportId));
                 // No Match found
                 return;

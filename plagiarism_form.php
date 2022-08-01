@@ -17,7 +17,7 @@ class plagiarism_setup_form extends moodleform {
         $mform->addElement('checkbox', 'mcopyfind_use', get_string('usemcopyfind', 'plagiarism_mcopyfind'));
         //comparison settings should be course specific
         //settings should be an object to give the runcomparison class
-        // needs to be loaded before the comparison is run
+        // needs to be loaded before the document is loaded 
 
 
         $mform->addElement('textarea', 'mcopyfind_student_disclosure', get_string('studentdisclosure','plagiarism_mcopyfind'),'wrap="virtual" rows="6" cols="50"');
