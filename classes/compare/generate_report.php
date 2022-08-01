@@ -311,7 +311,7 @@ class generate_report{
 
             if( (!$this->m_bBriefReport) || ($xMatch == WORD_PERFECT) || ($xMatch == WORD_FLAW) || ($xMatch == WORD_FILTERED) )
             {
-                // $wordLength=strlen($word);						// find length of word
+
                 if(!$indoc->m_UTF8)$word=utf8_encode($word);
                 fprintf($this->m_fHtml,htmlspecialchars($word,false));
                 // print the character, using UTF8 translation
@@ -337,13 +337,13 @@ class generate_report{
         else fprintf($this->m_fMatchHtml,"<br>".$this->m_szSoftwareName." found ".$compare->m_MatchingDocumentPairs." matching pairs of documents.<br>\n");
         fprintf($this->m_fMatchHtml,"</body></html>\n");
         fclose($this->m_fMatchHtml);
-        $result= $this->m_fMatchHtml;
+        // $result= $this->m_fMatchHtml;
         $this->m_fMatchHtml=NULL;
         $this->m_Time= $date->getTimestamp() - $this->m_StartTicks->getTimestamp();
 
         fprintf($this->m_fLog,"\nDone. Total Time:". strval($this->m_Time) ." seconds\n");
         fclose($this->m_fLog);
         $this->m_fLog=NULL;
-        return $result;
+        // return $result;
     }
 }

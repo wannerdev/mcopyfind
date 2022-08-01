@@ -73,7 +73,7 @@ class document
         }
         else
         {
-            $this->settings = settings::getdefaultSettings();
+            $this->settings = settings::getRecommendedSettings();
         }
 
         $this->words = new words(); //not used atm
@@ -83,22 +83,19 @@ class document
             $this->m_DocumentType=DOC_TYPE_OLD;
         }
         //If we got the resource from moodle
-        if(is_resource($file) ){ //|| is_string($file)
-            // $file->
+        if(is_resource($file) ){ 
             $this->m_filep=$file;
             $this->isRes=true;
             $this->m_haveFile=true;
             $this->filename=$filename;
             $this->OpenDocument();
+
         }else{ //If we have the file by path
             $this->definePath($filename);
         }
         
     }
 
-    function setSettings($_settings){
-        $this->settings = $_settings;
-    }
 
     function definePath($infile){
         if($infile==null)
@@ -920,7 +917,6 @@ class document
         }
         else if( $this->m_contentType == "CONTENT_TYPE_PDF" )
         {
-            $chars=0;
             while(true)
             {
                 if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
@@ -935,7 +931,7 @@ class document
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
-                else if( sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1 || ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
+                else if( $this->m_char== PHP_EOL || sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1 || ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
                 {
                     $delimiterType=DEL_TYPE_NEWLINE;
                     $this->m_gotDelimiter=true;

@@ -24,91 +24,97 @@ namespace plagiarism_mcopyfind\compare;
     public  $m_bSkipNonwords = false;
     public  $m_bBasic_Characters = false;
 
-    static function getdefaultSettings(){
-        // log("Settings not loaded, using defaults <br>");
+    static function getRecommendedSettings(){
+        // log("Settings not loaded, using recommended <br>");
         return new settings(); 
     }
 
-    function setPreset($preset){
+    /**
+     * @param int preset 1 recommended,
+     *  2 Minor edit ,3 Header and footer cut off, 4 absolut matching
+     */
+    static function getPreset($preset){
+        
+        $settings = new settings();
         //Compare settings
         switch($preset){
             default :{
-                return self::getdefaultSettings();
+                $settings=self::getRecommendedSettings();
                 break;
             }
             case 2:{
-                $this->getMinorEditSettings();
+                $settings=self::getMinorEditSettings();
                 break;
             }
             case 3:{
-                 $this->getPDFHeaderandFooterSettings();
+                $settings=self::getPDFHeaderandFooterSettings();
                 break;
             }
             case  4:{
-                $this->getAbsoluteMatching();
+                $settings=self::getAbsoluteMatching();
                 break;
             }
         }
-        return $this;
+        return $settings;
     }
 
-    function getMinorEditSettings(){
-        $this->m_PhraseLength = 6;
-        $this->m_WordThreshold = 80;
-        $this->m_SkipLength = 20;
-        $this->m_MismatchTolerance=2;
-        $this->m_MismatchPercentage = 80;
+    static function getMinorEditSettings(){
+        $settings = new settings();
+        $settings->m_PhraseLength = 6;
+        $settings->m_WordThreshold = 80;
+        $settings->m_SkipLength = 20;
+        $settings->m_MismatchTolerance=2;
+        $settings->m_MismatchPercentage = 80;
+        $settings->m_bIgnoreNumbers = true;
+        $settings->m_bIgnoreCase = true;
+        $settings->m_bIgnoreNumbers = true;
+        $settings->m_bIgnoreOuterPunctuation = true;
+        $settings->m_bIgnorePunctuation = false;
+        $settings->m_bSkipLongWords = true;
 
-        $this->m_bIgnoreNumbers = true;
-        $this->m_bIgnoreCase = true;
-        $this->m_bIgnoreNumbers = true;
-        $this->m_bIgnoreOuterPunctuation = true;
-        $this->m_bIgnorePunctuation = false;
-        $this->m_bSkipLongWords = true;
-
-        return $this;
-    }
-
-
-    function getPDFHeaderandFooterSettings(){
-        $this->m_PhraseLength = 6;
-        $this->m_WordThreshold = 100;
-        $this->m_SkipLength = 20;
-        $this->m_MismatchTolerance=0;
-        $this->m_MismatchPercentage = 100;
-        $this->pdfHeader = 20;
-        $this->pdfFooter = 20;
-
-        $this->m_bBriefReport = false;
-        $this->m_bIgnoreCase = false;
-        $this->m_bIgnoreNumbers = false;
-        $this->m_bIgnoreOuterPunctuation = false;
-        $this->m_bIgnorePunctuation = false;
-        $this->m_bSkipLongWords = true;
-        $this->m_bSkipNonwords = false;
-        $this->m_bBasic_Characters = false;
-        return $this;
+        return $settings;
     }
 
 
-    function getAbsoluteMatching(){
-        $this->m_PhraseLength = 6;
-        $this->m_WordThreshold = 100;
-        $this->m_SkipLength = 20;
-        $this->m_MismatchTolerance=0;
-        $this->m_MismatchPercentage = 100;
-        $this->pdfHeader = 0;
-        $this->pdfFooter = 0;
+    static function getPDFHeaderandFooterSettings(){
+        $settings = new settings();
+        $settings->m_PhraseLength = 6;
+        $settings->m_WordThreshold = 100;
+        $settings->m_SkipLength = 20;
+        $settings->m_MismatchTolerance=0;
+        $settings->m_MismatchPercentage = 100;
+        $settings->pdfHeader = 20;
+        $settings->pdfFooter = 20;
+        $settings->m_bBriefReport = false;
+        $settings->m_bIgnoreCase = false;
+        $settings->m_bIgnoreNumbers = false;
+        $settings->m_bIgnoreOuterPunctuation = false;
+        $settings->m_bIgnorePunctuation = false;
+        $settings->m_bSkipLongWords = true;
+        $settings->m_bSkipNonwords = false;
+        $settings->m_bBasic_Characters = false;
+        return $settings;
+    }
 
-        $this->m_bBriefReport = false;
-        $this->m_bIgnoreCase = false;
-        $this->m_bIgnoreNumbers = false;
-        $this->m_bIgnoreOuterPunctuation = false;
-        $this->m_bIgnorePunctuation = false;
-        $this->m_bSkipLongWords = false;
-        $this->m_bSkipNonwords = false;
-        $this->m_bBasic_Characters = false;
-        return $this;
+
+    static function getAbsoluteMatching(){
+        $settings = new settings();
+        $settings->m_PhraseLength = 6;
+        $settings->m_WordThreshold = 100;
+        $settings->m_SkipLength = 20;
+        $settings->m_MismatchTolerance=0;
+        $settings->m_MismatchPercentage = 100;
+        $settings->pdfHeader = 0;
+        $settings->pdfFooter = 0;
+        $settings->m_bBriefReport = false;
+        $settings->m_bIgnoreCase = false;
+        $settings->m_bIgnoreNumbers = false;
+        $settings->m_bIgnoreOuterPunctuation = false;
+        $settings->m_bIgnorePunctuation = false;
+        $settings->m_bSkipLongWords = false;
+        $settings->m_bSkipNonwords = false;
+        $settings->m_bBasic_Characters = false;
+        return $settings;
     }
 
    

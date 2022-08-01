@@ -39,17 +39,15 @@ class compare_functions{
 
     public $reportGen;
 
-    function __construct( $docs, $_reportId, $preset=null){
-        if($preset==null){
-            $this->settings = settings::getdefaultSettings();
+    function __construct( $docs, $_reportId, $_setting=null){
+        $this->settings = settings::getRecommendedSettings();
+        if($_setting !=null &&  $_setting instanceof settings){
+            $this->settings=$_setting;
         }
         $this->m_pDocs = $docs;
         $this->m_Documents = count($docs);
         $this->m_CompareStep=1000;
         
-        if($preset instanceof settings){
-            $this->settings = $preset;
-        }
         $this->reportGen = new generate_report( $_reportId, $this->settings);
         
         $this->m_MatchingWordsPerfect=0;
@@ -440,7 +438,7 @@ class compare_functions{
         // $DocL;$DocR;			// left document and right document
         // $szMessage;			// status messages
         // $i;					// local index counter
-        // $irvalue;
+        // $irvalue;            // return error codes
         $this->m_MatchingWordsTotalL=0;		// total number of matching words in left document
         $this->m_MatchingWordsTotalR=0;        // total number of matching words in right document
         $g_abort = false;					    		// abort signal when true
@@ -511,6 +509,9 @@ class compare_functions{
         
         //Short Output
         // echo($szMessage);
-        return array($this->m_pReportMatches, $this->reportGen->FinishReports($this));
+        $this->reportGen->FinishReports($this);
+        // echo codes
+        echo (load_documents::ErrorcodeToString($irvalue));
+        return $this->m_pReportMatches;
     }
 }

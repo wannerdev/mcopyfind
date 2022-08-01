@@ -42,7 +42,7 @@ class assignments {
      */
     function __construct($notinstance = false) {
         $this->config = get_config('plagiarism_mcopyfind');
-        $this->settings = settings::getdefaultSettings();
+        $this->settings = settings::getRecommendedSettings();
         if ($notinstance) {
             $this->username = false;
         }
@@ -125,11 +125,12 @@ class assignments {
                 }
             }
             
-            $preset = 2; //todo load from config, set via radio buttons in lib file
-            $this->settings->setPreset($preset);
-           
-           
-            
+            $preset = 3; //todo load from config, set via radio buttons in lib file
+            $this->settings=$this->settings->getPreset($preset);
+           //Preset 1 = 23,6%
+           //Preset 2 = 23,6%
+           //Preset 3 = 23,6%
+           //Preset 4 = 37,9%
 
             foreach ($files as $file) {
                 $filename = $file->get_filename();
@@ -165,11 +166,11 @@ class assignments {
             
             $reportId = $reportRec->id;
             $cmp = new compare_functions($corpus,$reportId, $this->settings);
-            $mix = $cmp->RunComparison();
 
-            $matches= $mix[0];
-            $reportfile = $mix[1];
+            //Get results from comparison
+            $matches = $cmp->RunComparison();
             $size=count($matches);
+
             $fs = get_file_storage();
             if($size >0){
                 

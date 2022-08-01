@@ -50,8 +50,7 @@ class load_documents
     public $wordsFunc;
 
     function __construct($_settings=null){
-        $_settings = new settings();
-        if($_settings==null)$this->settings =new settings();
+        if($_settings==null)$this->settings = settings::getRecommendedSettings();
         $this->settings=$_settings;        
         $this->wordsFunc = new words();
     }
@@ -62,21 +61,17 @@ class load_documents
     {
         //count wordAmount  - counting settings
         // echo getcwd(); //working directory -> with namespace workdir changes
-        
         //$doc1=new Document("t02.rtf");
-         $doc1=new Document("t01.txt");
+        $doc1=new Document("t01.txt", $this->settings);
         //$doc1 = mew document("fund1.pdf");
 
         //$doc2=new Document("t02d.rtf");
-         $doc2=new Document("t01e.txt");
-
-        $doc1->m_DocumentType=DOC_TYPE_NEW;
-        $doc2->m_DocumentType=DOC_TYPE_NEW;
+        $doc2=new Document("t01e.txt", $this->settings);
 
         array_push($this->documents, $doc2);
         array_push($this->documents, $doc1);
         
-        $cmp = new compare_functions( $this->documents,-1,2);
+        $cmp = new compare_functions( $this->documents,-1,$this->settings);
         $irvalue =$cmp->RunComparison($this);
         
         if($irvalue instanceof int && $irvalue > -1)
@@ -93,16 +88,13 @@ class load_documents
         $wordNumber = 0;
         $wordAmount = 0;
         $hashes = [];
-        $realwords = 0;
         $word='';
         $DelimiterType = DEL_TYPE_NONE;
         // echo "\n################################\n";
         // echo "Document:".$document->path . "\n";
         // echo "\n################################\n";
         // var_dump($document->file);
-        // if($document->isRes){
-        //     $document->Getword($word,$DelimiterType);
-        // }
+
         while ($DelimiterType != DEL_TYPE_EOF) {
             $word='';
             $document->Getword($word,$DelimiterType);
@@ -191,8 +183,8 @@ class load_documents
 
 
 
-  function ErrorcodeToString($irvalue){
-     $errorString = "";
+  static function ErrorcodeToString($irvalue){
+     if($irvalue ==-1)return ; //success
      switch(intval($irvalue)) {
          case ERR_CANNOT_OPEN_FILE :
              $errorString="Error: Could not open file during comparison process";
@@ -285,6 +277,13 @@ class load_documents
 }
 
 //Testcase 1
-//  $test = new load_documents();
-//  $test->testMain();
-//  file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
+    //results Presets t01-t0e.txt
+    // 1 - 99,4
+    // 2 - 99,6
+    // 3 - 99,6
+    // 4 - 99,4
+
+    //    $settings=settings::getPreset(1);
+    //   $test = new load_documents($settings);
+    //   $test->testMain();
+    //   file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
