@@ -500,7 +500,7 @@ class compare_functions{
                     //$this->m_pDoc->m_szDocL, i think have to replace the names with the link variable, document foreign key? or contenthash?
                     $szPerfectMatch=round(100*$this->m_MatchingWordsPerfect/$DocL->m_WordsTotal,2);
                     $szOverallMatch=round(100*$this->m_MatchingWordsTotalL/$DocL->m_WordsTotal,2);
-                    $this->m_pReportMatches[] = array($nItem,$szPerfectMatch, $szOverallMatch, $DocL->filename , $DocR->filename);
+                    $this->m_pReportMatches[] = array($nItem,$szPerfectMatch, $szOverallMatch, $DocL->filename , $DocR->filename, $DocL->contenthash , $DocR->contenthash);
                 }
             }
         }

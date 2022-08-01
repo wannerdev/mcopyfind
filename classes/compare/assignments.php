@@ -125,29 +125,40 @@ class assignments {
                 }
             }
             
-            $preset = 4; //todo load from config, set via radio buttons in lib file
+            $preset =1; //todo load from config, set via radio buttons in lib file
             $this->settings=$this->settings->getPreset($preset);
+            //trying to convert smybols back to ANSI  gets ?
             //UTF8
+           //converted with notepad
            //Preset 1 = 100%
            //Preset 2 = 100%
            //Preset 3 = 100%
            //Preset 4 = 100%
 
-           //Ansi converted to UTF8 with undeciphered symbols
+           //Ansi converted to UTF8 with undeciphered symbols : t01 and t01e 
+           //Both converted with the same wrong decoder
            
            //Preset 1 = 99,4%
            //Preset 2 = 99,6%
            //Preset 3 = 99,4%
            //Preset 4 = 99,4%
 
-           //Ansi falsely converted to UTF8, with different falsely converted document(same document)
+           //Ansi falsely converted to UTF8, with different falsely converted document(same document): t01 t01e
+           //both saved with visual code
 
            //Preset 1 = 23,6%
            //Preset 2 = 91,91%
            //Preset 3 = 23,6%
            //Preset 4 = 37,9%
+
+           // one utf 8 and one ANSI
+           //one converted to utf8
+           //Preset 1 = 56%
+           //Preset 2 = 83%
+           //Preset 3 = 56%
+           //Preset 4 = 17,8%
            
-           //documents with different Ansi mistake codings ? and boxes in utf8
+           //documents with different Ansi mistake codings ? and boxes in utf8: t01 t01__
            
            //Preset 1 = no match
            //Preset 2 = 51%%
@@ -157,11 +168,13 @@ class assignments {
             foreach ($files as $file) {
                 $filename = $file->get_filename();
                 $userid = $file->get_userid();
+                
                 $pathnamehash = $file->get_pathnamehash();
-                $file = get_file_storage()->get_file_by_hash($pathnamehash)->get_content_file_handle();
-                // var_dump($file);
-                $document = new document( $filename, $this->settings,$file);
-
+                $file = get_file_storage()->get_file_by_hash($pathnamehash);
+                
+                $resource=$file->get_content_file_handle();
+                $document = new document( $filename, $this->settings, $resource);
+                $document->contenthash = $file->get_contenthash();
                 array_push($corpus, $document);
                 // array_push($hashes, $pathnamehash);
 
@@ -170,8 +183,6 @@ class assignments {
                 // dies wirft die frage auf wie die daten gespeichert werden , soll mcopyfind die daten alle kopieren?
                 // Wenn Dateien aus externen Quellen kommen und die Dateien nicht in der db sind, dann müssen sie in die db geschrieben werden.  
             }
-            // Add content hash in docIn compare functions to add them to the list of compared files.
-            // Maybe create hash pairs which were already compared and save these in the DB.
           
             $insert = new \stdClass();
             //get logged in user
@@ -203,9 +214,10 @@ class assignments {
                     $matchR->perfectmatch = $match[1];
                     $matchR->reportId = $reportId;
                     $matchR->overalmatch   = $match[2];
-                    $matchR->contenthashl   = $match[3];
-                    $matchR->contenthashr = $match[4];
-
+                    $matchR->Lname   = $match[3];
+                    $matchR->Rname = $match[4];
+                    $matchR->contenthashl   = $match[5];
+                    $matchR->contenthashr = $match[6];
                     //Remove file type from filenames
                     $index=strpos($match[3],'.'); 
                     $fileLname = substr($match[3],0,$index);

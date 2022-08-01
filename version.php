@@ -19,7 +19,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'plagiarism_mcopyfind';
-$plugin->release = '0.1.1';
+$plugin->release = '0.1.2';
 $plugin->cron = 60;
 $plugin->version = 2022030300;
 $plugin->requires = 2020061512.05;

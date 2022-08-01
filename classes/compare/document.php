@@ -60,6 +60,7 @@ class document
     // public $wordNumber = 0;
     public $realwords = 0;
     public $words =null;
+    public $contenthash =null;
     public $m_filep=null;
     public $m_fHtml=null;
     public $isRes=false;
@@ -94,6 +95,10 @@ class document
             $this->definePath($filename);
         }
         
+    }
+
+    function setcontentHash($hash){
+        $this->contenthash=$hash;
     }
 
 
