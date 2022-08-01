@@ -106,10 +106,11 @@ class document
 
     function OpenDocument(){
         $pfilename = $this->filename;
-        // Check that file exists 
         // echo "------------"; 
         // echo getcwd(); //working directory -> with namespace workdir changes
         // echo "------------";
+        
+        // Check that file exists 
         if( !$this->isRes && !fopen($pfilename,"r") ) throw new Exception("ERR_CANNOT_FIND_FILE"); // open fails if file is not found
 
         $index=strpos($pfilename,'.'); // find $filename extension
@@ -257,6 +258,7 @@ class document
     }
 
     //todo translate fully to php, search for docx handler in php
+    // Or better implement file api converter to pdf
     function OpenDocx($filename)
     {
         // $filename;
@@ -316,7 +318,7 @@ class document
             // echo $commandLine;
            if(($this->m_filep= popen($commandLine,"r")) == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE"); // if the pipe don't form, command filed.
            
-        //    echo("STREAM:".stream_get_contents($this->m_filep));
+           //echo("STREAM:".stream_get_contents($this->m_filep));
            //echo ("CMD: ".$commandLine);
            //$this->filename = "conv_". $this->name .".txt";
            $this->m_haveFile = true;
@@ -335,8 +337,6 @@ class document
     function Getword(&$word,&$delimiterType)
     {
         if(!$this->m_haveFile || $this->m_filep==null) throw new Exception("ERR_NO_FILE_OPEN Filename:". $this->filename); // if no file is open, failure
-
-        //$word[0]=0; // start with empty $word, in case we encounter EOF before we encounter a $word
         
         $wordLength = 0;
         $this->m_gotWord = false;
@@ -772,7 +772,7 @@ class document
                 if($this->m_char < 0 || $this->m_char == '' ) // check for EOF encountered 
                 {
                     // //$word[$wordLength]=0; // finish the $word off
-                    $word[$wordLength]=-1;    // finish the $word off
+                    // $word[$wordLength]=-1;    // finish the $word off ?
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -1117,7 +1117,7 @@ class document
             {
                 $thisByte=$this->GetByteTxt();
                 if($thisByte < 0) return -1; // end of file reached prematurely?
-                $thisChar = ($thisChar << 6) | ($thisByte & 0x3F); // incorporate additional 6 bits
+                $thisChar = ($thisChar << 6) | (ord($thisByte) & 0x3F); // incorporate additional 6 bits
             }
             return $thisChar;
         }
@@ -1155,7 +1155,7 @@ class document
             {
                 $thisByte=$this->GetByteHtml();
                 if($thisByte < 0) return -1; // end of file reached prematurely?
-                $thisChar = ($thisChar << 6) | ($thisByte & 0x3F); // incorporate additional 6 bits
+                $thisChar = ($thisChar << 6) | (ord($thisByte) & 0x3F); // incorporate additional 6 bits
             }
             return $thisChar;
         }
@@ -1245,7 +1245,7 @@ class document
             {
                 $thisByte=$this->GetByteDocx();
                 if($thisByte < 0) return -1; // end of file reached prematurely?
-                $thisChar = ($thisChar << 6) | ($thisByte & 0x3F); // incorporate additional 6 bits
+                $thisChar = ($thisChar << 6) | (ord($thisByte) & 0x3F); // incorporate additional 6 bits
             }
             return $thisChar;
         }

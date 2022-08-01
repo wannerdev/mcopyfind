@@ -33,3 +33,4 @@ $string['savedconfigsuccess'] = 'Plagiarism Settings Saved';
 $string['compare_all_files'] = 'Compare all';
 $string['usemcopyfind'] = 'Enable Mcopyfind';
 $string['report'] = 'Show report';
+$string['print'] = 'print';

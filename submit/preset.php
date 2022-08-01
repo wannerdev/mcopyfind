@@ -41,8 +41,7 @@ $PAGE->set_url(new moodle_url('/plagiarism/mcopyfind/submit/submit_all.php'));
 require_login();
 
 $cmid = required_param('cmid', PARAM_INT);
-//$content = optional_param('content', '', PARAM_RAW);
-//$objectid = optional_param('objectid', 0, PARAM_INT);
+
 $return = required_param('return', PARAM_TEXT);
 
  if ($CFG->version < 2011120100) {
@@ -50,9 +49,7 @@ $return = required_param('return', PARAM_TEXT);
  } else {
      $context = context_module::instance($cmid);
  }
-//$context=context_module::instance($cmid);
-//print_error($cmid);
-//print_error($PAGE->cm);
+
 $PAGE->set_context($context);
 
 if (!(has_capability('plagiarism/mcopyfind:view', $context) || has_capability('plagiarism/mcopyfind:create', $context))) {
@@ -65,34 +62,19 @@ if (!get_config('plagiarism_mcopyfind', 'enabled')) {
 }
 
 $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
-//$cm=get_fast_modinfo($courseorid)->get_cm($cmid);
-//$cm=get_fast_modinfo(4)->get_cm($cmid);
+
 
 $notification = \core\output\notification::NOTIFY_SUCCESS;
 
-$sub = new assignments();
-$fs = get_file_storage();
+//to do insert preset in database mcopyfind config , something like: 
+// $preset=$DB->get_field('plagiarism_mcopyfind_config', 'preset',array('id' => $cm->instance));
+// if($preset ==5){
+//     $preset=1;
+// }
+// $preset = $DB->insert_record('plagiarism_mcopyfind_config', ['preset'=> $preset],array('id' => $cm->instance));
 
-$file=$sub->access_all_files($cm, $context,$preset=1);
 
-$url=urldecode($return);
-if($file != null){
-    $url = moodle_url::make_pluginfile_url(
-        $file->get_contextid(),
-        $file->get_component(),
-        $file->get_filearea(),
-        $file->get_itemid(),
-        $file->get_filepath(),
-        $file->get_filename(),
-        false                     // Do not force download of the file.
-    );
-  
-}
 
-//$return = $return . "&action=".$url;
 $return = urldecode($return);
 
-//$report = new moodle_url();
-// $url->param('target',$blan = '_blank');
 redirect($return);
-//redirect($url);

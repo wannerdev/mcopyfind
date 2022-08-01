@@ -84,7 +84,10 @@ class generate_report{
         
         fprintf($this->m_fMatchHtml,"<html><title>File Comparison Report</title><body><H2>File Comparison Report</H2>\n");
         fprintf($this->m_fMatchHtml,"<H3>Produced by ". $this->m_szSoftwareName ." with These Settings:</H3><br><blockquote>Shortest Phrase to Match: ".$this->settings->m_PhraseLength ."\n");
+        fprintf($this->m_fMatchHtml,"<button class=\"btn btn-outline \" onclick=\"window.print();\">".get_string('print', 'plagiarism_mcopyfind'). "</button>");
+
         fprintf($this->m_fMatchHtml,"<br>Fewest Matches to Report: ".$this->settings->m_WordThreshold."\n");
+
         if($this->settings->m_bIgnorePunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Punctuation: Yes\n");
         else fprintf($this->m_fMatchHtml,"<br>Ignore Punctuation: No\n");
         if($this->settings->m_bIgnoreOuterPunctuation) fprintf($this->m_fMatchHtml,"<br>Ignore Outer Punctuation: Yes\n");
@@ -291,7 +294,7 @@ class generate_report{
                 $word='';
                 $iReturn = $indoc->Getword($word,$DelimiterType);		// get next word
                 if($iReturn > -1) return $iReturn;	
-                $word=utf8_decode($word);
+                if($indoc->m_UTF8)$word=utf8_decode($word);
                 $tword=$word;								// copy word to a temporary
 
                 if($this->settings->m_bIgnorePunctuation) Words::WordRemovePunctuation($tword);	// if ignore punctuation is active, remove punctuation
@@ -302,7 +305,8 @@ class generate_report{
                 if($this->settings->m_bSkipNonwords & (!Words::WordCheck($tword)) ) continue;	// if skip nonwords is active, skip them
                 break;
             }
-        
+            
+            //todo Debug why öäü characters don't get printed correctly
             // if (!generate_report::is_utf8($word))
             // for($i=0;$i<$wordLength;$i++){                    
             //     fprintf($this->m_fHtml, htmlspecialchars($word[$i])); 
@@ -337,13 +341,11 @@ class generate_report{
         else fprintf($this->m_fMatchHtml,"<br>".$this->m_szSoftwareName." found ".$compare->m_MatchingDocumentPairs." matching pairs of documents.<br>\n");
         fprintf($this->m_fMatchHtml,"</body></html>\n");
         fclose($this->m_fMatchHtml);
-        // $result= $this->m_fMatchHtml;
         $this->m_fMatchHtml=NULL;
         $this->m_Time= $date->getTimestamp() - $this->m_StartTicks->getTimestamp();
 
         fprintf($this->m_fLog,"\nDone. Total Time:". strval($this->m_Time) ." seconds\n");
         fclose($this->m_fLog);
         $this->m_fLog=NULL;
-        // return $result;
     }
 }

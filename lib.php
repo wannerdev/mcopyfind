@@ -84,20 +84,20 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         //TODO: check if this cmid has plagiarism enabled.
         $outputhtml = '';
 
-        if ($plagiarismsettings = $this->get_settings()) {
-             if (!empty($plagiarismsettings['mcopyfind_student_disclosure'])) {
+        // if ($plagiarismsettings = $this->get_settings()) {
+        //      if (!empty($plagiarismsettings['mcopyfind_student_disclosure'])) {
 
-                 $params = array('cm' => $cmid, 'name' => 'use_mcopyfind');
-                 $showdisclosure = $DB->get_field('plagiarism_mcopyfind_config', 'value', $params);
-                 if ($showdisclosure) {
-                     $outputhtml .= $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
-                     $formatoptions = new stdClass;
-                     $formatoptions->noclean = true;
-                     $outputhtml .= format_text($plagiarismsettings['mcopyfind_student_disclosure'], FORMAT_MOODLE, $formatoptions);
-                     $outputhtml .= $OUTPUT->box_end();
-                 }
-             }
-         }
+        //          $params = array('cm' => $cmid, 'name' => 'use_mcopyfind');
+        //          $showdisclosure = $DB->get_field('plagiarism_mcopyfind_config', 'value', $params);
+        //          if ($showdisclosure) {
+        //              $outputhtml .= $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
+        //              $formatoptions = new stdClass;
+        //              $formatoptions->noclean = true;
+        //              $outputhtml .= format_text($plagiarismsettings['mcopyfind_student_disclosure'], FORMAT_MOODLE, $formatoptions);
+        //              $outputhtml .= $OUTPUT->box_end();
+        //          }
+        //      }
+        //  }
          return $outputhtml;
         // echo $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
         // $formatoptions = new stdClass;
@@ -134,7 +134,6 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
    
         $output = '';
         // $DB->set_debug(true);
-
         
    
         $pageurl = $PAGE->url;
@@ -143,22 +142,23 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         if($pagination != -1){
             $pageurl->param('page', $pagination);
         }
+        $preset=1;
         $output .= html_writer::empty_tag('br');
         $params = array('cmid' => s($cm->id), 
-                        'return' => urlencode($pageurl));
+                        'return' => urlencode($pageurl),
+                        'preset' => s($preset));
                      
         $submiturl = new moodle_url('/plagiarism/mcopyfind/submit/submit_all_files.php', $params);
-        $output .= "<a class=\"btn btn-outline-secondary \" role=\"button\" > ". " MCopy settings"."</a>";
+        $incPreset = new moodle_url('/plagiarism/mcopyfind/submit/preset.php');
+        //todo load user config preset
+         // get mcopyfind config preset from database, something like:        
+        // $preset = $DB->get_field('plagiarism_mcopyfind_config', 'preset',array('id' => $cm->instance));
+
+        $output .= "<a class=\"btn btn-outline-secondary \" role=\"button\"  href=\"" .$incPreset. "\" > ". " MCopy preset:".$preset."</a>";
         $output .= "<a class=\"btn btn-secondary\" role=\"button\" target=\"_blank\" href=\"" .$submiturl. "\"> ".get_string('compare_all_files', 'plagiarism_mcopyfind')."</a>";
-        // $output .= html_writer::link($submiturl, get_string('submit_all_files', 'plagiarism_mcopyfind',"btn btn-primary"));
-    
+ 
         
         $output .= html_writer::empty_tag('br');
-
-        // $compareurl = new moodle_url('/plagiarism/mcopyfind/classes/compare/load_documents.php');
-        // $output .= html_writer::link($compareurl, "test compare function");
-        // $output .= html_writer::empty_tag('br');
-
         return $output;
     }
 

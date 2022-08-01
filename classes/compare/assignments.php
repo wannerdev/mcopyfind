@@ -83,7 +83,7 @@ class assignments {
     /**
      * Case where all assignments have to be compared
      */
-    public function access_all_files($cm, $context) {
+    public function access_all_files($cm, $context, $preset) {
         global $CFG, $DB, $USER;
         
         require_login();
@@ -125,10 +125,10 @@ class assignments {
                 }
             }
             
-            $preset = 3; //todo load from config, set via radio buttons in lib file
+            // $preset = 1; //todo load from config, set via radio buttons in lib file
             $this->settings=$this->settings->getPreset($preset);
            //Preset 1 = 23,6%
-           //Preset 2 = 23,6%
+           //Preset 2 = 91,91%
            //Preset 3 = 23,6%
            //Preset 4 = 37,9%
 

@@ -106,7 +106,7 @@ namespace plagiarism_mcopyfind\compare;
         $settings->m_MismatchPercentage = 100;
         $settings->pdfHeader = 0;
         $settings->pdfFooter = 0;
-        $settings->m_bBriefReport = false;
+        $settings->m_bBriefReport = true;
         $settings->m_bIgnoreCase = false;
         $settings->m_bIgnoreNumbers = false;
         $settings->m_bIgnoreOuterPunctuation = false;
