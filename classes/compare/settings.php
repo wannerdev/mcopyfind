@@ -117,6 +117,24 @@ namespace plagiarism_mcopyfind\compare;
         return $settings;
     }
 
-   
+    function __toString(){
+        $string = "";
+        $string .= strval($this->m_PhraseLength) . ';';
+        $string .= strval($this->m_WordThreshold) . ';';
+        $string .= strval($this->m_SkipLength) . ';';
+        $string .= strval($this->m_MismatchTolerance). ';';
+        $string .= strval($this->m_MismatchPercentage) . ';';
+        $string .= strval($this->pdfHeader) . ';';
+        $string .= strval($this->pdfFooter) . ';';        
+        $string .= strval($this->m_bBriefReport) . ';';
+        $string .= strval($this->m_bIgnoreCase) . ';';
+        $string .= strval($this->m_bIgnoreNumbers) . ';';
+        $string .= strval($this->m_bIgnoreOuterPunctuation) . ';';
+        $string .= strval($this->m_bIgnorePunctuation) . ';';
+        $string .= strval($this->m_bSkipLongWords) . ';';
+        $string .= strval($this->m_bSkipNonwords) . ';';
+        $string .= strval($this->m_bBasic_Characters) . ';';
+        return $string;
+    }
 }
 

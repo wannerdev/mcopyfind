@@ -15,10 +15,10 @@
     <TABLE NAME="plagiarism_mcopyfind_report" COMMENT="Report information of matches and id">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="fileid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="File id from report"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="matches" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="settings" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="fileid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="File id from report"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -49,6 +49,7 @@
     <TABLE NAME="plagiarism_mcopyfind_match" COMMENT="A match of two documents and their contenthashes.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="reportId" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="perfectmatch" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="overalmatch" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="contenthashl" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false"/>
@@ -56,6 +57,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="reportId" TYPE="foreign" FIELDS="reportId" REFTABLE="plagiarism_mcopyfind_report" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>

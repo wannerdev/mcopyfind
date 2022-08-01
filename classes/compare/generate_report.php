@@ -294,7 +294,7 @@ class generate_report{
                 $word='';
                 $iReturn = $indoc->Getword($word,$DelimiterType);		// get next word
                 if($iReturn > -1) return $iReturn;	
-                if($indoc->m_UTF8)$word=utf8_decode($word);
+                if(!$indoc->m_UTF8)$word=utf8_decode($word);
                 $tword=$word;								// copy word to a temporary
 
                 if($this->settings->m_bIgnorePunctuation) Words::WordRemovePunctuation($tword);	// if ignore punctuation is active, remove punctuation
@@ -341,7 +341,7 @@ class generate_report{
         else fprintf($this->m_fMatchHtml,"<br>".$this->m_szSoftwareName." found ".$compare->m_MatchingDocumentPairs." matching pairs of documents.<br>\n");
         fprintf($this->m_fMatchHtml,"</div>");
         fprintf($this->m_fMatchHtml,"<br>");
-        fprintf($this->m_fMatchHtml,"<button class=\"btn btn-outline \" onclick=\"window.print('#report');\">".get_string('print', 'plagiarism_mcopyfind'). "</button>");
+        fprintf($this->m_fMatchHtml,"<button class=\"btn btn-outline \" onclick=\"window.print('report');\">".get_string('print', 'plagiarism_mcopyfind'). "</button>");
 
         fprintf($this->m_fMatchHtml,"</body></html>\n");
         fclose($this->m_fMatchHtml);

@@ -263,9 +263,9 @@ class document
     {
         // $filename;
         // $filenameLength;
-        // wcstombs_s($filenameLength, $filename, 256, $filename, _TRUNCATE); // convert wide-character $filename to byte $filename
+         // wcstombs_s($filenameLength, $filename, 256, $filename, _TRUNCATE); // convert wide-character $filename to byte $filename
 
-        // $m_docxZipArchive = unzOpen($filename);
+        //  $m_docxZipArchive = unzOpen($filename);
         // if ($m_docxZipArchive == NULL)
         // {
         //     $this->m_filep = NULL;

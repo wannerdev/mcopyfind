@@ -125,12 +125,34 @@ class assignments {
                 }
             }
             
-             $preset = 2; //todo load from config, set via radio buttons in lib file
+            $preset = 4; //todo load from config, set via radio buttons in lib file
             $this->settings=$this->settings->getPreset($preset);
+            //UTF8
+           //Preset 1 = 100%
+           //Preset 2 = 100%
+           //Preset 3 = 100%
+           //Preset 4 = 100%
+
+           //Ansi converted to UTF8 with undeciphered symbols
+           
+           //Preset 1 = 99,4%
+           //Preset 2 = 99,6%
+           //Preset 3 = 99,4%
+           //Preset 4 = 99,4%
+
+           //Ansi falsely converted to UTF8, with different falsely converted document(same document)
+
            //Preset 1 = 23,6%
            //Preset 2 = 91,91%
            //Preset 3 = 23,6%
            //Preset 4 = 37,9%
+           
+           //documents with different Ansi mistake codings ? and boxes in utf8
+           
+           //Preset 1 = no match
+           //Preset 2 = 51%%
+           //Preset 3 = no match
+           //Preset 4 = 17,9%
 
             foreach ($files as $file) {
                 $filename = $file->get_filename();
@@ -179,10 +201,12 @@ class assignments {
                     $matchR = new stdClass();
                     $matchR->id = $match[0];
                     $matchR->perfectmatch = $match[1];
+                    $matchR->reportId = $reportId;
                     $matchR->overalmatch   = $match[2];
                     $matchR->contenthashl   = $match[3];
                     $matchR->contenthashr = $match[4];
-                    
+
+                    //Remove file type from filenames
                     $index=strpos($match[3],'.'); 
                     $fileLname = substr($match[3],0,$index);
                     $index=strpos($match[4],'.'); 
@@ -219,6 +243,9 @@ class assignments {
 
                 //todo update report record with fileid
                 $reportRec->fileid = $file->get_id();// itemid;
+                $reportRec->matches = $size;// itemid;
+                $reportRec->settings = strval($this->settings);// itemid;
+                $DB->update_record('plagiarism_mcopyfind_report',$reportRec);
                 return $file ;
             }else{              
                 $DB->delete_records('plagiarism_mcopyfind_report', array('id'=>$reportId));
