@@ -20,6 +20,7 @@ If you are using Linux use the <a href="https://docs.moodle.org/39/en/Installing
 
 If you want to contribute to the Plugin development the learnMoodle <a href="https://learn.moodle.org/course/view.php?id=26428"> Plugin developer couse </a> is recommended, or better the newer <a href="https://moodle.academy/course/view.php?id=64">academy course</a>.
 The Sql client used was <a href="https://www.heidisql.com/download.php">heidisql</a>.
+The <a href="https://moodledev.io/general/documentation">developer documentation</a> is also helpful.
 
 ## Installing via uploaded ZIP file ##
 
