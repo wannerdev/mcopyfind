@@ -66,12 +66,17 @@ $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
 
 $notification = \core\output\notification::NOTIFY_SUCCESS;
 
-//to do insert preset in database mcopyfind config , something like: 
-// $preset=$DB->get_field('plagiarism_mcopyfind_config', 'preset',array('id' => $cm->instance));
-// if($preset ==5){
-//     $preset=1;
-// }
-// $preset = $DB->insert_record('plagiarism_mcopyfind_config', ['preset'=> $preset],array('id' => $cm->instance));
+//for now global should be course specific
+$preset = get_config( 'plagiarism_mcopyfind','preset');
+if($preset!=null){
+    $preset++;
+    if($preset ==5){
+       $preset=1;
+   }
+}else{
+    $preset=1;
+}
+set_config('preset', intval($preset), 'plagiarism_mcopyfind');
 
 
 

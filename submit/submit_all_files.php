@@ -73,7 +73,7 @@ $notification = \core\output\notification::NOTIFY_SUCCESS;
 $sub = new assignments();
 $fs = get_file_storage();
 
-$file=$sub->access_all_files($cm, $context,$preset=1);
+$file=$sub->access_all_files($cm, $context);
 
 $url=urldecode($return);
 if($file != null){

@@ -66,7 +66,7 @@ class load_documents
         //$doc1 = mew document("fund1.pdf");
 
         //$doc2=new Document("t02d.rtf");
-        $doc2=new Document("t01e.txt", $this->settings);
+        $doc2=new Document("t01K.txt", $this->settings);
 
         array_push($this->documents, $doc2);
         array_push($this->documents, $doc1);
@@ -277,13 +277,13 @@ class load_documents
 }
 
 //Testcase 1
-    //results Presets t01-t0e.txt
-    // 1 - 99,4
-    // 2 - 99,6
-    // 3 - 99,6
-    // 4 - 99,4
+//results Presets t01-t0e.txt
+// 1 - 99,4
+// 2 - 99,6
+// 3 - 99,6
+// 4 - 99,4
 
-    //    $settings=settings::getPreset(1);
-    //   $test = new load_documents($settings);
-    //   $test->testMain();
-    //   file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
+//     $settings=settings::getPreset(1);
+//    $test = new load_documents($settings);
+//    $test->testMain();
+//    file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");

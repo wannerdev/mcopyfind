@@ -235,7 +235,7 @@ class generate_report{
 
     function DocumentToHtml(Document $indoc,$MatchMark, $MatchAnchor, $words, $href)
     {
-        fprintf($this->m_fHtml,"<h1>%s</h1>\n",$indoc->name);
+        fprintf($this->m_fHtml,"<h1>%s</h1>\n",$indoc->filename);
         fprintf($this->m_fHtml,"<p>");
         $wordcount=0;								// current word number
 
@@ -341,7 +341,8 @@ class generate_report{
         else fprintf($this->m_fMatchHtml,"<br>".$this->m_szSoftwareName." found ".$compare->m_MatchingDocumentPairs." matching pairs of documents.<br>\n");
         fprintf($this->m_fMatchHtml,"</div>");
         fprintf($this->m_fMatchHtml,"<br>");
-        fprintf($this->m_fMatchHtml,"<button class=\"btn btn-outline \" onclick=\"window.print('report');\">".get_string('print', 'plagiarism_mcopyfind'). "</button>");
+        //get_string('print', 'plagiarism_mcopyfind')
+        fprintf($this->m_fMatchHtml,"<button class=\"btn btn-outline \" onclick=\"window.print('report');\">print</button>");
 
         fprintf($this->m_fMatchHtml,"</body></html>\n");
         fclose($this->m_fMatchHtml);

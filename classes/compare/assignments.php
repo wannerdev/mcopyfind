@@ -125,45 +125,10 @@ class assignments {
                 }
             }
             
-            $preset =1; //todo load from config, set via radio buttons in lib file
+            //$preset =3; //todo load from config, set via radio buttons in lib file
+            $preset=get_config( 'plagiarism_mcopyfind','preset');
             $this->settings=$this->settings->getPreset($preset);
-            //trying to convert smybols back to ANSI  gets ?
-            //UTF8
-           //converted with notepad
-           //Preset 1 = 100%
-           //Preset 2 = 100%
-           //Preset 3 = 100%
-           //Preset 4 = 100%
-
-           //Ansi converted to UTF8 with undeciphered symbols : t01 and t01e 
-           //Both converted with the same wrong decoder
            
-           //Preset 1 = 99,4%
-           //Preset 2 = 99,6%
-           //Preset 3 = 99,4%
-           //Preset 4 = 99,4%
-
-           //Ansi falsely converted to UTF8, with different falsely converted document(same document): t01 t01e
-           //both saved with visual code
-
-           //Preset 1 = 23,6%
-           //Preset 2 = 91,91%
-           //Preset 3 = 23,6%
-           //Preset 4 = 37,9%
-
-           // one utf 8 and one ANSI
-           //one converted to utf8
-           //Preset 1 = 56%
-           //Preset 2 = 83%
-           //Preset 3 = 56%
-           //Preset 4 = 17,8%
-           
-           //documents with different Ansi mistake codings ? and boxes in utf8: t01 t01__
-           
-           //Preset 1 = no match
-           //Preset 2 = 51%%
-           //Preset 3 = no match
-           //Preset 4 = 17,9%
 
             foreach ($files as $file) {
                 $filename = $file->get_filename();
@@ -214,8 +179,8 @@ class assignments {
                     $matchR->perfectmatch = $match[1];
                     $matchR->reportId = $reportId;
                     $matchR->overalmatch   = $match[2];
-                    $matchR->Lname   = $match[3];
-                    $matchR->Rname = $match[4];
+                    $matchR->lname   = $match[3];
+                    $matchR->rname = $match[4];
                     $matchR->contenthashl   = $match[5];
                     $matchR->contenthashr = $match[6];
                     //Remove file type from filenames
