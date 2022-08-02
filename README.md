@@ -1,7 +1,7 @@
-Mcopyfind
+# Mcopyfind
 Mcopyfind is a Moodle plagiarism plugin based on wcopyfind/copyfind which aims to provide a usable tool to detect collusion.
 
-Setup to start developing
+## Setup to start developing
 To start developing you need a running moodle instance. If you use windows you can Download pre packaged <a href="https://docs.moodle.org/311/en/Windows_installation">windows moodle</a>.
 With the windows version we change the opcache settings to speed up the refreshrate of our php files. Change cache settings to be able to develop more comfortably by disabling the opcache in the php.ini
 At the bottom of the file change the settings to the following:
