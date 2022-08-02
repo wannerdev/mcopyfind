@@ -65,8 +65,6 @@ if (!get_config('plagiarism_mcopyfind', 'enabled')) {
 }
 
 $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
-//$cm=get_fast_modinfo($courseorid)->get_cm($cmid);
-//$cm=get_fast_modinfo(4)->get_cm($cmid);
 
 $notification = \core\output\notification::NOTIFY_SUCCESS;
 
@@ -74,8 +72,9 @@ $sub = new assignments();
 $fs = get_file_storage();
 
 $file=$sub->access_all_files($cm, $context);
-
+//no Match ?? return to the previous page
 $url=urldecode($return);
+
 if($file != null){
     $url = moodle_url::make_pluginfile_url(
         $file->get_contextid(),
@@ -89,8 +88,4 @@ if($file != null){
   
 }
 
-//$return = $return . "&action=".$url;
-//$return = urldecode($return);
-
-//redirect($return);
 redirect($url);

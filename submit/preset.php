@@ -67,7 +67,7 @@ $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
 $notification = \core\output\notification::NOTIFY_SUCCESS;
 
 //for now global should be course specific
-$preset = get_config( 'plagiarism_mcopyfind','preset');
+$preset = get_config( 'plagiarism_mcopyfind',$cmid.'preset');
 if($preset!=null){
     $preset++;
     if($preset ==5){
@@ -76,7 +76,7 @@ if($preset!=null){
 }else{
     $preset=1;
 }
-set_config('preset', intval($preset), 'plagiarism_mcopyfind');
+set_config($cmid.'preset', intval($preset), 'plagiarism_mcopyfind');
 
 
 

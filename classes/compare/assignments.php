@@ -126,7 +126,7 @@ class assignments {
             }
             
             //$preset =3; //todo load from config, set via radio buttons in lib file
-            $preset=get_config( 'plagiarism_mcopyfind','preset');
+            $preset=get_config( 'plagiarism_mcopyfind',$cm->id.'preset');
             $this->settings=$this->settings->getPreset($preset);
            
 

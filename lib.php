@@ -149,7 +149,7 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         $submiturl = new moodle_url('/plagiarism/mcopyfind/submit/submit_all_files.php', $params);
         $incPreset = new moodle_url('/plagiarism/mcopyfind/submit/preset.php', $params);
         //todo load user config preset
-        $preset=get_config( 'plagiarism_mcopyfind','preset');
+        $preset=get_config( 'plagiarism_mcopyfind',$cm->id.'preset');
          // get mcopyfind config preset from database, something like:        
         // $preset = $DB->get_field('plagiarism_mcopyfind_config', 'preset',array('id' => $cm->instance));
         switch($preset){
@@ -170,7 +170,8 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
                 $preset="AbsoluteMatching";
             }
         }
-        $output .= "<a class=\"btn btn-outline-secondary \" role=\"button\"  href=\"" .$incPreset. "\" > ". " MCopy preset:".$preset."</a>";
+        $output .=  "<h5>MCopyfind</h5>";
+        $output .= "<a class=\"btn btn-outline-secondary \" role=\"button\"  href=\"" .$incPreset. "\" > ". "preset:".$preset."</a>";
         $output .= "<a class=\"btn btn-secondary\" role=\"button\" target=\"_blank\" href=\"" .$submiturl. "\"> ".get_string('compare_all_files', 'plagiarism_mcopyfind')."</a>";
  
         
