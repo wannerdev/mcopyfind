@@ -194,14 +194,14 @@ class assignments {
                         'filearea' => 'report',
                         'itemid' => $reportId,
                         'filepath' => '/',
-                        'filename' => $reportId.'SBS.'. $fileRname .$fileLname.'_1.html',
+                        'filename' => $reportId.'SBS.'. $fileRname .$fileLname.'.html',
                     );
-                    $file = $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId."SBS.". $fileRname. $fileLname.'_1.html');
+                    $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId."SBS.". $fileRname. $fileLname.'.html');
                     $file_recordM['filename'] =$reportId.$fileLname.'.'.$fileRname.'.html';
 
-                    $file = $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId. $fileLname.'.'.$fileRname.'.html');
+                    $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId. $fileLname.'.'.$fileRname.'.html');
                     $file_recordM['filename'] =$reportId.$fileRname.'.'.$fileLname.'.html';
-                    $file = $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId. $fileRname.'.'.$fileLname.'.html');
+                    $fs->create_file_from_pathname($file_recordM ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/".$reportId. $fileRname.'.'.$fileLname.'.html');
 
                     
                     $id = $DB->insert_record('plagiarism_mcopyfind_match', $matchR);

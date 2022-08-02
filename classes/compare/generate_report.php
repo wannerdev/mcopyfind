@@ -139,8 +139,8 @@ class generate_report{
         $hrefR = $this->reportId . $hrefR;
     
 
-        $dstring = strval($compare->m_MatchingDocumentPairs);
-        $hrefB = $this->reportId."SBS.".$this->m_pDocR->name . $this->m_pDocL->name . "_" . $dstring . ".html";
+        // $dstring = strval($compare->m_MatchingDocumentPairs); "_" . $dstring .
+        $hrefB = $this->reportId."SBS.".$this->m_pDocR->name . $this->m_pDocL->name .  ".html";
 
    
         $szPerfectMatch =($compare->m_MatchingWordsPerfect. " (" . round(100*$compare->m_MatchingWordsPerfect/$this->m_pDocL->m_WordsTotal,2)."% L, ".  round(100*$compare->m_MatchingWordsPerfect/$this->m_pDocR->m_WordsTotal,2)."% R)");
