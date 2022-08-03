@@ -133,14 +133,16 @@ class assignments {
             foreach ($files as $file) {
                 $filename = $file->get_filename();
                 $userid = $file->get_userid();
-                
-                $pathnamehash = $file->get_pathnamehash();
-                $file = get_file_storage()->get_file_by_hash($pathnamehash);
-                
-                $resource=$file->get_content_file_handle();
-                $document = new document( $filename, $this->settings, $resource);
-                $document->contenthash = $file->get_contenthash();
-                array_push($corpus, $document);
+                $optout = get_user_preferences('plagiarism_mcopyfind_optout', false, $userid);
+                if(!$optout){
+                    $pathnamehash = $file->get_pathnamehash();
+                    $file = get_file_storage()->get_file_by_hash($pathnamehash);
+                    
+                    $resource=$file->get_content_file_handle();
+                    $document = new document( $filename, $this->settings, $resource);
+                    $document->contenthash = $file->get_contenthash();
+                    array_push($corpus, $document);
+                }
                 // array_push($hashes, $pathnamehash);
 
                 // Momentan erstmal nur die reports speichern.

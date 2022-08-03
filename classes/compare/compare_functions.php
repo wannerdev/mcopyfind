@@ -442,7 +442,7 @@ class compare_functions{
         $this->m_MatchingWordsTotalL=0;		// total number of matching words in left document
         $this->m_MatchingWordsTotalR=0;        // total number of matching words in right document
         $g_abort = false;					    		// abort signal when true
-        
+        $irvalue=-1;
                
         fprintf($this->reportGen->m_fLog,"Starting to Load and Hash-Code Documents\n");					// log loading step
         foreach ($this->m_pDocs as $doc) {

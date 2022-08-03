@@ -25,6 +25,17 @@ $string['pluginname'] = 'plagiarism_mcopyfind';
 $string['studentdisclosuredefault']  ='All files uploaded will be submitted to a plagiarism detection service';
 $string['studentdisclosure'] = 'Student Disclosure';
 $string['studentdisclosure_help'] = 'This text will be displayed to all students on the file upload page.';
+
+$string['optin'] = 'Plagiarism opt-in';
+$string['optin_explanation'] = 'You chose to opt-in to plagiarism detection. From now on, any assignments you submit will be compared with other documents';
+$string['optout'] = 'Plagiarism opt-out';
+$string['optout_explanation'] = 'You chose to opt-out of plagiarism detection. Your submitted assignments will <b>not</b> be compared with other documents submitted by other students.';
+$string['studentdisclosure'] = 'Student Disclosure';
+$string['studentdisclosure_help'] = 'This text will be displayed to all students on the file upload page.';
+$string['studentdisclosuredefault'] = 'All files uploaded will be submitted to a plagiarism detection service';
+$string['studentdisclosureoptedout'] = 'You have opted-out from plagiarism detection';
+$string['studentdisclosureoptin'] = 'Click here to opt-in to plagiarism detection';
+$string['studentdisclosureoptout'] = 'Click here to opt-out from plagiarism detection';
 $string['mcopyfind_student_disclosure'] = 'Agree to compare this with mcopyfind.';
 $string['mcopyfindexplain'] = 'For more information on this plugin see: ';
 $string['mcopyfind'] = 'Mcopyfind a plagiarism plugin';

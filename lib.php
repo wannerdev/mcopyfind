@@ -83,7 +83,24 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         $plagiarismsettings = (array)get_config('plagiarism');
         //TODO: check if this cmid has plagiarism enabled.
         $outputhtml = '';
+        
+        //Default is that the student permission is needed
 
+        $url = new moodle_url('/plagiarism/mcopyfind/optout.php', array('sesskey' => sesskey(),
+            'cmid' => $cmid));
+        if (get_user_preferences('plagiarism_mcopyfind_optout', false)) {
+            $outputhtml .= get_string('studentdisclosureoptedout', 'plagiarism_mcopyfind');
+            $outputhtml .= html_writer::empty_tag('br');
+
+            $url->param('optout', 0);
+            $outputhtml .= html_writer::link($url, get_string('studentdisclosureoptin', 'plagiarism_mcopyfind'));
+        } else {
+            $outputhtml .= get_config('plagiarism_mcopyfind', 'mcopyfind_student_disclosure');
+            $outputhtml .= html_writer::empty_tag('br');
+
+            $url->param('optout', 1);
+            $outputhtml .= html_writer::link($url, get_string('studentdisclosureoptout', 'plagiarism_mcopyfind'));
+        }
         // if ($plagiarismsettings = $this->get_settings()) {
         //      if (!empty($plagiarismsettings['mcopyfind_student_disclosure'])) {
 
