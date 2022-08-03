@@ -179,7 +179,7 @@ class assignments {
                     $matchR = new stdClass();
                     $matchR->id = $match[0];
                     $matchR->perfectmatch = $match[1];
-                    $matchR->reportId = $reportId;
+                    $matchR->reportid = $reportId;
                     $matchR->overalmatch   = $match[2];
                     $matchR->lname   = $match[3];
                     $matchR->rname = $match[4];
