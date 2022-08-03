@@ -273,6 +273,7 @@ class document
             
         $zip = zip_open($input_file);
         $zip = new ZipArchive();
+        $this->m_docxByteBuffer=$zip->open($input_file);
         if ($zip->open($input_file)) {
             $content = $zip->getFromName("word/document.xml");
             $zip->close();
@@ -1274,9 +1275,11 @@ class document
             else
             {
                 //find replacement
+                //todo https://www.php.net/manual/de/class.ziparchive.php
                 // $zip = new ZipArchive();
                 // $this->m_ByteCountDocx = $zip->open($this->m_docxZipArchive);
                 // $this->m_ByteCountDocx = unzReadCurrentFile($m_docxZipArchive,$m_docxByteBuffer,$m_docxByteBufferLength);
+                // $zip->getFromIndex($this->m_ByteIndexDocx,$this->m_docxByteBufferLength);
                 $this->m_ByteIndexDocx = 0;
                 if($this->m_ByteCountDocx==0)
                 {
