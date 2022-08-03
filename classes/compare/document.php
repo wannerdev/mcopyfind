@@ -5,6 +5,7 @@ namespace plagiarism_mcopyfind\compare;
 use ErrorException;
 use Exception;
 use IntlChar;
+use ZipArchive;
 
 const DEL_TYPE_NONE =0;
 const DEL_TYPE_WHITE = 1;
@@ -93,6 +94,7 @@ class document
 
         }else{ //If we have the file by path
             $this->definePath($filename);
+            $this->OpenDocument();
         }
         
     }
@@ -106,7 +108,6 @@ class document
         if($infile==null)
             return;
         $this->filename = $infile;
-        $this->OpenDocument();
     }
 
     function OpenDocument(){
@@ -123,7 +124,6 @@ class document
         $pstr=substr($pfilename,$index+1); // get extension 
         if($pstr == NULL) throw new Exception("ERR_CANNOT_FIND_FILE_EXTENSION"); // open fails if there is no file extension
         
-
         if( (strcmp($pstr,"htm") == 0 ) || (strcmp($pstr,"html") == 0 ) ) $this->m_contentType="CONTENT_TYPE_HTML";
         else if ( strcmp($pstr,"docx") == 0 ) $this->m_contentType="CONTENT_TYPE_DOCX";
         else if ( strcmp($pstr,"doc") == 0 ) $this->m_contentType="CONTENT_TYPE_DOC";
@@ -262,38 +262,48 @@ class document
         return -1;
     }
 
-    //todo translate fully to php, search for docx handler in php
-    // Or better implement file api converter to pdf
-    function OpenDocx($filename)
+
+    function OpenDocx($input_file)
     {
         // $filename;
         // $filenameLength;
-         // wcstombs_s($filenameLength, $filename, 256, $filename, _TRUNCATE); // convert wide-character $filename to byte $filename
+        // wcstombs_s($filenameLength, $filename, 256, $filename, _TRUNCATE); // convert wide-character $filename to byte $filename
+        $text="";
+        if(!$input_file || !file_exists($input_file)) return false;
+            
+        $zip = zip_open($input_file);
+        $zip = new ZipArchive();
+        if ($zip->open($input_file)) {
+            $content = $zip->getFromName("word/document.xml");
+            $zip->close();
+            $content = str_replace('</w:r></w:p></w:tc><w:tc>', " ", $content);
+            $content = str_replace('</w:r></w:p>', "\r\n", $content);
 
-        //  $m_docxZipArchive = unzOpen($filename);
-        // if ($m_docxZipArchive == NULL)
-        // {
-        //     $this->m_filep = NULL;
-        //     throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE";
-        // }
+            $text= strip_tags($content);
+        }
+        
 
-        // $rv = unzLocateFile(m_docxZipArchive, "word/document.xml", NULL);
-        // if(rv != UNZ_OK)
-        // {
-        //     unzClose(m_docxZipArchive);
-        //     m_docxZipArchive=NULL;
-        //     $this->m_filep = NULL;
-        //     return ERR_BAD_DOCX_FILE;
-        // }
-        // unzOpenCurrentFile(m_docxZipArchive);
-        // $this->m_haveFile = true;
-        // $this->m_UTF8 = true;
-        // $this->m_ByteIndexDocx=0; // start at first byte
-        // $this->m_ByteCountDocx=0; // there are currently zero $bytes
-        // $this->m_filep = 1; // indicate that the file was found?
+        //For now ugly workaround convert docx to txt
+        // $index=strpos($input_file,'.'); // find $filename extension
+        // $name = substr($input_file,0,$index); // get $filename without extension
+        // $this->m_filep= fopen($name.'.txt',"rw");
+        // fwrite($this->m_filep , $kv_strip_texts);
+        // $this->OpenTxt($name.'.txt'); 
+        // $this->m_contentType="CONTENT_TYPE_TXT"; 
+        
+        // $this->m_filep= $kv_strip_texts;
+        // echo();
+        // $this->m_filep=$kv_texts;//fopen($filename,"r");
+        // echo('-----------------------------------------------\n');
+        // echo($this->m_filep);
+        // echo('-----------------------------------------------\n');
+        $this->m_haveFile = true;
+        $this->m_UTF8 = true;
+        $this->m_ByteIndexDocx=0; // start at first byte
+        $this->m_ByteCountDocx=0; // there are currently zero $bytes
         return -1;
     }
-
+    
     function OpenRtf($filename)
     {
         $this->m_filep=fopen($filename,"r");
@@ -308,9 +318,9 @@ class document
         // echo ("Filename Openpdf:".$filename); 
 
         $m_pdftotextFile= __DIR__."\\pdftotext.exe";
-        $m_path= "C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\classes\\compare\\";
+        $m_path= __DIR__."\\"; 
         $m_pdftotext= file_exists($m_pdftotextFile);
-        // echo $m_pdftotextFile;
+
         if($m_pdftotext){ 
            // pdftotext program exists, so use it 
            // Add header and footer remove margins
@@ -329,7 +339,6 @@ class document
            $this->m_haveFile = true;
            $this->m_UTF8 = true;
            $this->m_pdftotext =true;
-
            return -1; // we should now have the text portion of the PDF file as a readable file attached to $this->m_filep
         }
          else{ // don't have pdftotext program avialable, so use default pdf function
@@ -341,7 +350,8 @@ class document
         
     function Getword(&$word,&$delimiterType)
     {
-        if(!$this->m_haveFile || $this->m_filep==null) throw new Exception("ERR_NO_FILE_OPEN Filename:". $this->filename); // if no file is open, failure
+        if(!$this->m_haveFile ||
+         $this->m_filep==null) throw new Exception("ERR_NO_FILE_OPEN Filename:". $this->filename); // if no file is open, failure
         
         $wordLength = 0;
         $this->m_gotWord = false;
@@ -349,6 +359,7 @@ class document
         $delimiterType = DEL_TYPE_NONE;
 
         //switch($this->m_contentType){ probably nicer with switch case syntax
+        //DocX Needs debugging
         if($this->m_contentType == "CONTENT_TYPE_DOCX")
         {
             while(true)
@@ -400,7 +411,7 @@ class document
                 else if(IntlChar::iscntrl($this->m_char)) continue; // skip other control characters
                 else if($this->m_gotDelimiter) // have we just reached the end of one or more delimiters?
                 {
-                    if($ $this->m_gotWord) // make sure that we have a $word
+                    if($this->m_gotWord) // make sure that we have a $word
                     {
                         //$word[$wordLength]=0; // finish the $word off
                         $this->m_gotChar=true;
@@ -415,7 +426,7 @@ class document
                 }
                 else if($this->m_char == '&') // skip and ignore &xxx; codes.
                 {
-                    $ampBuffer[256];
+                    $ampBuffer=[];
                     $ampBufferCount = 0;
                     while(true)
                     {
@@ -640,7 +651,7 @@ class document
                 }
                 else if($this->m_char == '&') // skip and ignore &xxx; codes.
                 {
-                    $ampBuffer[256];
+                    $ampBuffer=[];
                     $ampBufferCount = 0;
                     while(true)
                     {
@@ -766,18 +777,11 @@ class document
         {            
             while(true)
             {
-                // echo ("Newline characters:". strval($chars) . "\n");
                 if($this->m_gotChar) $this->m_gotChar = false;  // check to see if we already have the next character
                 else $this->m_char=$this->GetCharTxt();         // otherwise, get the next character (normal or UTF-8)
-                // echo("Char: ".$this->m_char. "\n");
-                // if($this->m_char == '012' || ord($this->m_char) == 012 ){ // check for page break encountered 
-                //     echo "<h1>page break".$this->m_char."</h1>";
-                //     $this->m_pageBreak = true;
-                // }
+
                 if($this->m_char < 0 || $this->m_char == '' ) // check for EOF encountered 
                 {
-                    // //$word[$wordLength]=0; // finish the $word off
-                    // $word[$wordLength]=-1;    // finish the $word off ?
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
@@ -825,8 +829,6 @@ class document
                 if($this->m_gotChar) $this->m_gotChar = false; // check to see if we already have the next character
                 else $this->m_char=fgetc($this->m_filep);
                 
-                if(ord($this->m_char )== 0) $this->m_char=fgetc( $this->m_filep); // skip a single null character (but not multiple nulls)
-                
                 if(ord($this->m_char )>= 0x80)	// convert extended ISO8559-1 characters into appropriate unicode characters
                 {
                     switch( $this->m_char )
@@ -865,13 +867,13 @@ class document
                     case 159: $this->m_char = 376; break;
                     }
                 }
-                else if(ord($this->m_char )< 0 || $this->m_char == false) // check for EOF encountered
+                else if($this->m_char< 0 || $this->m_char == '') // check for EOF encountered
                 {
                     //$word[$wordLength]=0; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
-                else if( ($this->m_char == '\n') || ($this->m_char == '\r')) // check for newline characters
+                else if( sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1 ||($this->m_char == '\n') || ($this->m_char == '\r')) // check for newline characters
                 {
                     $delimiterType=DEL_TYPE_NEWLINE;
                     $this->m_gotDelimiter=true;
@@ -929,14 +931,13 @@ class document
                 {
                     $this->m_char=$this->GetCharPdf();
                 }
-                // || $this->m_char == false || $this->m_char == false
                 if($this->m_char < 0  ) // check for EOF encountered
                 {
                     // $word[$wordLength]='0'; // finish the $word off
                     $delimiterType = DEL_TYPE_EOF;
                     return -1;
                 }
-                else if( $this->m_char== PHP_EOL || sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1 || ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
+                else if( sizeof(preg_split('/\r\n|\r|\n/',$this->m_char)) >1 || ($this->m_char == '\n') || ($this->m_char == '\r') ) // check for newline characters
                 {
                     $delimiterType=DEL_TYPE_NEWLINE;
                     $this->m_gotDelimiter=true;
@@ -946,7 +947,7 @@ class document
                     $delimiterType=max($delimiterType,DEL_TYPE_WHITE); // if delimiter isn't already at NEWLINE, set it to WHITE
                     $this->m_gotDelimiter=true;
                 }
-                else if( (IntlChar::iscntrl($this->m_char) && ord($this->m_char) < 0x80) || (ord($this->m_char) == 0xff) ) continue; // skip any other control characters
+                else if( (IntlChar::iscntrl(ord($this->m_char)) && ord($this->m_char) < 0x80) || (ord($this->m_char) == 0xff) ) continue; // skip any other control characters
                 else if($this->m_gotDelimiter) // have we just reached the end of one or more delimiters?
                 {
                     if($this->m_gotWord) // make sure that we have a $word
@@ -1265,14 +1266,16 @@ class document
             if($this->m_ByteIndexDocx < $this->m_ByteCountDocx)
             {
                 //where do we get the buffer from? 
-                //$thisByte=$m_docxByteBuffer[$this->m_ByteIndexDocx];
+                $thisByte=$this->m_docxByteBuffer[$this->m_ByteIndexDocx];
                 $this->m_ByteIndexDocx++;
-                return -1;//$thisByte;
+                return $thisByte;
             }
             else if($this->m_eof) return -1;
             else
             {
                 //find replacement
+                // $zip = new ZipArchive();
+                // $this->m_ByteCountDocx = $zip->open($this->m_docxZipArchive);
                 // $this->m_ByteCountDocx = unzReadCurrentFile($m_docxZipArchive,$m_docxByteBuffer,$m_docxByteBufferLength);
                 $this->m_ByteIndexDocx = 0;
                 if($this->m_ByteCountDocx==0)

@@ -62,11 +62,15 @@ class load_documents
         //count wordAmount  - counting settings
         // echo getcwd(); //working directory -> with namespace workdir changes
         //$doc1=new Document("t02.rtf");
-        $doc1=new Document("t01.txt", $this->settings);
+        //$doc1=new Document("t01.txt", $this->settings);
+        // $doc1=new Document("textX.docx", $this->settings);
+        $doc1=new Document("fund1.pdf", $this->settings);
         //$doc1 = mew document("fund1.pdf");
 
         //$doc2=new Document("t02d.rtf");
-        $doc2=new Document("t01K.txt", $this->settings);
+        //$doc2=new Document("t01K.txt", $this->settings);
+        // $doc2=new Document("textXcopy.docx", $this->settings);
+        $doc2=new Document("fund2.pdf", $this->settings);
 
         array_push($this->documents, $doc2);
         array_push($this->documents, $doc1);
@@ -74,9 +78,9 @@ class load_documents
         $cmp = new compare_functions( $this->documents,-1,$this->settings);
         $irvalue =$cmp->RunComparison($this);
         
-        if($irvalue instanceof int && $irvalue > -1)
+         if($irvalue instanceof int && $irvalue > -1)
         {
-            echo $this->ErrorcodeToString($irvalue);
+             echo $this->ErrorcodeToString($irvalue);
         }
         
     }
@@ -283,7 +287,7 @@ class load_documents
 // 3 - 99,6
 // 4 - 99,4
 
-//     $settings=settings::getPreset(1);
-//    $test = new load_documents($settings);
-//    $test->testMain();
-//    file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html");
+// $settings=settings::getPreset(1);
+// $test = new load_documents($settings);
+// $test->testMain();
+// echo(file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html"));
