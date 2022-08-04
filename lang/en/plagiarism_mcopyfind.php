@@ -22,10 +22,6 @@
  */
 
 $string['pluginname'] = 'plagiarism_mcopyfind';
-$string['studentdisclosuredefault']  ='All files uploaded will be submitted to a plagiarism detection service';
-$string['studentdisclosure'] = 'Student Disclosure';
-$string['studentdisclosure_help'] = 'This text will be displayed to all students on the file upload page.';
-
 $string['optin'] = 'Plagiarism opt-in';
 $string['optin_explanation'] = 'You chose to opt-in to plagiarism detection. From now on, any assignments you submit will be compared with other documents';
 $string['optout'] = 'Plagiarism opt-out';
