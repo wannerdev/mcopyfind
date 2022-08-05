@@ -202,17 +202,23 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
      */
     public function cron() {
         //do any scheduled task stuff        
-        cleanReports();
+        // cleanReports();
     }
 }
 
 function cleanReports(){
     // Clean report folder
-    $folder_path = "reports";
-       
+    $folder_path =__DIR__.'\reports';
+    echo($folder_path);
+    $files = glob($folder_path.'\*'); 
+    if( PHP_OS_FAMILY == 'Linux' ){
+        $folder_path =__DIR__.'/reports/*';
+        // $folder_path = "/var/moodledata/mcopyfind/reports/*";
+        $files = glob($folder_path);
+    }
+        
     // List of name of files inside
     // specified folder
-    $files = glob($folder_path.'\*'); 
     // Deleting all the files in the list
     foreach($files as $file) {
         // Delete the given file

@@ -96,6 +96,16 @@ class document
             $this->definePath($filename);
             $this->OpenDocument();
         }
+        if (PHP_OS_FAMILY === "Windows") {
+            $this->m_pdftotextFile= __DIR__.'\pdftotext.exe';
+        } elseif (PHP_OS_FAMILY === "Linux") {  
+            //use different commandlinetool
+            $this->m_pdftotextFile= __DIR__.'/pdftotext32';
+            if(strlen(decbin(~0)) == 64){
+                $this->m_pdftotextFile= __DIR__.'/pdftotext64';
+            }
+
+        }
         
     }
 
@@ -317,19 +327,18 @@ class document
     { 
         // echo ("Filename Openpdf:".$filename); 
 
-        $m_pdftotextFile= __DIR__."\\pdftotext.exe";
         $m_path= __DIR__."\\"; 
-        $m_pdftotext= file_exists($m_pdftotextFile);
+        $this->m_pdftotext= file_exists($this->m_pdftotextFile);
 
-        if($m_pdftotext){ 
+        if($this->m_pdftotext){ 
            // pdftotext program exists, so use it 
            // Add header and footer remove margins
             $headerFooter= "";
             if($this->settings->pdfHeader!=0 || $this->settings->pdfFooter !=0 ){
                 $headerFooter= "-margint ". strval($this->settings->pdfHeader)." -marginb ". strval($this->settings->pdfFooter)." ";
             }
-           // generate txt file $commandLine=$m_pdftotextFile ." -enc UTF-8 " . $m_path. $filename ." " . $m_path."conv_". $this->name .".txt"; // assemble command
-           $commandLine=$m_pdftotextFile ." -enc UTF-8 ". $headerFooter ."-eol dos ". $m_path. $filename. " -"; // assemble command
+           
+           $commandLine=$this->m_pdftotextFile ." -enc UTF-8 ". $headerFooter ."-eol dos ". $m_path. $filename. " -"; // assemble command
             // echo $commandLine;
            if(($this->m_filep= popen($commandLine,"r")) == NULL) throw new Exception("ERR_CANNOT_OPEN_INPUT_FILE"); // if the pipe don't form, command filed.
            
