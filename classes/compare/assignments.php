@@ -142,13 +142,7 @@ class assignments {
                     $document = new document( $filename, $this->settings, $resource);
                     $document->contenthash = $file->get_contenthash();
                     array_push($corpus, $document);
-                }
-                // array_push($hashes, $pathnamehash);
-
-                // Momentan erstmal nur die reports speichern.
-                // vlt nur metadaten sammeln wie hash und id.  
-                // dies wirft die frage auf wie die daten gespeichert werden , soll mcopyfind die daten alle kopieren?
-                // Wenn Dateien aus externen Quellen kommen und die Dateien nicht in der db sind, dann müssen sie in die db geschrieben werden.  
+                } 
             }
           
             $insert = new \stdClass();
@@ -220,7 +214,6 @@ class assignments {
 
                  $file = $fs->create_file_from_pathname($file_record ,$CFG->dirroot ."/plagiarism/mcopyfind/reports/". $reportId.'matches.html');
 
-                //todo update report record with fileid
                 $reportRec->fileid = $file->get_id();// itemid;
                 $reportRec->matches = $size;// itemid;
                 $reportRec->settings = strval($this->settings);// itemid;
