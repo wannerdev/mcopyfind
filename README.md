@@ -45,6 +45,18 @@ Alternatively, you can run
 
 to complete the installation from the command line.
 
+
+## Usage of Mcopyfind
+The Pugin only adds two buttons at this point in the grading view.  
+The preset button to change settings and the compare all button which starts comparing all assignments with students consent with each other.
+The recommended presets are based on copyfinds recommendations detailed <a href="https://plagiarism.bloomfieldmedia.com/software/wcopyfind-instructions/" > here</a>. For now custom settings are not possible.
+![usage btns](https://user-images.githubusercontent.com/7975579/183043231-b44eca87-d9fd-4f6c-87c6-730614743564.png)
+
+Students need to consent when they upload their assignment.
+
+![opt in for plagiarism detection](https://user-images.githubusercontent.com/7975579/183043693-11f9e3eb-f782-4bd7-ae3e-8ab54654fc25.png)
+
+
 ## License ##
 
 2022 Johannes Wanner <johannes.wanner@web.de>
