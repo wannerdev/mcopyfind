@@ -48,9 +48,11 @@ to complete the installation from the command line.
 
 ## Usage of Mcopyfind
 To enable it the settings have to be saved once.
-The Pugin only adds two buttons at this point in the grading view.  
-The preset button to change settings and the compare all button which starts comparing all assignments with students consent with each other.
-The recommended presets are based on copyfinds recommendations detailed <a href="https://plagiarism.bloomfieldmedia.com/software/wcopyfind-instructions/" > here</a>. For now custom settings are not possible.
+The Pugin only adds two buttons at this point in the view all submissions grading view.  
+The preset button to change presets and the compare all button.
+The compare all button starts comparing all assignments but only students who opted in while uploading.
+
+In this Plugin there are four presets the recommended setting, the absolute matching, minorEdits, and pdfheaderfooter. The minor edits has a lower threshold in matching accuracy and generally reaches a higher similarity score. An option was added to exclude header and footer margins in pdf files. This reduction of scanned area of the pdf can result in more accurate matchings as the reoccurring headers and footers are not added to the similarity score. If there are no headers or footers this setting is discouraged. The recommended presets are based on copyfinds recommendations detailed <a href="https://plagiarism.bloomfieldmedia.com/software/wcopyfind-instructions/" > here</a>. For now custom settings are not possible.
 ![usage btns](https://user-images.githubusercontent.com/7975579/183043231-b44eca87-d9fd-4f6c-87c6-730614743564.png)
 
 Students need to consent when they upload their assignment.
