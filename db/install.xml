@@ -17,8 +17,8 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="fileid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="File id from report"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User id of moodle "/>
-        <FIELD NAME="matches" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Count of Matches, mathces are referenced by match to report "/>
-        <FIELD NAME="settings" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false" COMMENT="File id from report"/>
+        <FIELD NAME="matches" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Count of Matches, matches are referenced by match to report "/>
+        <FIELD NAME="settings" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false" COMMENT="Settings object as String ';' seperated"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
