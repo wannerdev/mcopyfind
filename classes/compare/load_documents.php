@@ -287,7 +287,7 @@ class load_documents
 // 3 - 99,6
 // 4 - 99,4
 
-// $settings=settings::getPreset(1);
-// $test = new load_documents($settings);
-// $test->testMain();
-// echo(file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html"));
+ $settings=settings::getPreset(1);
+ $test = new load_documents($settings);
+ $test->testMain();
+ echo(file_get_contents("C:\\moodle\\server\\moodle\\plagiarism\\mcopyfind\\reports\\-1matches.html"));

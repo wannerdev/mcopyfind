@@ -29,6 +29,7 @@ class document
     public $m_haveFile = false;
     public $m_UTF8 = false;
     public $m_pdftotext;
+    public $m_pdftotextFile;
     
 	public $m_gotWord = false;
 	public $m_gotChar = false;
@@ -84,6 +85,17 @@ class document
         }else{
             $this->m_DocumentType=DOC_TYPE_OLD;
         }
+        if (PHP_OS_FAMILY === "Windows") {
+            $this->m_pdftotextFile= __DIR__.'\pdftotext.exe';
+            echo $this->m_pdftotextFile;
+        } elseif (PHP_OS_FAMILY === "Linux") {  
+            //use different commandlinetool
+            $this->m_pdftotextFile= __DIR__.'/pdftotext32';
+            if(strlen(decbin(~0)) == 64){
+                $this->m_pdftotextFile= __DIR__.'/pdftotext64';
+            }
+
+        }
         //If we got the resource from moodle
         if(is_resource($file) ){ 
             $this->m_filep=$file;
@@ -96,16 +108,7 @@ class document
             $this->definePath($filename);
             $this->OpenDocument();
         }
-        if (PHP_OS_FAMILY === "Windows") {
-            $this->m_pdftotextFile= __DIR__.'\pdftotext.exe';
-        } elseif (PHP_OS_FAMILY === "Linux") {  
-            //use different commandlinetool
-            $this->m_pdftotextFile= __DIR__.'/pdftotext32';
-            if(strlen(decbin(~0)) == 64){
-                $this->m_pdftotextFile= __DIR__.'/pdftotext64';
-            }
-
-        }
+       
         
     }
 
