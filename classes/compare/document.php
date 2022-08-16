@@ -87,7 +87,7 @@ class document
         }
         if (PHP_OS_FAMILY === "Windows") {
             $this->m_pdftotextFile= __DIR__.'\pdftotext.exe';
-            echo $this->m_pdftotextFile;
+            // echo $this->m_pdftotextFile;
         } elseif (PHP_OS_FAMILY === "Linux") {  
             //use different commandlinetool
             $this->m_pdftotextFile= __DIR__.'/pdftotext32';

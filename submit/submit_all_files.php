@@ -74,7 +74,8 @@ $fs = get_file_storage();
 $file=$sub->access_all_files($cm, $context);
 //no Match ?? return to the previous page
 $url=urldecode($return);
-
+$msg="Match found";
+$time=10;
 if($file != null){
     $url = moodle_url::make_pluginfile_url(
         $file->get_contextid(),
@@ -86,6 +87,11 @@ if($file != null){
         false                     // Do not force download of the file.
     );
   
+}else{
+    $notification = \core\output\notification::NOTIFY_INFO;
+    $msg="No Match found";
+    $time=10;
+    $url = urldecode($return);
 }
 
-redirect($url);
+redirect($url, $msg, $time, $notification);
