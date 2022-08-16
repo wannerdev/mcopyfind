@@ -63,7 +63,7 @@ Students need to consent when they upload their assignment as the default is opt
 ## Usage of standalone php copyfind
 In the load_document class a testcase is prepared to use the php version without a moodle environment.
 Possibibly some path issues arise using it located outside of the moodle directory structure.
-They would need to be adjusted in the constructor of the class generate_report. The testcase is commented out at the bottom of the class.
+They would need to be adjusted in the constructor of the class generate_report. The testcase is commented out at the bottom of the class load_document.
 
 ## License ##
 
