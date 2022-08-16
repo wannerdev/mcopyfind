@@ -1,5 +1,5 @@
 # Mcopyfind
-Mcopyfind is a Moodle plagiarism plugin based on <a href="https://plagiarism.bloomfieldmedia.com/software/">WCopyfind/Copyfind </a> which aims to provide a tool which can help detecting <a href="https://www.sydney.edu.au/students/academic-dishonesty.html#collusion">collusion</a>.
+Mcopyfind is a Moodle plagiarism plugin based on <a href="https://plagiarism.bloomfieldmedia.com/software/">WCopyfind/Copyfind </a> which aims to provide easy to use tool to generate similarity reports, which can lead to the detection of <a href="https://www.sydney.edu.au/students/academic-dishonesty.html#collusion">collusion</a>.
 
 ## Setup to start developing
 To start developing you need a running moodle instance. If you use windows you can Download pre packaged <a href="https://docs.moodle.org/311/en/Windows_installation">windows moodle</a>.
