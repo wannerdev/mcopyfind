@@ -1,7 +1,7 @@
 # Mcopyfind
 Mcopyfind is a Moodle plagiarism plugin based on <a href="https://plagiarism.bloomfieldmedia.com/software/">WCopyfind/Copyfind </a> which aims to provide an easy to use tool to generate similarity reports. These reports can lead to the detection of <a href="https://www.sydney.edu.au/students/academic-dishonesty.html#collusion">collusion</a>.
 
-## Setup to start developing
+## Setup to Start Developing
 To start developing you need a running moodle instance. If you use windows you can Download pre packaged <a href="https://docs.moodle.org/311/en/Windows_installation">windows moodle</a>.
 With the windows version we change the opcache settings to speed up the refreshrate of our php files. Change cache settings to be able to develop more comfortably by disabling the opcache in the php.ini
 At the bottom of the file change the settings to the following:
@@ -60,7 +60,7 @@ Students need to consent when they upload their assignment as the default is opt
 ![opt in for plagiarism detection](https://user-images.githubusercontent.com/7975579/183043693-11f9e3eb-f782-4bd7-ae3e-8ab54654fc25.png)
 
 
-## Usage of standalone php copyfind
+## Usage of Standalone PHP Copyfind
 In the load_document class a testcase is prepared to use the php version without a moodle environment.
 Possibibly some path issues arise using it located outside of the moodle directory structure.
 They would need to be adjusted in the constructor of the class generate_report. The testcase is commented out at the bottom of the class load_document.
