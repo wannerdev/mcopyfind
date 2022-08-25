@@ -41,3 +41,7 @@ $string['compare_all_files'] = 'Compare all';
 $string['usemcopyfind'] = 'Enable Mcopyfind';
 $string['report'] = 'Show report';
 $string['print'] = 'print';
+$string['presetrecommended'] = 'Default recommended';
+$string['presetminoredit'] = 'Minor edit';
+$string['presetabsolute'] = 'Absolute Matching';
+$string['presetpdfheadfoot'] = 'Remove Header and Footer in pdf files';

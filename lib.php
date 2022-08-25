@@ -25,6 +25,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
 }
@@ -32,7 +33,7 @@ if (!defined('MOODLE_INTERNAL')) {
 //get global class
 global $CFG;
 require_once($CFG->dirroot.'/plagiarism/lib.php');
-
+require_once('presets_form.php');
 
 class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
 
@@ -50,7 +51,7 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
     const SHOWS_LINKS = 1;
     const ONLINE_TEXT = 1;
     const ONLINE_TEXT_NO = 0;
-
+    public $mform;
     public $file=null;
 
      /**
@@ -146,7 +147,7 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
      */
     public function update_status($course, $cm) {
         global $PAGE, $DB, $CFG;
-
+        if($this->mform == null)$this->mform = new preset_form();
         //called at top of submissions/grading pages - allows printing of admin style links or updating status
    
         $output = '';
@@ -190,8 +191,11 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         $output .=  "<h5>MCopyfind</h5>";
         $output .= "<a class=\"btn btn-outline-secondary \" role=\"button\"  href=\"" .$incPreset. "\" > ". "preset:".$preset."</a>";
         $output .= "<a class=\"btn btn-secondary\" role=\"button\" target=\"_blank\" href=\"" .$submiturl. "\"> ".get_string('compare_all_files', 'plagiarism_mcopyfind')."</a>";
- 
         
+        // if (($data = $this->mform->get_data()) && confirm_sesskey()) {
+        // }
+        //$this->mform->ge
+        $this->mform->display();
         $output .= html_writer::empty_tag('br');
         return $output;
     }
