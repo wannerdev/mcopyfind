@@ -21,8 +21,15 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+//Presets
 $string['pluginname'] = 'plagiarism_mcopyfind';
 $string['optin'] = 'Plagiarism opt-in';
+$string['default'] = 'Recommended';
+$string['mcopyfind_description'] = 'Compare text submissions with other submissions';
+$string['minoredit'] = 'Minor edit';
+$string['courses_compare'] = 'Courses to compare against';
+$string['absolutematching'] = 'Strict word matching';
+$string['removeheaderandfooter'] = 'PDF Remove Header and Footer';
 $string['optin_explanation'] = 'You chose to opt-in to plagiarism detection. From now on, any assignments you submit will be compared with other documents';
 $string['optout'] = 'Plagiarism opt-out';
 $string['optout_explanation'] = 'You chose to opt-out of plagiarism detection. Your submitted assignments will <b>not</b> be compared with other documents submitted by other students.';

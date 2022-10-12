@@ -22,6 +22,12 @@
  */
 
 $string['pluginname'] = 'plagiarism_mcopyfind';
+//Presets
+$string['default'] = 'Empfohlen';
+$string['minoredit'] = 'Geringe veränderung';
+$string['absolutematching'] = 'Strenges vergleichen';
+$string['removeheaderandfooter'] = 'PDF - Kopf und Fußzeile entfernen';
+$string['courses_compare'] = 'Vergleiche mit folgenden Kursen';
 $string['optin'] = 'Plagiatspr&uuml;fung zulassen';
 $string['optin_explanation'] = 'Sie haben sich entschieden, die Plagiatspr&uuml;fung zuzulassen. Von nun an werden alle Ihre Arbeiten gepr&uuml;ft';
 $string['optout'] = 'Plagiatspr&uuml;fung verweigern';

@@ -25,6 +25,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
 }
@@ -32,6 +33,7 @@ if (!defined('MOODLE_INTERNAL')) {
 //get global class
 global $CFG;
 require_once($CFG->dirroot.'/plagiarism/lib.php');
+require_once($CFG->dirroot.'/plagiarism/mcopyfind/plagiarism_mcopyfind_presets.php');
 
 
 class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
@@ -116,11 +118,6 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         //      }
         //  }
          return $outputhtml;
-        // echo $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
-        // $formatoptions = new stdClass;
-        // $formatoptions->noclean = true;
-        // echo format_text($plagiarismsettings['mcopyfind_student_disclosure'], FORMAT_MOODLE, $formatoptions);
-        // echo $OUTPUT->box_end();
     }
 
     /**
@@ -132,6 +129,7 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
         global $DB;
         $plagiarismsettings = (array)get_config('plagiarism');
         //check if mcopyfind is enabled.
+        //$plagiarism_mcopyfind->enabled &&  ??
         if (isset($plagiarismsettings['mcopyfind_use']) ) {
             return $plagiarismsettings;
         } else {
@@ -145,7 +143,7 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
      * @param object $cm - full cm object
      */
     public function update_status($course, $cm) {
-        global $PAGE, $DB, $CFG;
+        global $PAGE, $DB, $CFG,$USER;
 
         //called at top of submissions/grading pages - allows printing of admin style links or updating status
    
@@ -188,10 +186,24 @@ class plagiarism_plugin_mcopyfind extends plagiarism_plugin {
             }
         }
         $output .=  "<h5>MCopyfind</h5>";
-        $output .= "<a class=\"btn btn-outline-secondary \" role=\"button\"  href=\"" .$incPreset. "\" > ". "preset:".$preset."</a>";
-        $output .= "<a class=\"btn btn-secondary\" role=\"button\" target=\"_blank\" href=\"" .$submiturl. "\"> ".get_string('compare_all_files', 'plagiarism_mcopyfind')."</a>";
- 
-        
+        $output .=  get_string('mcopyfind_description','plagiarism_mcopyfind');
+
+        $mform = new plagiarism_mcopyfind_presets();
+        //$mform->set_data(['radioar' => $incPreset]);
+
+        if ($mform->is_cancelled()) {
+            // You need this section if you have a cancel button on your form.        
+        } else if ($fromform = $mform->get_data()) {
+            // This branch is where you process validated data.
+            print_error("deleted: ");
+            var_dump($fromform);
+            redirect($submiturl);
+        }
+        // $output .= "<a class=\"btn btn-outline-secondary \" role=\"button\"  href=\"" .$incPreset. "\" > ". "preset:".$preset."</a>";
+        // $output .= "<a class=\"btn btn-secondary\" role=\"button\" target=\"_blank\" href=\"" .$submiturl. "\"> ".get_string('compare_all_files', 'plagiarism_mcopyfind')."</a>";
+     
+        $output .= $mform->render();
+        //$mform->_process_submission()get_data()
         $output .= html_writer::empty_tag('br');
         return $output;
     }

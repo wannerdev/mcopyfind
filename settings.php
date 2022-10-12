@@ -70,6 +70,7 @@ if (($data = $mform->get_data()) && confirm_sesskey()) {
     }
     
     set_config('enabled', $data->mcopyfind_use, 'plagiarism_mcopyfind');
+    $plagiarismplugin->enabled= $data->mcopyfind_use;
     $OUTPUT->notification = get_string('savedconfigsuccess', 'plagiarism_mcopyfind');
 }
 $plagiarismsettings = (array)get_config('plagiarism');
